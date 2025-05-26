@@ -1,0 +1,41 @@
+/* politica de pricavidade */
+.Politica_de_Privacidade {
+    max-width: 800px;
+    margin: 40px auto;
+    padding: 30px;
+    background: #fff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+    font-family: Arial, sans-serif;
+    color: #444;
+    line-height: 1.6;
+  }
+  
+  .Politica_de_Privacidade h2, 
+  .Politica_de_Privacidade h3 {
+    color: #333;
+    text-align: center;
+  }
+  
+  .Politica_de_Privacidade p {
+    text-align: justify;
+    margin-bottom: 15px;
+  }
+  
+  .Politica_de_Privacidade a {
+    color: #007bff;
+    text-decoration: none;
+  }
+  
+  .Politica_de_Privacidade a:hover {
+    text-decoration: underline;
+  }
+  
+  .Politica_de_Privacidade ul {
+    padding-left: 20px;
+  }
+  
+  .Politica_de_Privacidade li {
+    margin-bottom: 10px;
+  }
+  

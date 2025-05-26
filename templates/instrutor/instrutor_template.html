@@ -1,0 +1,48 @@
+<!-- templates/instrutor_template.html -->
+<h1>Instrutor: {{ instrutor.nome }}</h1>
+
+<h2>Lista de Alunos</h2>
+<table border="1">
+    <tr>
+        <th>Nome</th>
+        <th>Status</th>
+        <th>Telefone</th>
+        <th>Ações</th>
+    </tr>
+    {% for aluno in alunos %}
+    <tr>
+        <td>{{ aluno.nome }}</td>
+        <td>{{ aluno.status }}</td>
+        <td>{{ aluno.telefone }}</td>
+        <td>
+            <a href="?editar={{ aluno.id }}">Editar</a>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+
+{% if aluno_editar %}
+    <h3>Editando Aluno: {{ aluno_editar.nome }}</h3>
+    <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="aluno_id" value="{{ aluno_editar.id }}">
+        <label>Nome:</label><br>
+        <input type="text" name="nome" value="{{ aluno_editar.nome }}"><br>
+
+        <label>Status:</label><br>
+        <input type="text" name="status" value="{{ aluno_editar.status }}"><br>
+
+        <label>Telefone:</label><br>
+        <input type="text" name="telefone" value="{{ aluno_editar.telefone }}"><br>
+
+        <label>Treino:</label><br>
+        <select name="treino">
+            <option value="A" {% if aluno_editar.treino == "A" %}selected{% endif %}>Treino A</option>
+            <option value="B" {% if aluno_editar.treino == "B" %}selected{% endif %}>Treino B</option>
+            <option value="C" {% if aluno_editar.treino == "C" %}selected{% endif %}>Treino C</option>
+        </select><br><br>
+
+        <button type="submit">Salvar</button>
+        <a href="{% url 'instrutor_view' instrutor.id %}">Cancelar</a>
+    </form>
+{% endif %}

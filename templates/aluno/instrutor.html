@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<h2>Lista de Alunos</h2>
+<table>
+  <thead>
+    <tr>
+      <th>Nome</th>
+      <th>Ações</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for aluno in alunos %}
+    <tr>
+      <td>{{ aluno.nome }}</td>
+      <td>
+        <button onclick="abrirModal('{{ aluno.id }}', '{{ aluno.nome }}')">Editar</button>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<!-- Modal -->
+<div id="modalTreino" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5);">
+  <div style="background:white; padding:20px; width:300px; margin:100px auto; position:relative;">
+    <span style="cursor:pointer; position:absolute; top:10px; right:10px;" onclick="fecharModal()">X</span>
+    <h3 id="nomeAluno"></h3>
+    <form id="formTreino" method="post" action="{% url 'salvar_treino' %}">
+      {% csrf_token %}
+      <input type="hidden" name="aluno_id" id="alunoIdInput">
+      <textarea name="treino" placeholder="Adicionar treino..."></textarea><br><br>
+      <button type="submit">Salvar</button>
+    </form>
+  </div>
+</div>
+
+<script>
+  function abrirModal(alunoId, nome) {
+    document.getElementById('modalTreino').style.display = 'block';
+    document.getElementById('nomeAluno').innerText = nome;
+    document.getElementById('alunoIdInput').value = alunoId;
+  }
+
+  function fecharModal() {
+    document.getElementById('modalTreino').style.display = 'none';
+  }
+
+  window.onclick = function(event) {
+    const modal = document.getElementById('modalTreino');
+    if (event.target === modal) {
+      fecharModal();
+    }
+  }
+</script>
+
+{% endblock %}

@@ -1,0 +1,41 @@
+{% load static %}
+
+{% block style %}
+<link rel="stylesheet" href="{% static 'css/base.css' %}">
+<script src="https://cdn.tailwindcss.com"></script>
+{% endblock %}
+
+{% block content %}
+<header class="bg-gray-800 text-white p-6">
+    <h1 class="text-3xl font-bold text-center">🏋️ Treinos de Peito</h1>
+</header>
+
+<!-- Formulário para filtro -->
+<form method="get" class="max-w-7xl mx-auto px-6 py-4">
+    <input
+        type="text"
+        name="search"
+        placeholder="Buscar exercício pelo nome..."
+        value="{{ request.GET.search|default:'' }}"
+        class="w-full p-2 border border-gray-300 rounded"
+    />
+</form>
+
+<main class="max-w-7xl mx-auto px-6 py-10 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+    {% for treino in treinos.values %}
+        <div class="bg-white shadow-md rounded-lg p-4 hover:shadow-xl transition">
+            <img src="{{ treino.gifUrl }}" alt="GIF do exercício" class="w-full h-40 object-contain rounded mb-4">
+            <h2 class="text-lg font-bold text-gray-800">{{ treino.name|title }}</h2>
+            <p class="text-sm text-gray-600"><strong>Equipamento:</strong> {{ treino.equipment }}</p>
+            <p class="text-sm text-gray-600"><strong>Grupo muscular:</strong> {{ treino.target }}</p>
+            <p class="text-sm text-gray-600"><strong>Nível:</strong> {{ treino.bodyPart }}</p>
+        </div>
+    {% empty %}
+        <p class="col-span-full text-center text-red-500">Nenhum exercício encontrado.</p>
+    {% endfor %}
+</main>
+
+<footer class="bg-gray-100 text-center p-4 text-sm text-gray-500">
+    © {{ now|date:"d/m/Y" }} Academia Fit. Todos os direitos reservados.
+</footer>
+{% endblock %}

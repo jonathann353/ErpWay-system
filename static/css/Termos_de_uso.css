@@ -1,0 +1,31 @@
+.Termo_de_uso {
+    max-width: 800px;
+    margin: 40px auto;
+    padding: 20px;
+    background: #fff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1), 
+                0 8px 16px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    font-family: Arial, sans-serif;
+    color: #444;
+    line-height: 1.6;
+}
+
+.Termo_de_uso h2, .Termo_de_uso h3 {
+    color: #333;
+    border-bottom: 2px solid #ddd;
+    padding-bottom: 5px;
+}
+
+.Termo_de_uso p, .Termo_de_uso li {
+    text-align: justify;
+}
+
+.Termo_de_uso a {
+    color: #007BFF;
+    text-decoration: none;
+}
+
+.Termo_de_uso a:hover {
+    text-decoration: underline;
+}
