@@ -1,4 +1,7 @@
-import datetime
+import uuid
+import random
+from datetime import datetime
+from django.http import HttpResponseBadRequest, JsonResponse
 import requests
 import hashlib
 from pyexpat.errors import messages
@@ -49,55 +52,40 @@ def editar_aluno(request, cod_aluno):
 
         response = supabase.table("alunos").update(dados).eq("cod_aluno", cod_aluno).execute()
         return redirect(reverse('aluno'))
-def perfil(request, cod_aluno):
-    # exemplo simplificado para testes
-    aluno = {
-        'foto_url': '/static/img/avatar.png',
-        'nome': 'João da Silva',
-        'cpf': '123.456.789-00',
-        'email': 'joao@email.com',
-        'telefone': '(51) 99999-9999',
-        'sexo': 'Masculino',
-        'data_nascimento': '1990-01-01',
-        'status': 'Ativo',
-        'cod_instrutor': '45',
-        'nome_instrutor': 'Carlos Treinador'
-    }
 
-    # Dados mockados para outras seções
+
+def perfil(request, cod_aluno):
+    aluno = {}
+    treinos = []
+
+    try:
+        # Buscar dados do aluno via API Flask
+        response = requests.get(f'https://api-flask-academia.onrender.com/busca/aluno/{cod_aluno}')
+
+        if response.status_code == 200:
+            dados = response.json().get('dados', [])
+            aluno = next((a for a in dados if str(a.get('cod_aluno')) == str(cod_aluno)), {})
+        else:
+            error_message = response.json().get('message', 'Erro desconhecido')
+            messages.error(request, f"Erro ao buscar aluno: {error_message}")
+
+    except requests.exceptions.RequestException as e:
+        messages.error(request, f"Erro de conexão com a API: {str(e)}")
+
+    try:
+        # Buscar treinos diretamente no Supabase
+        treino_result = supabase.table("treino").select("*").eq("cod_aluno", cod_aluno).execute()
+        treinos = treino_result.data if treino_result.data else []
+    except Exception as e:
+        messages.error(request, f"Erro ao buscar treinos: {str(e)}")
+
     contexto = {
         'aluno': aluno,
-        'treino': {
-            'nome': 'Hipertrofia A-B',
-            'inicio': '2025-05-01',
-            'fim': '2025-06-01',
-            'exercicios': {
-                'Peito': ['Supino reto', 'Crucifixo'],
-                'Pernas': ['Agachamento livre', 'Leg press']
-            },
-            'ficha_url': '#'
-        },
-        'historico': [],
-        'pagamento': {
-            'status': 'Pago',
-            'vencimento': '2025-05-10',
-            'forma': 'Pix',
-            'valor': 149.90
-        },
-        'historico_pagamentos': [],
-        'avaliacao': {
-            'data': '2025-04-15',
-            'peso': 78,
-            'altura': 1.75,
-            'imc': 25.5,
-            'observacoes': 'Boa evolução nos últimos 3 meses.'
-        },
-        'documentos': [
-            {'nome': 'Contrato de matrícula', 'url': '#'}
-        ]
+        'treinos': treinos
     }
 
     return render(request, 'aluno/perfil.html', contexto)
+
 
 def treinos_peito(request):
     url = "https://exercise-db-fitness-workout-gym.p.rapidapi.com/exercises"
@@ -259,16 +247,15 @@ def logout_view(request):
     request.session.flush()
     return redirect('login')
 
-def login_view(request):
+def login_view(request): 
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
 
-        # Gerar hash da senha fornecida
         hashed_input_password = hashlib.sha256(password.encode('utf-8')).hexdigest()
 
         try:
-            # Consulta no Supabase
+            # Buscar usuário no Supabase
             response = supabase.table("auth_user").select("*").eq("username", username).execute()
             user_data = response.data
 
@@ -281,13 +268,31 @@ def login_view(request):
                     request.session['username'] = user['username']
                     request.session['user_id'] = user['id']
 
-                    # Verificar se é superusuário
+                    # Verifica se é superusuário
                     if user.get('is_superuser', False):
-                        return redirect('dashboard')  # redireciona para o dashboard
-                    else:
-                        return redirect('aluno')  # redireciona para a página do aluno
+                        return redirect('dashboard')
+
+                    # Verifica se é instrutor
+                    instrutor_response = supabase.table("instrutor").select("cod_instrutor").eq("ID_auth", user['id']).execute()
+                    instrutor_data = instrutor_response.data
+
+                    if instrutor_data:
+                        cod_instrutor = instrutor_data[0]['cod_instrutor']
+                        return redirect('dashboard_instrutor', cod_instrutor=cod_instrutor)
+
+                    # Verifica se é aluno
+                    aluno_response = supabase.table("aluno").select("cod_aluno").eq("ID_auth", user['id']).execute()
+                    aluno_data = aluno_response.data
+
+                    if aluno_data:
+                        cod_aluno = aluno_data[0]['cod_aluno']
+                        return redirect('perfil', cod_aluno=cod_aluno)
+
+                    messages.error(request, "Usuário autenticado, mas não vinculado como aluno ou instrutor.")
+                    return redirect('login')
+
                 else:
-                    return render(request, 'accounts/login.html', {'error': 'Usuário ou senha incorretos.'})
+                    return render(request, 'accounts/login.html', {'error': 'Senha incorreta.'})
             else:
                 return render(request, 'accounts/login.html', {'error': 'Usuário não encontrado.'})
 
@@ -295,6 +300,111 @@ def login_view(request):
             return render(request, 'accounts/login.html', {'error': f'Erro no login: {str(e)}'})
 
     return render(request, 'accounts/login.html')
+
+##################instrutor########################
+# URL base da API Flask hospedada no Render
+BASE_URL = 'https://api-flask-academia.onrender.com'
+
+def dashboard_instrutor(request, cod_instrutor):
+    try:
+        url = f'{BASE_URL}/alunos/do/instrutor/{cod_instrutor}'
+        response = requests.get(url)
+        response.raise_for_status()
+        data = response.json()
+
+        alunos = data.get('alunos', [])
+        instrutor_id = data.get('instrutor_id')
+
+        context = {
+            'instrutor_id': instrutor_id,
+            'alunos': alunos,
+            'year': datetime.now().year
+        }
+        return render(request, 'instrutor/dashboard.html', context)
+
+    except requests.exceptions.RequestException as e:
+        return render(request, 'instrutor/dashboard.html', {
+            'error': 'Erro ao se comunicar com a API.',
+            'exception': str(e)
+        })
+
+    except Exception as e:
+        return render(request, 'instrutor/dashboard.html', {
+            'error': 'Erro inesperado ao carregar os dados.',
+            'exception': str(e)
+        })
+        
+@csrf_exempt
+def adicionar_treino(request):
+    if request.method == 'POST':
+        try:
+            cod_aluno = request.POST.get('cod_aluno')
+            cod_instrutor = request.POST.get('cod_instrutor')
+
+            if not cod_aluno or not cod_instrutor:
+                return HttpResponseBadRequest("Código do aluno ou instrutor ausente.")
+
+            cod_aluno = int(cod_aluno)
+            cod_treino = random.randint(100000, 999999)
+            request.session['cod_treino'] = cod_treino
+
+            treino_payload = {
+                "cod_treino": cod_treino,
+                "tipo_treino": request.POST.get('tipo_treino'),
+                "cod_aluno": cod_aluno,
+                "cod_instrutor": cod_instrutor,
+                "objetivo": request.POST.get('objetivo', ''),
+                "observacoes": request.POST.get('observacoes', ''),
+                "data_inicio": request.POST.get('data_inicio'),
+                "data_final": request.POST.get('data_final') or None
+            }
+
+            treino_response = requests.post(f"{BASE_URL}/criar/treino/aluno", json=treino_payload)
+
+            if treino_response.status_code not in [200, 201]:
+                print("Erro ao criar treino:", treino_response.text)
+                return HttpResponseBadRequest("Erro ao criar treino.")
+
+            # Retorna o código do treino criado para ser usado na próxima requisição
+            return JsonResponse({"cod_treino": cod_treino})
+
+        except ValueError:
+            return HttpResponseBadRequest("Código inválido.")
+        except Exception as e:
+            print("Erro inesperado:", e)
+            return HttpResponseBadRequest("Erro interno.")
+
+        
+@csrf_exempt
+def adicionar_exercicio(request):
+    if request.method == 'POST':
+        try:
+            # Recupera o cod_treino salvo anteriormente
+            cod_treino = request.session.get('cod_treino')
+
+            if not cod_treino:
+                return HttpResponseBadRequest("Código do treino ausente.")
+
+            exercicio_payload = {
+                "Cod_treino": cod_treino,
+                "nome": request.POST.get('nome_exercicio'),
+                "tipo_treino": request.POST.get('tipo_exercicio'),
+                "discricao": request.POST.get('descricao_exercicio')  # ⚠️ com S, se a API exigir
+            }
+
+            exercicio_response = requests.post(f"{BASE_URL}/criar/exercicio/treino", json=exercicio_payload)
+
+            if exercicio_response.status_code not in [200, 201]:
+                print("Erro ao criar exercício:", exercicio_response.text)
+                return HttpResponseBadRequest("Erro ao criar exercício.")
+
+            return JsonResponse({"message": "Exercício criado com sucesso."})
+
+        except Exception as e:
+            print("Erro inesperado:", e)
+            return HttpResponseBadRequest("Erro interno.")
+        
+###########
 
 def register_view(request):
     if request.method == "POST":
