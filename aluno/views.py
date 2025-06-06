@@ -17,7 +17,6 @@ url = "https://pgdldfqzqgxowqedrldh.supabase.co"
 key = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBnZGxkZnF6cWd4b3dxZWRybGRoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzc1Nzk0MjksImV4cCI6MjA1MzE1NTQyOX0.jntDjoG90UW916FljiMlrmM4YqaNLeTphwTO2IPkY9E"
 supabase: Client = create_client(url, key)
 
-# Create your views here.
 @login_required_custom
 def Aluno(request):
     try:
@@ -153,50 +152,69 @@ def cadastrar_aluno(request):
 
 @login_required_custom
 def dashboard(request):
+    def is_ativo(valor):
+        # Função para interpretar o campo 'ativo' em vários formatos possíveis
+        if isinstance(valor, bool):
+            return valor
+        if isinstance(valor, str):
+            return valor.lower() in ['true', '1', 'sim', 'ativo']
+        if isinstance(valor, int):
+            return valor == 1
+        return False
+
     # --- Consulta de alunos ---
+    alunos = []
+    mapa_instrutores = {}
+
     try:
         response = requests.get('https://api-flask-academia.onrender.com/listar/aluno')
 
         if response.status_code == 200:
             dados_api = response.json().get('dados', [])
-            alunos = []
-
-            for aluno in dados_api:
-                status = 'Ativo' if aluno.get('ativo', False) else 'Inativo'
-                aluno['status'] = status
-                alunos.append(aluno)
         else:
-            alunos = []
+            dados_api = []
             error_message = response.json().get('message', 'Erro desconhecido')
             messages.error(request, f"Erro ao buscar alunos: {error_message}")
 
     except requests.exceptions.RequestException as e:
-        alunos = []
+        dados_api = []
         messages.error(request, f"Erro de conexão com a API: {str(e)}")
 
-    total_alunos = len(alunos)
-
     # --- Consulta de instrutores ---
+    instrutores = []
+
     try:
         response_instrutor = requests.get('https://api-flask-academia.onrender.com/listar/instrutor')
 
         if response_instrutor.status_code == 200:
             dados_instrutor = response_instrutor.json().get('dados', [])
-            instrutores = []
 
             for instrutor in dados_instrutor:
-                status = 'Ativo' if instrutor.get('ativo', False) else 'Inativo'
-                instrutor['status'] = status
                 instrutores.append(instrutor)
+
+            # Mapeia cod_instrutor para nome
+            mapa_instrutores = {
+                instrutor['cod_instrutor']: instrutor['nome']
+                for instrutor in instrutores
+            }
+
         else:
-            instrutores = []
             error_message = response_instrutor.json().get('message', 'Erro desconhecido')
             messages.error(request, f"Erro ao buscar instrutores: {error_message}")
 
     except requests.exceptions.RequestException as e:
-        instrutores = []
         messages.error(request, f"Erro de conexão com a API (instrutores): {str(e)}")
 
+    # --- Processa os alunos ---
+    for aluno in dados_api:
+                # Determina status como 'Ativo' ou 'Inativo' baseado no campo 'ativo'
+                status = 'Ativo' if aluno.get('ativo', False) else 'Inativo'
+
+                # Adiciona o status à estrutura de cada aluno
+                aluno['status'] = status
+                alunos.append(aluno)
+
+    total_alunos = len(alunos)
     total_instrutores = len(instrutores)
 
     # --- Consulta de pagamentos no Supabase ---
@@ -221,6 +239,7 @@ def dashboard(request):
         'soma_valores': soma_valores,
         'ultimo_pagamento': ultimo_valor_pago
     })
+ 
 
 
     
@@ -306,6 +325,27 @@ def login_view(request):
 BASE_URL = 'https://api-flask-academia.onrender.com'
 
 def dashboard_instrutor(request, cod_instrutor):
+    if request.method == 'GET' and request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        aluno_id = request.GET.get('aluno_id')
+        if aluno_id:
+            try:
+                url = f'{BASE_URL}/detalhes/aluno/e/instrutores/{aluno_id}'
+                response = requests.get(url)
+                response.raise_for_status()
+                data = response.json()
+
+                instrutor_nome = data.get('instrutor', {}).get('nome_instrutor', 'Não encontrado')
+
+                return JsonResponse({
+                    'instrutor_nome': instrutor_nome
+                })
+
+            except requests.exceptions.RequestException as e:
+                return JsonResponse({'error': 'Erro ao buscar instrutor.', 'exception': str(e)}, status=500)
+        else:
+            return JsonResponse({'error': 'ID do aluno não informado.'}, status=400)
+
+    # Requisição padrão para carregar dashboard
     try:
         url = f'{BASE_URL}/alunos/do/instrutor/{cod_instrutor}'
         response = requests.get(url)
@@ -313,10 +353,17 @@ def dashboard_instrutor(request, cod_instrutor):
         data = response.json()
 
         alunos = data.get('alunos', [])
-        instrutor_id = data.get('instrutor_id')
+
+        # Tenta extrair dados do instrutor do JSON
+        instrutor = data.get('instrutor', {})
+
+        # Alguns endpoints podem usar chaves diferentes
+        instrutor_id = instrutor.get('cod_instrutor') or data.get('instrutor_id') or cod_instrutor
+        instrutor_nome = instrutor.get('nome') or instrutor.get('nome_instrutor') or data.get('instrutor_nome') or 'Nome não disponível'
 
         context = {
             'instrutor_id': instrutor_id,
+            'instrutor_nome': instrutor_nome,
             'alunos': alunos,
             'year': datetime.now().year
         }
@@ -387,9 +434,9 @@ def adicionar_exercicio(request):
 
             exercicio_payload = {
                 "Cod_treino": cod_treino,
-                "nome": request.POST.get('nome_exercicio'),
-                "tipo_treino": request.POST.get('tipo_exercicio'),
-                "discricao": request.POST.get('descricao_exercicio')  # ⚠️ com S, se a API exigir
+                "serie": request.POST.get('nome_exercicio'),
+                "repeticao": request.POST.get('tipo_exercicio'),
+                "intervalo": request.POST.get('descricao_exercicio')  # ⚠️ com S, se a API exigir
             }
 
             exercicio_response = requests.post(f"{BASE_URL}/criar/exercicio/treino", json=exercicio_payload)

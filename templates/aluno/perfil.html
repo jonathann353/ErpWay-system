@@ -5,229 +5,582 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard do Aluno</title>
     <link rel="stylesheet" href="{% static 'css/base.css' %}">
     <link rel="stylesheet" href="{% static 'css/aluno.css' %}">
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <style>
+        /* Estilos personalizados para o layout moderno */
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            /* Imagem de fundo sutil e esmaecida */
+            background-image: url('{% static "img/hero1-min.jpg" %}');
+            /* Imagem aleatória de fitness */
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-color: #1a202c;
+            /* Cor de fallback para navegadores antigos ou caso a imagem não carregue */
+            color: #e2e8f0;
+            /* Cor de texto padrão clara */
+        }
+
+        .overlay-bg {
+            background-color: rgba(0, 0, 0, 0.6);
+            /* Overlay escuro para melhorar a legibilidade do texto */
+            min-height: 100%;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Estilo para as seções de conteúdo */
+        section {
+            background-color: rgba(255, 255, 255, 0.95);
+            /* Fundo branco semi-transparente para as seções */
+            backdrop-filter: blur(5px);
+            /* Efeito de desfoque para um visual moderno */
+            border-radius: 1.25rem;
+            /* Bordas mais arredondadas (20px) */
+            padding: 1.75rem;
+            /* Padding ligeiramente maior */
+        }
+
+        /* Cores e gradientes para botões e títulos */
+        .header-gradient {
+            background-image: linear-gradient(to right, #6366f1, #8b5cf6);
+            /* Gradiente roxo/azul */
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            color: transparent;
+            /* Necessário para browsers que não suportam -webkit-text-fill-color */
+        }
+
+        .button-gradient {
+            background-image: linear-gradient(to right, #4f46e5, #7c3aed);
+            /* Gradiente para botões */
+        }
+
+        .button-gradient:hover {
+            background-image: linear-gradient(to right, #6366f1, #8b5cf6);
+        }
+
+        /* Estilos para animação de modal */
+        .modal-fade-in {
+            transition: opacity 0.3s ease-out;
+        }
+
+        .modal-scale-in {
+            transition: transform 0.3s ease-out, opacity 0.3s ease-out;
+        }
+    </style>
 </head>
-<!-- Cabeçalho -->
-<header class="bg-gray-800 text-white py-4 shadow-md">
-    <div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row md:justify-between md:items-center">
-        <div class="mb-2 md:mb-0">
-            <h1 class="text-2xl md:text-3xl font-bold">🏋️ Área do Aluno</h1>
+
+<body class="font-sans antialiased">
+    <div class="overlay-bg">
+        <header class="bg-gray-900 bg-opacity-80 text-white py-5 shadow-lg">
+            <div
+                class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row md:justify-between md:items-center">
+                <div class="mb-3 md:mb-0 text-center md:text-left">
+                    <h1
+                        class="text-3xl md:text-4xl font-extrabold flex items-center justify-center md:justify-start gap-3">
+                        <span class="text-purple-400">🏋️</span> <span class="header-gradient">Área do Aluno</span>
+                    </h1>
+                </div>
+
+                <form method="post" action="{% url 'logout' %}" class="flex justify-center md:justify-end">
+                    {% csrf_token %}
+                    <button type="submit"
+                        class="px-6 py-2.5 button-gradient text-white font-semibold rounded-full shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105">
+                        Logout
+                    </button>
+                </form>
+            </div>
+        </header>
+
+        <main class="flex-grow py-10 px-4 sm:px-6 lg:px-8">
+            <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+                <section class="lg:col-span-3 text-gray-800">
+                    <h2 class="text-2xl font-bold mb-6 text-gray-900 border-b-2 border-indigo-400 pb-2">🎯 Informações
+                        Pessoais</h2>
+                    <div class="flex flex-col md:flex-row items-center md:items-start gap-8">
+                        <img src="{{ aluno.foto_url }}" alt="Foto de perfil"
+                            class="w-36 h-36 rounded-full object-cover border-4 border-indigo-500 shadow-xl flex-shrink-0">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-3 w-full text-lg">
+                            <p><strong class="text-gray-900">Nome:</strong> {{ aluno.nome }}</p>
+                            <p><strong class="text-gray-900">CPF:</strong> {{ aluno.cpf }}</p>
+                            <p><strong class="text-gray-900">Email:</strong> {{ aluno.email }}</p>
+                            <p><strong class="text-gray-900">Telefone:</strong> {{ aluno.telefone }}</p>
+                            <p><strong class="text-gray-900">Sexo:</strong> {{ aluno.sexo }}</p>
+                            <p><strong class="text-gray-900">Nascimento:</strong> {{ aluno.data_nascimento }}</p>
+                            <p><strong class="text-gray-900">Status:</strong> <span class="font-bold text-green-600">{{
+                                aluno.status }}</span></p>
+                            <p><strong class="text-gray-900">Instrutor:</strong> {{ aluno.cod_instrutor }} - {{
+                                aluno.nome_instrutor }}</p>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="lg:col-span-3 text-gray-800">
+                    <h2 class="text-2xl font-bold mb-6 text-gray-900 border-b-2 border-indigo-400 pb-2">🏋️ Treinos do
+                        Aluno</h2>
+                    {% if treinos %}
+                    <div class="overflow-x-auto pb-2">
+                        <div class="flex gap-x-6 min-w-full">
+                            {% for treino in treinos %}
+                            <div
+                                class="min-w-[300px] max-w-sm bg-white border border-gray-200 rounded-xl p-6 shadow-md hover:shadow-lg transition-all duration-300 flex-shrink-0 relative overflow-hidden">
+                                <div class="absolute inset-0 bg-gradient-to-br from-indigo-50 to-purple-50 opacity-75">
+                                </div>
+                                <div class="relative z-10">
+                                    <h3 class="text-xl font-bold text-indigo-700 mb-3">{{ treino.tipo_treino }}</h3>
+                                    <p class="text-gray-700 mb-1"><span class="font-medium">Início:</span> {{
+                                        treino.data_inicio }}</p>
+                                    <p class="text-gray-700 mb-1"><span class="font-medium">Fim:</span> {{
+                                        treino.data_final|default:"Sem data de término" }}</p>
+
+                                    {% if treino.observacoes %}
+                                    <p class="mt-3 text-sm text-gray-600">
+                                        <span class="font-medium">Observações:</span> {{ treino.observacoes }}
+                                    </p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% else %}
+                    <p class="text-gray-600">Nenhum treino cadastrado para este aluno.</p>
+                    {% endif %}
+                </section>
+
+                <section class="col-span-1 lg:col-span-1 text-gray-800">
+                    <h2 class="text-2xl font-bold mb-6 text-gray-900 border-b-2 border-indigo-400 pb-2">🧠 Histórico de
+                        Treinos</h2>
+                    {% if historico %}
+                    <ul class="divide-y divide-gray-200">
+                        {% for hist in historico %}
+                        <li class="py-4">
+                            <p class="text-gray-700 mb-1"><strong class="text-gray-900">Período:</strong> {{ hist.inicio
+                                }} - {{ hist.fim }}</p>
+                            <p class="text-gray-700 mb-1"><strong class="text-gray-900">Avaliação:</strong> {{
+                                hist.avaliacao }}</p>
+                            <p class="text-gray-700"><strong class="text-gray-900">Instrutor:</strong> {{ hist.instrutor
+                                }}</p>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                    <p class="text-gray-600">Nenhum histórico de treino disponível.</p>
+                    {% endif %}
+                </section>
+
+                <section class="col-span-1 lg:col-span-1 text-gray-800">
+                    <h2 class="text-2xl font-bold mb-6 text-gray-900 border-b-2 border-indigo-400 pb-2">💳 Pagamentos
+                    </h2>
+                    <div class="text-gray-700 mb-4 text-lg">
+                        <p class="mb-1"><strong class="text-gray-900">Status atual:</strong> <span
+                                class="font-bold text-blue-600">{{ pagamento.status }}</span></p>
+                        <p class="mb-1"><strong class="text-gray-900">Vencimento:</strong> {{ pagamento.vencimento }}
+                        </p>
+                        <p class="mb-1"><strong class="text-gray-900">Forma:</strong> {{ pagamento.forma }}</p>
+                        <p class="mb-1"><strong class="text-gray-900">Valor:</strong> R$ {{ pagamento.valor }}</p>
+                    </div>
+                    <h3 class="font-semibold text-xl mt-4 mb-3 text-gray-900">Histórico de Pagamentos:</h3>
+                    {% if historico_pagamentos %}
+                    <ul class="mt-2 text-base list-disc ml-6 text-gray-700">
+                        {% for pag in historico_pagamentos %}
+                        <li>{{ pag.data }} - {{ pag.status }} - R$ {{ pag.valor }}</li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                    <p class="text-gray-600">Nenhum pagamento registrado.</p>
+                    {% endif %}
+                </section>
+
+                <section class="col-span-1 lg:col-span-1 text-gray-800">
+                    <h2 class="text-2xl font-bold mb-6 text-gray-900 border-b-2 border-indigo-400 pb-2">📥 Documentos
+                    </h2>
+                    {% if documentos %}
+                    <ul class="list-disc list-inside space-y-3 text-lg">
+                        {% for doc in documentos %}
+                        <li><a href="{{ doc.url }}"
+                                class="text-blue-600 hover:text-blue-800 underline transition-colors duration-200">{{
+                                doc.nome }}</a></li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                    <p class="text-gray-600">Nenhum documento disponível.</p>
+                    {% endif %}
+                </section>
+
+                <section class="lg:col-span-2 text-gray-800">
+                    <h2 class="text-2xl font-bold mb-6 text-gray-900 border-b-2 border-indigo-400 pb-2">📊 Avaliações
+                        Físicas</h2>
+                    <form method="post" class="space-y-5">
+                        {% csrf_token %}
+                        <div>
+                            <label for="peso" class="block font-semibold mb-2 text-gray-700 text-lg">Peso (kg):</label>
+                            <input type="number" step="0.1" id="peso" name="peso" required
+                                value="{{ avaliacao.peso|default:'' }}"
+                                class="w-full p-3.5 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 text-gray-800 bg-gray-50" />
+                        </div>
+
+                        <div>
+                            <label for="altura" class="block font-semibold mb-2 text-gray-700 text-lg">Altura
+                                (m):</label>
+                            <input type="number" step="0.01" id="altura" name="altura" required
+                                value="{{ avaliacao.altura|default:'' }}"
+                                class="w-full p-3.5 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 text-gray-800 bg-gray-50" />
+                        </div>
+
+                        <div>
+                            <label for="observacoes"
+                                class="block font-semibold mb-2 text-gray-700 text-lg">Observações:</label>
+                            <textarea id="observacoes" name="observacoes" rows="4"
+                                class="w-full p-3.5 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 resize-y text-gray-800 bg-gray-50">{{ avaliacao.observacoes|default:'' }}</textarea>
+                        </div>
+
+                        <p class="text-xl text-gray-800"><strong class="text-gray-900">IMC:</strong> <span
+                                id="imcDisplay" class="font-bold text-indigo-700">{{ avaliacao.imc|default:"-" }}</span>
+                        </p>
+
+                        <button type="submit"
+                            class="mt-4 px-8 py-3 button-gradient text-white font-semibold rounded-full shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105">
+                            Salvar Avaliação
+                        </button>
+                    </form>
+                </section>
+
+                <section class="lg:col-span-3 flex flex-wrap justify-center md:justify-start gap-4 p-6">
+                    <a href="#" id="abrirModalEditarDados"
+                        class="px-6 py-2.5 button-gradient text-white font-semibold rounded-full shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105 flex items-center gap-2">
+                        <span class="text-lg">✏️</span> Editar Dados
+                    </a>
+                    <a href="#"
+                        class="bg-gray-700 text-white px-6 py-2.5 rounded-full shadow-md hover:bg-gray-800 hover:shadow-lg transition-all duration-300 transform hover:scale-105 flex items-center gap-2">
+                        <span class="text-lg">🔑</span> Trocar Senha
+                    </a>
+                    <a href="#"
+                        class="bg-red-600 text-white px-6 py-2.5 rounded-full shadow-md hover:bg-red-700 hover:shadow-lg transition-all duration-300 transform hover:scale-105 flex items-center gap-2">
+                        <span class="text-lg">❌</span> Encerrar Matrícula
+                    </a>
+                    <a href="#"
+                        class="bg-green-600 text-white px-6 py-2.5 rounded-full shadow-md hover:bg-green-700 hover:shadow-lg transition-all duration-300 transform hover:scale-105 flex items-center gap-2">
+                        <span class="text-lg">🔄</span> Atualizar Plano
+                    </a>
+
+                    <button onclick="openModal('modal-pagamento')"
+                        class="bg-purple-600 text-white px-6 py-2.5 rounded-full shadow-md hover:bg-purple-700 hover:shadow-lg transition-all duration-300 transform hover:scale-105 flex items-center gap-2">
+                        <span class="text-lg">💳</span> Ver Pagamentos
+                    </button>
+                </section>
+
+            </div>
+        </main>
+
+        <div id="modalEditarDados"
+            class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4 hidden modal-fade-in opacity-0">
+            <div
+                class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl p-8 space-y-6 text-gray-800 relative modal-scale-in transform scale-95 opacity-0">
+                <button onclick="closeModal('modalEditarDados')"
+                    class="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-4xl font-bold leading-none">&times;</button>
+
+                <h2 class="text-3xl font-bold text-center text-blue-900 border-b-2 border-indigo-400 pb-3">
+                    Editar Perfil</h2>
+
+                <div class="flex flex-col items-center mb-5">
+                    <img src="https://i.pravatar.cc/300" alt="Profile Picture"
+                        class="rounded-full w-32 h-32 mx-auto border-4 border-indigo-800 mb-4 transition-transform duration-300 hover:scale-105 ring ring-gray-300">
+                    <input type="file" name="profile" id="upload_profile_modal" hidden> <label
+                        for="upload_profile_modal"
+                        class="inline-flex items-center cursor-pointer text-blue-700 hover:text-blue-900 transition-colors duration-300">
+                        <svg data-slot="icon" class="w-5 h-5 mr-2" fill="none" stroke-width="1.5"
+                            stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"
+                            aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z">
+                            </path>
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0ZM18.75 10.5h.008v.008h-.008V10.5Z">
+                            </path>
+                        </svg>
+                        Alterar Foto de Perfil
+                    </label>
+                </div>
+
+                <form class="space-y-4" id="formEditarDados">
+                    {% csrf_token %}
+                    <div>
+                        <label for="nome_perfil"
+                            class="block text-sm font-medium text-gray-700">Nome</label>
+                        <input type="text" id="nome_perfil" name="nome"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                            value="{{ aluno.nome|default:'Nome do Aluno' }}">
+                    </div>
+                    <div>
+                        <label for="email_perfil"
+                            class="block text-sm font-medium text-gray-700">Email</label>
+                        <input type="email" id="email_perfil" name="email"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                            value="{{ aluno.email|default:'aluno@example.com' }}">
+                    </div>
+                    <div>
+                        <label for="telefone_perfil"
+                            class="block text-sm font-medium text-gray-700">Telefone</label>
+                        <input type="tel" id="telefone_perfil" name="telefone"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                            value="{{ aluno.telefone|default:'+55 (XX) XXXXX-XXXX' }}">
+                    </div>
+                    <div>
+                        <label for="data_nascimento_perfil"
+                            class="block text-sm font-medium text-gray-700">Data de Nascimento</label>
+                        <input type="date" id="data_nascimento_perfil" name="data_nascimento"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                            value="{{ aluno.data_nascimento|date:'Y-m-d'|default:'' }}">
+                    </div>
+                    <div>
+                        <label for="sexo_perfil" class="block text-sm font-medium text-gray-700">Sexo</label>
+                        <select id="sexo_perfil" name="sexo"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
+                            <option value="M" {% if aluno.sexo == 'M' %}selected{% endif %}>Masculino</option>
+                            <option value="F" {% if aluno.sexo == 'F' %}selected{% endif %}>Feminino</option>
+                            <option value="O" {% if aluno.sexo == 'O' %}selected{% endif %}>Outro</option>
+                        </select>
+                    </div>
+
+                    <div class="flex justify-end space-x-4 mt-6">
+                        <button type="button" onclick="closeModal('modalEditarDados')"
+                            class="px-6 py-2.5 bg-gray-300 text-gray-700 rounded-full hover:bg-gray-400 transition-colors duration-200 shadow-md">Cancelar</button>
+                        <button type="submit"
+                            class="px-6 py-2.5 bg-indigo-800 text-white rounded-full hover:bg-indigo-700 transition-colors duration-300 shadow-md">Salvar
+                            Alterações</button>
+                    </div>
+                </form>
+            </div>
         </div>
 
-        <form method="post" action="{% url 'logout' %}" class="flex justify-end">
-            {% csrf_token %}
-            <button type="submit"
-                class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition duration-200">
-                Logout
-            </button>
-        </form>
-    </div>
-</header>
-
-<!-- Conteúdo principal -->
-<main class="flex-grow py-8">
-    <div class="max-w-7xl mx-auto px-4 grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-        <!-- 🎯 Informações Pessoais -->
-        <section class="bg-white rounded-xl shadow-lg p-6 lg:col-span-3">
-            <h2 class="text-xl font-bold mb-4">🎯 Informações Pessoais</h2>
-            <div class="flex flex-col md:flex-row items-center gap-6">
-                <img src="{{ aluno.foto_url }}" alt="Foto de perfil"
-                    class="w-28 h-28 rounded-full object-cover border border-gray-300">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2 w-full">
-                    <p><strong>Nome:</strong> {{ aluno.nome }}</p>
-                    <p><strong>CPF:</strong> {{ aluno.cpf }}</p>
-                    <p><strong>Email:</strong> {{ aluno.email }}</p>
-                    <p><strong>Telefone:</strong> {{ aluno.telefone }}</p>
-                    <p><strong>Sexo:</strong> {{ aluno.sexo }}</p>
-                    <p><strong>Nascimento:</strong> {{ aluno.data_nascimento }}</p>
-                    <p><strong>Status:</strong> {{ aluno.status }}</p>
-                    <p><strong>Instrutor:</strong> {{ aluno.cod_instrutor }} - {{ aluno.nome_instrutor }}</p>
-                </div>
-            </div>
-        </section>
-
-        <!-- 🏋️ Treinos Atuais -->
-        <section class="bg-white rounded-xl shadow-lg p-6 lg:col-span-3">
-            <h2 class="text-xl font-semibold mb-4">Treinos do Aluno</h2>
-
-            {% if treinos %}
-            <div class="overflow-x-auto">
-                <div class="flex gap-x-4 pb-2 min-w-full">
-                    {% for treino in treinos %}
-                    <div
-                        class="min-w-[250px] max-w-xs border border-gray-200 rounded-xl p-4 shadow hover:shadow-md transition-all bg-white flex-shrink-0">
-                        <h3 class="text-lg font-bold text-indigo-600 mb-2">{{ treino.tipo_treino }}</h3>
-                        <p><span class="font-medium">Início:</span> {{ treino.data_inicio }}</p>
-                        <p><span class="font-medium">Fim:</span> {{ treino.data_final|default:"Sem data de término" }}
-                        </p>
-
-                        {% if treino.observacoes %}
-                        <p class="mt-2 text-sm text-gray-600">
-                            <span class="font-medium">Observações:</span> {{ treino.observacoes }}
-                        </p>
-                        {% endif %}
-                    </div>
-                    {% endfor %}
-                </div>
-            </div>
-            {% else %}
-            <p class="text-gray-600">Nenhum treino cadastrado para este aluno.</p>
-            {% endif %}
-        </section>
-
-        <!-- 🧠 Histórico de Treinos -->
-        <section class="bg-white rounded-xl shadow-lg p-6">
-            <h2 class="text-xl font-bold mb-4">🧠 Histórico de Treinos</h2>
-            {% if historico %}
-            <ul class="divide-y divide-gray-200">
-                {% for hist in historico %}
-                <li class="py-3">
-                    <p><strong>Período:</strong> {{ hist.inicio }} - {{ hist.fim }}</p>
-                    <p><strong>Avaliação:</strong> {{ hist.avaliacao }}</p>
-                    <p><strong>Instrutor:</strong> {{ hist.instrutor }}</p>
-                </li>
-                {% endfor %}
-            </ul>
-            {% else %}
-            <p class="text-sm text-gray-500">Nenhum histórico de treino disponível.</p>
-            {% endif %}
-        </section>
-
-        <!-- 💳 Pagamentos -->
-        <section class="bg-white rounded-xl shadow-lg p-6">
-            <h2 class="text-xl font-bold mb-4">💳 Pagamentos</h2>
-            <p><strong>Status atual:</strong> {{ pagamento.status }}</p>
-            <p><strong>Vencimento:</strong> {{ pagamento.vencimento }}</p>
-            <p><strong>Forma:</strong> {{ pagamento.forma }}</p>
-            <p><strong>Valor:</strong> R$ {{ pagamento.valor }}</p>
-            <h3 class="font-semibold mt-4">Histórico de Pagamentos:</h3>
-            {% if historico_pagamentos %}
-            <ul class="mt-2 text-sm list-disc ml-6">
-                {% for pag in historico_pagamentos %}
-                <li>{{ pag.data }} - {{ pag.status }} - R$ {{ pag.valor }}</li>
-                {% endfor %}
-            </ul>
-            {% else %}
-            <p class="text-sm text-gray-500">Nenhum pagamento registrado.</p>
-            {% endif %}
-        </section>
-
-        <!-- 📊 Avaliações Físicas -->
-        <section class="bg-white rounded-xl shadow-lg p-6 lg:col-span-3">
-            <h2 class="text-xl font-bold mb-4">📊 Avaliações Físicas</h2>
-            <form method="post">
-                {% csrf_token %}
-                <label for="peso" class="block font-semibold mb-1">Peso (kg):</label>
-                <input type="number" step="0.1" id="peso" name="peso" required value="{{ avaliacao.peso|default:'' }}"
-                    class="w-full p-2 border rounded mb-4" />
-
-                <label for="altura" class="block font-semibold mb-1">Altura (m):</label>
-                <input type="number" step="0.01" id="altura" name="altura" required
-                    value="{{ avaliacao.altura|default:'' }}" class="w-full p-2 border rounded mb-4" />
-
-                <label for="observacoes" class="block font-semibold mb-1">Observações:</label>
-                <textarea id="observacoes" name="observacoes" rows="3"
-                    class="w-full p-2 border rounded mb-4">{{ avaliacao.observacoes|default:'' }}</textarea>
-
-                <p><strong>IMC:</strong> <span id="imcDisplay">{{ avaliacao.imc|default:"-" }}</span></p>
-
-                <button type="submit" class="mt-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-                    Salvar Avaliação
-                </button>
-            </form>
-        </section>
-
-        <!-- 📥 Documentos -->
-        <section class="bg-white rounded-xl shadow-lg p-6">
-            <h2 class="text-xl font-bold mb-4">📥 Documentos</h2>
-            {% if documentos %}
-            <ul class="list-disc list-inside">
-                {% for doc in documentos %}
-                <li><a href="{{ doc.url }}" class="text-blue-500 underline">{{ doc.nome }}</a></li>
-                {% endfor %}
-            </ul>
-            {% else %}
-            <p class="text-sm text-gray-500">Nenhum documento disponível.</p>
-            {% endif %}
-        </section>
-
-        <!-- ⚙️ Ações Rápidas -->
-        <section class="bg-white rounded-xl shadow-lg p-6 flex flex-wrap gap-4 lg:col-span-3">
-            <a href="#" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">✏️ Editar
-                Dados</a>
-            <a href="#" class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700 transition">🔑 Trocar
-                Senha</a>
-            <a href="#" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition">❌ Encerrar
-                Matrícula</a>
-            <a href="#" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition">🔄 Atualizar
-                Plano</a>
-
-            <!-- Botão de Pagamento (abre modal) -->
-            <button onclick="document.getElementById('modal-pagamento').classList.remove('hidden')"
-                class="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 transition">
-                💳 Pagamentos
-            </button>
-        </section>
-        <!-- Modal de Pagamento -->
         <div id="modal-pagamento"
-            class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-            <div class="bg-white rounded-xl shadow-xl p-6 w-full max-w-lg relative">
-                <!-- Botão de fechar -->
-                <button onclick="document.getElementById('modal-pagamento').classList.add('hidden')"
-                    class="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-xl font-bold">&times;</button>
+            class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4 hidden modal-fade-in opacity-0">
+            <div
+                class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-lg relative modal-scale-in transform scale-95 opacity-0">
+                <button onclick="closeModal('modal-pagamento')"
+                    class="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-4xl font-bold leading-none">&times;</button>
 
-                <h2 class="text-2xl font-bold mb-4">💳 Pagamentos</h2>
+                <h2 class="text-2xl font-bold mb-6 text-gray-900 border-b-2 border-indigo-400 pb-2">💳 Detalhes de
+                    Pagamento</h2>
 
-                <p><strong>Status atual:</strong> {{ pagamento.status }}</p>
-                <p><strong>Vencimento:</strong> {{ pagamento.vencimento }}</p>
-                <p><strong>Forma:</strong> {{ pagamento.forma }}</p>
-                <p><strong>Valor:</strong> R$ {{ pagamento.valor }}</p>
+                <div class="text-gray-700 mb-6 text-lg">
+                    <p class="mb-1"><strong class="text-gray-900">Status atual:</strong> <span
+                            class="font-bold text-blue-600">{{ pagamento.status }}</span></p>
+                    <p class="mb-1"><strong class="text-gray-900">Vencimento:</strong> {{ pagamento.vencimento }}</p>
+                    <p class="mb-1"><strong class="text-gray-900">Forma:</strong> {{ pagamento.forma }}</p>
+                    <p class="mb-1"><strong class="text-gray-900">Valor:</strong> R$ {{ pagamento.valor }}</p>
+                </div>
 
-                <h3 class="font-semibold mt-4">Histórico de Pagamentos:</h3>
+                <h3 class="font-semibold text-xl mt-4 mb-3 text-gray-900">Histórico de Pagamentos:</h3>
                 {% if historico_pagamentos %}
-                <ul class="mt-2 text-sm list-disc ml-6">
+                <ul class="mt-2 text-base list-disc ml-6 text-gray-700 max-h-60 overflow-y-auto pr-2">
                     {% for pag in historico_pagamentos %}
-                    <li>{{ pag.data }} - {{ pag.status }} - R$ {{ pag.valor }}</li>
+                    <li class="py-1">{{ pag.data }} - {{ pag.status }} - R$ {{ pag.valor }}</li>
                     {% endfor %}
                 </ul>
                 {% else %}
-                <p class="text-sm text-gray-500">Nenhum pagamento registrado.</p>
+                <p class="text-gray-600">Nenhum pagamento registrado.</p>
                 {% endif %}
             </div>
         </div>
 
     </div>
-</main>
-
-<!-- Rodapé -->
-<footer class="bg-white border-t py-4 mt-8">
-    <div class="max-w-7xl mx-auto px-4 text-sm text-gray-500 text-center">
-        © {{ year|default:"2025" }} ERPWAY SYSTEM — Todos os direitos reservados.
-    </div>
-</footer>
-
-<script>
-    function calculaIMC() {
-        const peso = parseFloat(document.getElementById('peso').value);
-        const altura = parseFloat(document.getElementById('altura').value);
-        if (peso > 0 && altura > 0) {
-            const imc = peso / (altura * altura);
-            document.getElementById('imcDisplay').textContent = imc.toFixed(2);
-        } else {
-            document.getElementById('imcDisplay').textContent = "-";
+    <footer class="bg-gray-900 bg-opacity-80 text-white py-5 mt-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-sm text-gray-400 text-center">
+            © {{ year|default:"2025" }} ERPWAY SYSTEM — Todos os direitos reservados.
+        </div>
+    </footer>
+    <script>
+        // --- Funções de Modal Reutilizáveis ---
+        function openModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.remove('hidden');
+                setTimeout(() => {
+                    modal.classList.add('opacity-100');
+                    modal.querySelector('.modal-scale-in').classList.add('scale-100', 'opacity-100');
+                    modal.querySelector('.modal-scale-in').classList.remove('scale-95', 'opacity-0');
+                }, 10);
+            }
         }
-    }
 
-    document.getElementById('peso').addEventListener('input', calculaIMC);
-    document.getElementById('altura').addEventListener('input', calculaIMC);
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.remove('opacity-100');
+                modal.querySelector('.modal-scale-in').classList.remove('scale-100', 'opacity-100');
+                modal.querySelector('.modal-scale-in').classList.add('scale-95', 'opacity-0');
+                setTimeout(() => {
+                    modal.classList.add('hidden');
+                }, 300); // Should match the transition duration
+            }
+        }
 
-    calculaIMC(); // Inicial
-</script>
+
+        document.addEventListener('DOMContentLoaded', function () {
+            // --- Lógica do Gráfico Chart.js (seu script existente) ---
+            // Certifique-se de que Chart.js esteja carregado para esta parte
+            // const ctx = document.getElementById('graficoTreinos').getContext('2d');
+            // new Chart(ctx, {
+            //     type: 'bar',
+            //     data: {
+            //         labels: ['Semana 1', 'Semana 2', 'Semana 3', 'Semana 4'],
+            //         datasets: [{
+            //             label: 'Treinos Aplicados',
+            //             data: [5, 8, 7, 10], // Dados de exemplo
+            //             backgroundColor: [
+            //                 'rgba(75, 192, 192, 0.7)',
+            //                 'rgba(153, 102, 255, 0.7)',
+            //                 'rgba(255, 159, 64, 0.7)',
+            //                 'rgba(54, 162, 235, 0.7)'
+            //             ],
+            //             borderColor: [
+            //                 'rgba(75, 192, 192, 1)',
+            //                 'rgba(153, 102, 255, 1)',
+            //                 'rgba(255, 159, 64, 1)',
+            //                 'rgba(54, 162, 235, 1)'
+            //             ],
+            //             borderWidth: 1
+            //         }]
+            //     },
+            //     options: {
+            //         responsive: true,
+            //         maintainAspectRatio: false,
+            //         scales: {
+            //             y: {
+            //                 beginAtZero: true,
+            //                 ticks: {
+            //                     color: '#4a5568'
+            //                 },
+            //                 grid: {
+            //                     color: 'rgba(200, 200, 200, 0.2)'
+            //                 }
+            //             },
+            //             x: {
+            //                 ticks: {
+            //                     color: '#4a5568'
+            //                 },
+            //                 grid: {
+            //                     color: 'rgba(200, 200, 200, 0.2)'
+            //                 }
+            //             }
+            //         },
+            //         plugins: {
+            //             legend: {
+            //                 labels: {
+            //                     color: '#4a5568'
+            //                 }
+            //             }
+            //         }
+            //     }
+            // });
+            // ... outras funções e inicializações ...
+            // calcularIMCAvaliacao(); // Se essa função existir e for chamada aqui
+
+            // --- Lógica para o Modal de Edição de Dados ---
+            const btnAbrirEditarDados = document.getElementById("abrirModalEditarDados");
+            if (btnAbrirEditarDados) {
+                btnAbrirEditarDados.addEventListener("click", function (e) {
+                    e.preventDefault();
+                    openModal("modalEditarDados");
+
+                    // Preenche os campos do formulário com os dados atuais do aluno
+                    // Certifique-se de que `aluno` está disponível no contexto do Django
+                    document.getElementById('nome_perfil').value = '{{ aluno.nome|default:"Nome do Aluno" }}';
+                    document.getElementById('email_perfil').value = '{{ aluno.email|default:"aluno@example.com" }}';
+                    document.getElementById('telefone_perfil').value = '{{ aluno.telefone|default:"+55 (XX) XXXXX-XXXX" }}';
+                    // Converte a data para o formato YYYY-MM-DD para o input type="date"
+                    const dataNascimento = '{{ aluno.data_nascimento|date:"Y-m-d" }}';
+                    if (dataNascimento) {
+                        document.getElementById('data_nascimento_perfil').value = dataNascimento;
+                    }
+                    const sexoAluno = '{{ aluno.sexo|default:"" }}';
+                    if (sexoAluno) {
+                        document.getElementById('sexo_perfil').value = sexoAluno;
+                    }
+                });
+            }
+
+            // Lógica para Salvar Alterações (você precisará implementar a integração com seu backend aqui)
+            const formEditarDados = document.getElementById('formEditarDados');
+            if (formEditarDados) {
+                formEditarDados.addEventListener('submit', async function (e) {
+                    e.preventDefault(); // Impede o comportamento padrão do formulário
+
+                    const dadosAtualizados = {
+                        nome: document.getElementById('nome_perfil').value.trim(),
+                        email: document.getElementById('email_perfil').value.trim(),
+                        telefone: document.getElementById('telefone_perfil').value.trim(),
+                        data_nascimento: document.getElementById('data_nascimento_perfil').value.trim(),
+                        sexo: document.getElementById('sexo_perfil').value.trim(),
+                        // Adicione outros campos conforme necessário para o seu modelo de aluno
+                    };
+
+                    // Exemplo de como você enviaria os dados para uma API Django
+                    try {
+                        // Substitua `/api/aluno/{{ aluno.id }}/` pelo seu endpoint real para atualizar o aluno
+                        const response = await fetch(`/api/aluno/{{ aluno.id }}/`, {
+                            method: 'PATCH', // Ou 'PUT' para atualização completa
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': '{{ csrf_token }}' // Não esqueça do CSRF token
+                            },
+                            body: JSON.stringify(dadosAtualizados)
+                        });
+
+                        if (!response.ok) {
+                            const errorData = await response.json();
+                            throw new Error(errorData.message || 'Erro ao salvar alterações.');
+                        }
+
+                        alert('Dados atualizados com sucesso!');
+                        closeModal('modalEditarDados');
+                        // Opcional: Recarregar a página ou atualizar os elementos que exibem os dados do aluno
+                        window.location.reload();
+
+                    } catch (error) {
+                        alert('Erro ao salvar alterações: ' + error.message);
+                        console.error('Erro na API:', error);
+                    }
+                });
+            }
+
+            // Lógica para upload de imagem de perfil (opcional)
+            const uploadProfileModal = document.getElementById('upload_profile_modal');
+            const profileImageModal = document.querySelector('#modalEditarDados img');
+
+            if (uploadProfileModal && profileImageModal) {
+                uploadProfileModal.addEventListener('change', function (event) {
+                    const file = event.target.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = function (e) {
+                            profileImageModal.src = e.target.result;
+                        };
+                        reader.readAsDataURL(file);
+
+                        // TODO: Implementar a lógica para enviar a nova imagem para o servidor.
+                        // Isso provavelmente envolverá um novo endpoint de API e um `FormData` para enviar o arquivo.
+                        console.log('Imagem selecionada para upload:', file.name);
+                        // Exemplo: uploadProfile(file);
+                    }
+                });
+            }
+        });
+    </script>
 </body>
 
 </html>
