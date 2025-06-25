@@ -1,470 +1,427 @@
-{% extends "aluno/test.html" %}
-
-{% load static %}
-
-{% block title %}
-    {{ block.super }} - Lista de Alunos
-{% endblock title %}
-
-{% block style %}
-    <link rel="stylesheet" href="{% static 'css/base.css' %}">
-    <link rel="stylesheet" href="{% static 'css/aluno.css' %}">
-     <!-- Tailwind CSS CDN -->
-     <script src="https://cdn.tailwindcss.com"></script>
-     <!-- Alpine.js CDN -->
-     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-{% endblock style %}
-     
-{% block content %}
-<div>
-    <script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.x.x/dist/alpine.min.js" defer></script>
-    
-    <div x-data="{ sidebarOpen: false }" class="flex h-screen bg-gray-200">
-        <div :class="sidebarOpen ? 'block' : 'hidden'" @click="sidebarOpen = false" class="fixed inset-0 z-20 transition-opacity bg-black opacity-50 lg:hidden"></div>
-            
-<div :class="sidebarOpen ? 'translate-x-0 ease-out' : '-translate-x-full ease-in'" class="fixed inset-y-0 left-0 z-30 w-64 overflow-y-auto transition duration-300 transform bg-gray-900 lg:translate-x-0 lg:static lg:inset-0">
-    <div class="flex items-center justify-center mt-8">
-        <div class="flex items-center">
-            <svg class="w-12 h-12" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M364.61 390.213C304.625 450.196 207.37 450.196 147.386 390.213C117.394 360.22 102.398 320.911 102.398 281.6C102.398 242.291 117.394 202.981 147.386 172.989C147.386 230.4 153.6 281.6 230.4 307.2C230.4 256 256 102.4 294.4 76.7999C320 128 334.618 142.997 364.608 172.989C394.601 202.981 409.597 242.291 409.597 281.6C409.597 320.911 394.601 360.22 364.61 390.213Z" fill="#4C51BF" stroke="#4C51BF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
-                <path d="M201.694 387.105C231.686 417.098 280.312 417.098 310.305 387.105C325.301 372.109 332.8 352.456 332.8 332.8C332.8 313.144 325.301 293.491 310.305 278.495C295.309 263.498 288 256 275.2 230.4C256 243.2 243.201 320 243.201 345.6C201.694 345.6 179.2 332.8 179.2 332.8C179.2 352.456 186.698 372.109 201.694 387.105Z" fill="white"></path>
-            </svg>
-            
-            <span class="mx-2 text-2xl font-semibold text-white">ERPWAY SYSTEM</span>
-        </div>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seus Treinos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
         
-    </div>
-
-    <nav class="mt-10">
-        <a class="flex items-center px-6 py-2 mt-4 text-gray-100 bg-gray-700 bg-opacity-25" href="{% url 'dashboard' %}">
-            <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path>
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"></path>
-            </svg>
-
-            <span class="mx-3">Dashboard</span>
-        </a>
-
-        <a class="flex items-center px-6 py-2 mt-4 text-gray-500 hover:bg-gray-700 hover:bg-opacity-25 hover:text-gray-100"
-            href="../instrutores">
-            <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M17 14v6m-3-3h6M6 10h2a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v2a2 2 0 002 2zm10 0h2a2 2 0 002-2V6a2 2 0 00-2-2h-2a2 2 0 00-2 2v2a2 2 0 002 2zM6 20h2a2 2 0 002-2v-2a2 2 0 00-2-2H6a2 2 0 00-2 2v2a2 2 0 002 2z">
-                </path>
-            </svg>
-
-            <span class="mx-3">Instrutor</span>
-        </a>
-
-        <a class="flex items-center px-6 py-2 mt-4 text-gray-500 hover:bg-gray-700 hover:bg-opacity-25 hover:text-gray-100"
-            href="#">
-            <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10">
-                </path>
-            </svg>
-
-            <span class="mx-3">Tables</span>
-        </a>
-
-        <a class="flex items-center px-6 py-2 mt-4 text-gray-500 hover:bg-gray-700 hover:bg-opacity-25 hover:text-gray-100"
-            href="#">
-            <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
-                </path>
-            </svg>
-
-            <span class="mx-3">Forms</span>
-        </a>
-    </nav>
-</div>
-<!-- cards -->
-<div class="w-full px-6 py-6 mx-auto">
-    <!-- row 1 -->
-    <div class="flex flex-wrap -mx-3">
-      <!-- card1 -->
-      <div class="w-full max-w-full px-3 mb-6 sm:w-1/2 sm:flex-none xl:mb-0 xl:w-1/4">
-        <div class="relative flex flex-col min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
-          <div class="flex-auto p-4">
-            <div class="flex flex-row -mx-3">
-              <div class="flex-none w-2/3 max-w-full px-3">
-                <div>
-                  <p class="mb-0 font-sans text-sm font-semibold leading-normal uppercase dark:text-white dark:opacity-60">Alunos inativos</p>
-                  <h4 class="text-2xl font-semibold text-gray-700">{{total_alunos_inativos}}</h5>                    
-                 
+        /* Custom animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .animate-fade-in {
+            animation: fadeIn 0.3s ease-out forwards;
+        }
+        
+        /* Custom checkbox */
+        .custom-checkbox {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #6366f1;
+            border-radius: 4px;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.2s;
+        }
+        
+        .custom-checkbox:checked {
+            background-color: #6366f1;
+        }
+        
+        .custom-checkbox:checked::after {
+            content: "✓";
+            position: absolute;
+            color: white;
+            font-size: 12px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans">
+    <div class="container mx-auto px-4 py-8 max-w-7xl">
+        <!-- Card Principal -->
+        <div class="bg-white rounded-2xl shadow-sm p-6 lg:col-span-2 transition-all duration-300 hover:shadow-md">
+            <div class="flex justify-between items-center mb-6">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-indigo-100 p-2 rounded-lg">
+                        <i class="fas fa-dumbbell text-indigo-600 text-xl"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold text-gray-800">Seus Treinos</h2>
                 </div>
-              </div>
-              <div class="px-3 text-right basis-1/3">
-                <div class="inline-block w-12 h-12 text-center rounded-circle bg-gradient-to-tl from-blue-500 to-violet-500">
-                  <i class="ni leading-none ni-money-coins text-lg relative top-3.5 text-white"></i>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- card2 -->
-      <div class="w-full max-w-full px-3 mb-6 sm:w-1/2 sm:flex-none xl:mb-0 xl:w-1/4">
-        <div class="relative flex flex-col min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
-          <div class="flex-auto p-4">
-            <div class="flex flex-row -mx-3">
-              <div class="flex-none w-2/3 max-w-full px-3">
-                <div>
-                  <p class="mb-0 font-sans text-sm font-semibold leading-normal uppercase dark:text-white dark:opacity-60">Alunos Ativos</p>
-                  <h4 class="text-2xl font-semibold text-gray-700">{{ total_alunos }}</h4> 
-                                    
-                </div>
-              </div>
-              <div class="px-3 text-right basis-1/3">
-                <div class="inline-block w-12 h-12 text-center rounded-circle bg-gradient-to-tl from-red-600 to-orange-600">
-                  <i class="ni leading-none ni-world text-lg relative top-3.5 text-white"></i>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- card3 -->
-      <div class="w-full max-w-full px-3 mb-6 sm:w-1/2 sm:flex-none xl:mb-0 xl:w-1/4">
-        <div class="relative flex flex-col min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
-          <div class="flex-auto p-4">
-            <div class="flex flex-row -mx-3">
-              <div class="flex-none w-2/3 max-w-full px-3">
-                <div>
-                  <p class="mb-0 font-sans text-sm font-semibold leading-normal uppercase dark:text-white dark:opacity-60">Faturamento mensal</p>
-                  <h4 class="text-2xl font-semibold text-gray-700">R$ {{soma_valores}}</h4>
-                   
-                </div>
-              </div>
-              <div class="px-3 text-right basis-1/3">
-                <div class="inline-block w-12 h-12 text-center rounded-circle bg-gradient-to-tl from-emerald-500 to-teal-400">
-                  <i class="ni leading-none ni-paper-diploma text-lg relative top-3.5 text-white"></i>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- card4 -->
-      <div class="w-full max-w-full px-3 sm:w-1/2 sm:flex-none xl:w-1/4">
-        <div class="relative flex flex-col min-w-0 break-words bg-white shadow-xl dark:bg-slate-850 dark:shadow-dark-xl rounded-2xl bg-clip-border">
-          <div class="flex-auto p-4">
-            <div class="flex flex-row -mx-3">
-              <div class="flex-none w-2/3 max-w-full px-3">
-                <div>
-                  <p class="mb-0 font-sans text-sm font-semibold leading-normal uppercase dark:text-white dark:opacity-60">ùltimo pagamento</p>
-                  <h4 class="text-2xl font-semibold text-gray-700"> R$ {{ultimo_pagamento}}</h4>
-                   
-                </div>
-              </div>
-              <div class="px-3 text-right basis-1/3">
-                <div class="inline-block w-12 h-12 text-center rounded-circle bg-gradient-to-tl from-orange-500 to-yellow-500">
-                  <i class="ni leading-none ni-cart text-lg relative top-3.5 text-white"></i>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    
-
-    <!-- cards grafrico -->
-    <div class="flex flex-wrap mt-6 -mx-3">
-      <div class="w-full max-w-full px-3 mt-0 lg:w-7/12 lg:flex-none">
-        <div class="border-black/12.5 dark:bg-slate-850 dark:shadow-dark-xl shadow-xl relative z-20 flex min-w-0 flex-col break-words rounded-2xl border-0 border-solid bg-white bg-clip-border">
-          <div class="border-black/12.5 mb-0 rounded-t-2xl border-b-0 border-solid p-6 pt-4 pb-0">
-            <h6 class="capitalize dark:text-white">Sales overview</h6>
-            <p class="mb-0 text-sm leading-normal dark:text-white dark:opacity-60">
-              <i class="fa fa-arrow-up text-emerald-500"></i>
-              <span class="font-semibold">4% more</span> in 2021
-            </p>
-          </div>
-          <div class="flex-auto p-4">
-            <div>
-              <canvas id="chart-line" height="300"></canvas>
-            </div>
-          </div>
-        </div>
-      </div>
-      <script>
-        var page = window.location.pathname.split("/").pop().split(".")[0];
-        var aux = window.location.pathname.split("/");
-        var to_build = (aux.includes('pages')?'../':'./');
-        var root = window.location.pathname.split("/")
-        if (!aux.includes("pages")) {
-          page = "dashboard";
-        }
-      
-        loadStylesheet("{% static 'css/perfect-scrollbar.css' %}");
-        loadJS("{% static 'js/perfect-scrollbar.js' %}", true);
-      
-        if (document.querySelector("nav [navbar-trigger]")) {
-          loadJS("{% static 'js/navbar-collapse.js' %}", true);
-        }
-      
-        if (document.querySelector("[data-target='tooltip']")) {
-          loadJS("{% static 'js/tooltips.js' %}", true);
-          loadStylesheet("{% static 'css/tooltips.css' %}");
-        }
-      
-        if (document.querySelector("[nav-pills]")) {
-          loadJS("{% static 'js/nav-pills.js' %}", true);
-        }
-      
-        if (document.querySelector("[dropdown-trigger]")) {
-          loadJS("{% static 'js/dropdown.js' %}", true);
-      
-        }
-      
-        if (document.querySelector("[fixed-plugin]")) {
-          loadJS("{% static 'js/fixed-plugin.js' %}", true);
-        }
-      
-        if (document.querySelector("[navbar-main]")) {
-          loadJS("{% static 'js/sidenav-burger.js' %}", true);
-          loadJS("{% static 'js/navbar-sticky.js' %}", true);
-        }
-      
-        if (document.querySelector("canvas")) {
-          loadJS("{% static 'js/chart-1.js' %}", true);
-          loadJS("{% static 'js/chart-2.js' %}", true);
-        }
-      
-        function loadJS(FILE_URL, async) {
-          let dynamicScript = document.createElement("script");
-      
-          dynamicScript.setAttribute("src", FILE_URL);
-          dynamicScript.setAttribute("type", "text/javascript");
-          dynamicScript.setAttribute("async", async);
-      
-          document.head.appendChild(dynamicScript);
-        }
-      
-        function loadStylesheet(FILE_URL) {
-          let dynamicStylesheet = document.createElement("link");
-      
-          dynamicStylesheet.setAttribute("href", FILE_URL);
-          dynamicStylesheet.setAttribute("type", "text/css");
-          dynamicStylesheet.setAttribute("rel", "stylesheet");
-      
-          document.head.appendChild(dynamicStylesheet);
-        }
-      
-      </script>
-
-      <!-- galeria de cards -->
-      <div class="w-full max-w-full px-3 lg:w-5/12 lg:flex-none">
-        <div slider class="relative w-full h-full overflow-hidden rounded-2xl">
-          <!-- slide 1 -->
-          <div slide class="absolute w-full h-full transition-all duration-500">
-            <img class="object-cover h-full" src="{% static 'img/carousel-1.jpg' %}" alt="carousel image" />
-            <div class="block text-start ml-12 left-0 bottom-0 absolute right-[15%] pt-5 pb-5 text-white">
-              <div class="inline-block w-8 h-8 mb-4 text-center text-black bg-white bg-center rounded-lg fill-current stroke-none">
-                <i class="top-0.75 text-xxs relative text-slate-700 ni ni-camera-compact"></i>
-              </div>
-              <h5 class="mb-1 text-white">Get started with Argon</h5>
-              <p class="dark:opacity-80">There’s nothing I really wanted to do in life that I wasn’t able to get good at.</p>
-            </div>
-          </div>
-
-          <!-- slide 2 -->
-          <div slide class="absolute w-full h-full transition-all duration-500">
-            <img class="object-cover h-full" src="{% static 'img/carousel-2.jpg' %}" alt="carousel image" />
-            <div class="block text-start ml-12 left-0 bottom-0 absolute right-[15%] pt-5 pb-5 text-white">
-              <div class="inline-block w-8 h-8 mb-4 text-center text-black bg-white bg-center rounded-lg fill-current stroke-none">
-                <i class="top-0.75 text-xxs relative text-slate-700 ni ni-bulb-61"></i>
-              </div>
-              <h5 class="mb-1 text-white">Faster way to create web pages</h5>
-              <p class="dark:opacity-80">That’s my skill. I’m not really specifically talented at anything except for the ability to learn.</p>
-            </div>
-          </div>
-
-          <!-- slide 3 -->
-          <div slide class="absolute w-full h-full transition-all duration-500">
-            <img class="object-cover h-full" src="{% static 'img/carousel-3.jpg' %}" alt="carousel image" />
-            <div class="block text-start ml-12 left-0 bottom-0 absolute right-[15%] pt-5 pb-5 text-white">
-              <div class="inline-block w-8 h-8 mb-4 text-center text-black bg-white bg-center rounded-lg fill-current stroke-none">
-                <i class="top-0.75 text-xxs relative text-slate-700 ni ni-trophy"></i>
-              </div>
-              <h5 class="mb-1 text-white">Share with us your design tips!</h5>
-              <p class="dark:opacity-80">Don’t be afraid to be wrong because you can’t learn anything from a compliment.</p>
-            </div>
-          </div>
-
-          <!-- Control buttons -->
-          <button btn-next class="absolute z-10 w-10 h-10 p-2 text-lg text-white border-none opacity-50 cursor-pointer hover:opacity-100 far fa-chevron-right active:scale-110 top-6 right-4"></button>
-          <button btn-prev class="absolute z-10 w-10 h-10 p-2 text-lg text-white border-none opacity-50 cursor-pointer hover:opacity-100 far fa-chevron-left active:scale-110 top-6 right-16"></button>
-        </div>
-      </div>
-    </div>
-
-   <!-- cards tabela -->
-<div class="flex flex-wrap mt-6 -mx-3">
-  <!-- Card da Tabela -->
-  <div class="w-full px-3 mt-0 mb-6 lg:mb-0 lg:w-7/12">
-    <div class="flex flex-col h-full bg-white dark:bg-gray-900 rounded-2xl shadow-xl border border-gray-200">
-      <!-- Cabeçalho do Card -->
-      <div class="p-4 pb-0 mb-0 rounded-t-2xl">
-        <div class="flex justify-between">
-          <h6 class="mb-2 text-lg font-semibold text-gray-800 dark:text-white">Lista de alunos</h6>
-        </div>
-      </div>
-
-      <!-- Tabela -->
-      <div class="flex-1 px-4 pb-4 overflow-hidden">
-        <!-- Cabeçalho fixo -->
-        <div class="overflow-x-auto">
-          <!-- Tabela com cabeçalho fixo e corpo com rolagem -->
-<div class="overflow-y-auto max-h-[16rem]">
-  <table class="min-w-full text-sm text-left text-gray-800">
-    <thead class="sticky top-0 bg-gray-100 z-10 border-b border-gray-200">
-      <tr>
-        <th class="px-4 py-3 whitespace-nowrap font-medium uppercase">Nome</th>
-        <th class="px-4 py-3 whitespace-nowrap font-medium uppercase">CPF</th>
-        <th class="px-4 py-3 whitespace-nowrap font-medium uppercase">Email</th>
-        <th class="px-4 py-3 whitespace-nowrap font-medium uppercase">Telefone</th>
-        <th class="px-4 py-3 whitespace-nowrap font-medium uppercase">Status</th>
-        <th class="px-4 py-3 whitespace-nowrap font-medium uppercase" style="width: 80px;">Cod. Instrutor</th>
-        <th class="px-4 py-3 whitespace-nowrap font-medium uppercase">Ações</th>
-      </tr>
-    </thead>
-    <tbody class="divide-y divide-gray-100">
-      {% for aluno in alunos %}
-      <tr class="hover:bg-gray-50 transition">
-        <td class="px-4 py-3 whitespace-nowrap">{{ aluno.nome }}</td>
-        <td class="px-4 py-3 whitespace-nowrap">{{ aluno.cpf }}</td>
-        <td class="px-4 py-3 whitespace-nowrap">{{ aluno.email }}</td>
-        <td class="px-4 py-3 whitespace-nowrap">{{ aluno.telefone }}</td>
-        <td class="px-4 py-3 whitespace-nowrap">{{ aluno.status }}</td>
-        <td class="px-4 py-3 whitespace-nowrap" style="width: 80px;">{{ aluno.Cod_instrutor }}</td>
-        <td class="px-4 py-3 whitespace-nowrap space-x-2">
-          <!-- Editar -->
-          <button class="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
-                  @click="abrirModalEditar({{ aluno.cod_aluno }})">
-            Editar
-          </button>
-          <!-- Deletar -->
-          <button class="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700"
-                  onclick="document.getElementById('modal-excluir-{{ aluno.cod_aluno }}').classList.remove('hidden')">
-            Deletar
-          </button>
-
-          <!-- Modal Confirmação -->
-          <div id="modal-excluir-{{ aluno.cod_aluno }}" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 hidden">
-            <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
-              <h2 class="text-xl font-semibold mb-4">Confirmar Exclusão</h2>
-              <p class="mb-6">Tem certeza de que deseja excluir o aluno <strong>{{ aluno.nome }}</strong>?</p>
-              <div class="flex justify-end space-x-4">
-                <button type="button"
-                        class="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
-                        onclick="document.getElementById('modal-excluir-{{ aluno.cod_aluno }}').classList.add('hidden')">
-                  Cancelar
+                <button onclick="toggleModal()" class="flex items-center space-x-2 text-indigo-600 hover:text-indigo-800 font-medium transition-colors">
+                    <span>Ver todos</span>
+                    <i class="fas fa-chevron-right text-sm"></i>
                 </button>
-                <form method="POST" action="{% url 'deletar_aluno' aluno.cod_aluno %}">
-                  {% csrf_token %}
-                  <button type="submit" class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">
-                    Sim, excluir
-                  </button>
-                </form>
-              </div>
             </div>
-          </div>
-        </td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-</div>
 
+            <!-- Seção de Treinos do Dia -->
+            <section class="lg:col-span-3">
+                <div class="flex items-center mb-6 pb-4 border-b border-gray-200">
+                    <div class="bg-indigo-100 p-2 rounded-lg mr-3">
+                        <i class="fas fa-calendar-day text-indigo-600"></i>
+                    </div>
+                    <h2 class="text-xl font-bold text-gray-800">
+                        Treinos do Dia <span class="text-indigo-600">Hoje</span>
+                    </h2>
+                </div>
+
+                <!-- Mensagens -->
+                <div id="messages" class="mb-6 space-y-3">
+                    <!-- Exemplo de mensagem de sucesso -->
+                    <div class="p-4 rounded-lg bg-green-50 border border-green-200 flex items-start">
+                        <i class="fas fa-check-circle text-green-500 mt-1 mr-3"></i>
+                        <p class="text-green-800">Exercício concluído com sucesso!</p>
+                    </div>
+                    
+                    <!-- Exemplo de mensagem de erro -->
+                    <!-- <div class="p-4 rounded-lg bg-red-50 border border-red-200 flex items-start">
+                        <i class="fas fa-exclamation-circle text-red-500 mt-1 mr-3"></i>
+                        <p class="text-red-800">Ocorreu um erro ao atualizar o exercício.</p>
+                    </div> -->
+                </div>
+
+                <!-- Lista de Treinos -->
+                <div id="treinos-container">
+                    <!-- Treino 1 -->
+                    <div class="bg-white border border-gray-200 rounded-xl p-5 mb-6 shadow-sm hover:shadow-md transition-all duration-300 relative overflow-hidden animate-fade-in">
+                        <div class="absolute inset-0 bg-gradient-to-br from-indigo-50/30 to-purple-100/30 opacity-80 -z-0"></div>
+                        <div class="relative z-10">
+                            <!-- Cabeçalho do Treino -->
+                            <div class="flex justify-between items-start mb-4">
+                                <div>
+                                    <h3 class="text-lg font-semibold text-indigo-700 mb-1">Treino de Peito</h3>
+                                    <div class="flex items-center text-sm text-gray-500">
+                                        <i class="far fa-clock mr-1"></i>
+                                        <span>08:00 - 09:30</span>
+                                    </div>
+                                </div>
+                                <span class="bg-indigo-100 text-indigo-800 text-xs px-2 py-1 rounded-full">Ativo</span>
+                            </div>
+
+                            <!-- Observações -->
+                            <div class="bg-blue-50 border border-blue-100 rounded-lg p-3 mb-4">
+                                <div class="flex items-start">
+                                    <i class="fas fa-info-circle text-blue-400 mt-0.5 mr-2"></i>
+                                    <p class="text-sm text-blue-800">Focar na execução correta dos movimentos, manter postura ereta.</p>
+                                </div>
+                            </div>
+
+                            <!-- Lista de Exercícios -->
+                            <div>
+                                <h4 class="text-sm font-medium text-gray-700 mb-3 flex items-center">
+                                    <i class="fas fa-list-ul mr-2 text-indigo-500"></i>
+                                    Exercícios
+                                </h4>
+                                <ul class="space-y-3">
+                                    <!-- Exercício 1 -->
+                                    <li class="bg-gray-50 p-3 rounded-lg border border-gray-100 hover:border-indigo-200 transition-colors">
+                                        <div class="flex justify-between items-center">
+                                            <div>
+                                                <p class="font-medium text-gray-800">Supino Reto</p>
+                                                <div class="flex flex-wrap gap-x-4 mt-1">
+                                                    <span class="text-xs text-gray-600"><i class="fas fa-redo mr-1"></i> 4 séries</span>
+                                                    <span class="text-xs text-gray-600"><i class="fas fa-sync-alt mr-1"></i> 12 repetições</span>
+                                                    <span class="text-xs text-gray-600"><i class="fas fa-weight-hanging mr-1"></i> 40kg</span>
+                                                </div>
+                                            </div>
+                                            <label class="inline-flex items-center cursor-pointer">
+                                                <input type="checkbox" class="custom-checkbox">
+                                            </label>
+                                        </div>
+                                    </li>
+                                    
+                                    <!-- Exercício 2 -->
+                                    <li class="bg-gray-50 p-3 rounded-lg border border-gray-100 hover:border-indigo-200 transition-colors">
+                                        <div class="flex justify-between items-center">
+                                            <div>
+                                                <p class="font-medium text-gray-800">Supino Inclinado</p>
+                                                <div class="flex flex-wrap gap-x-4 mt-1">
+                                                    <span class="text-xs text-gray-600"><i class="fas fa-redo mr-1"></i> 3 séries</span>
+                                                    <span class="text-xs text-gray-600"><i class="fas fa-sync-alt mr-1"></i> 10 repetições</span>
+                                                    <span class="text-xs text-gray-600"><i class="fas fa-weight-hanging mr-1"></i> 30kg</span>
+                                                </div>
+                                            </div>
+                                            <label class="inline-flex items-center cursor-pointer">
+                                                <input type="checkbox" class="custom-checkbox" checked>
+                                            </label>
+                                        </div>
+                                    </li>
+                                    
+                                    <!-- Exercício 3 -->
+                                    <li class="bg-gray-50 p-3 rounded-lg border border-gray-100 hover:border-indigo-200 transition-colors">
+                                        <div class="flex justify-between items-center">
+                                            <div>
+                                                <p class="font-medium text-gray-800">Crucifixo</p>
+                                                <div class="flex flex-wrap gap-x-4 mt-1">
+                                                    <span class="text-xs text-gray-600"><i class="fas fa-redo mr-1"></i> 3 séries</span>
+                                                    <span class="text-xs text-gray-600"><i class="fas fa-sync-alt mr-1"></i> 15 repetições</span>
+                                                    <span class="text-xs text-gray-600"><i class="fas fa-weight-hanging mr-1"></i> 12kg</span>
+                                                </div>
+                                            </div>
+                                            <label class="inline-flex items-center cursor-pointer">
+                                                <input type="checkbox" class="custom-checkbox">
+                                            </label>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Treino 2 -->
+                    <div class="bg-white border border-gray-200 rounded-xl p-5 mb-6 shadow-sm hover:shadow-md transition-all duration-300 relative overflow-hidden animate-fade-in" style="animation-delay: 0.1s">
+                        <div class="absolute inset-0 bg-gradient-to-br from-blue-50/30 to-cyan-100/30 opacity-80 -z-0"></div>
+                        <div class="relative z-10">
+                            <!-- Cabeçalho do Treino -->
+                            <div class="flex justify-between items-start mb-4">
+                                <div>
+                                    <h3 class="text-lg font-semibold text-blue-700 mb-1">Treino de Perna</h3>
+                                    <div class="flex items-center text-sm text-gray-500">
+                                        <i class="far fa-clock mr-1"></i>
+                                        <span>18:00 - 19:30</span>
+                                    </div>
+                                </div>
+                                <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">Próximo</span>
+                            </div>
+
+                            <!-- Lista de Exercícios -->
+                            <div>
+                                <h4 class="text-sm font-medium text-gray-700 mb-3 flex items-center">
+                                    <i class="fas fa-list-ul mr-2 text-blue-500"></i>
+                                    Exercícios
+                                </h4>
+                                <ul class="space-y-3">
+                                    <!-- Exercício 1 -->
+                                    <li class="bg-gray-50 p-3 rounded-lg border border-gray-100 hover:border-blue-200 transition-colors">
+                                        <div class="flex justify-between items-center">
+                                            <div>
+                                                <p class="font-medium text-gray-800">Agachamento Livre</p>
+                                                <div class="flex flex-wrap gap-x-4 mt-1">
+                                                    <span class="text-xs text-gray-600"><i class="fas fa-redo mr-1"></i> 4 séries</span>
+                                                    <span class="text-xs text-gray-600"><i class="fas fa-sync-alt mr-1"></i> 10 repetições</span>
+                                                    <span class="text-xs text-gray-600"><i class="fas fa-weight-hanging mr-1"></i> 60kg</span>
+                                                </div>
+                                            </div>
+                                            <label class="inline-flex items-center cursor-pointer">
+                                                <input type="checkbox" class="custom-checkbox">
+                                            </label>
+                                        </div>
+                                    </li>
+                                    
+                                    <!-- Exercício 2 -->
+                                    <li class="bg-gray-50 p-3 rounded-lg border border-gray-100 hover:border-blue-200 transition-colors">
+                                        <div class="flex justify-between items-center">
+                                            <div>
+                                                <p class="font-medium text-gray-800">Leg Press</p>
+                                                <div class="flex flex-wrap gap-x-4 mt-1">
+                                                    <span class="text-xs text-gray-600"><i class="fas fa-redo mr-1"></i> 3 séries</span>
+                                                    <span class="text-xs text-gray-600"><i class="fas fa-sync-alt mr-1"></i> 12 repetições</span>
+                                                    <span class="text-xs text-gray-600"><i class="fas fa-weight-hanging mr-1"></i> 120kg</span>
+                                                </div>
+                                            </div>
+                                            <label class="inline-flex items-center cursor-pointer">
+                                                <input type="checkbox" class="custom-checkbox">
+                                            </label>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sem treinos -->
+                <!-- <div class="text-center py-10">
+                    <div class="bg-gray-100 inline-block p-4 rounded-full mb-4">
+                        <i class="fas fa-dumbbell text-gray-400 text-2xl"></i>
+                    </div>
+                    <h3 class="text-lg font-medium text-gray-700 mb-2">Nenhum treino hoje</h3>
+                    <p class="text-gray-500">Você não tem treinos agendados para hoje.</p>
+                </div> -->
+            </section>
         </div>
-      </div>
     </div>
-  </div>
 
-  <!-- Card Categoria -->
-  <div class="w-full max-w-full px-3 mt-0 lg:w-5/12 lg:flex-none">
-    <div class="border-black/12.5 shadow-xl dark:bg-slate-850 dark:shadow-dark-xl relative flex min-w-0 flex-col break-words rounded-2xl border-0 border-solid bg-white bg-clip-border">
-      <div class="p-4 pb-0 rounded-t-4">
-        <h6 class="mb-0 dark:text-white">Categories</h6>
-      </div>
-      <div class="flex-auto p-4">
-        <ul class="flex flex-col pl-0 mb-0 rounded-lg">
-          <li class="relative flex justify-between py-2 pr-4 mb-2 border-0 rounded-t-lg rounded-xl text-inherit">
-            <div class="flex items-center">
-              <div class="inline-block w-8 h-8 mr-4 text-center text-black bg-center shadow-sm fill-current stroke-none bg-gradient-to-tl from-zinc-800 to-zinc-700 dark:bg-gradient-to-tl dark:from-slate-750 dark:to-gray-850 rounded-xl">
-                <i class="text-white ni ni-mobile-button relative top-0.75 text-xxs"></i>
-              </div>
-              <div class="flex flex-col">
-                <h6 class="mb-1 text-sm leading-normal text-slate-700 dark:text-white">Devices</h6>
-                <span class="text-xs leading-tight dark:text-white/80">250 in stock, <span class="font-semibold">346+ sold</span></span>
-              </div>
+    <!-- Modal de Todos os Treinos -->
+    <div id="modalTreinos" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden transition-opacity duration-300">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-6xl max-h-[90vh] overflow-hidden mx-4">
+            <!-- Cabeçalho do Modal -->
+            <div class="sticky top-0 bg-white border-b border-gray-200 p-4 sm:p-6 flex justify-between items-center z-10">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-indigo-100 p-2 rounded-lg">
+                        <i class="fas fa-dumbbell text-indigo-600"></i>
+                    </div>
+                    <h2 class="text-xl font-bold text-gray-800">Todos os Treinos</h2>
+                </div>
+                <button onclick="toggleModal()" class="text-gray-500 hover:text-gray-700 transition-colors">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
             </div>
-            <div class="flex">
-              <button class="group ease-in leading-pro text-xs rounded-3.5xl p-1.2 h-6.5 w-6.5 mx-0 my-auto inline-block cursor-pointer border-0 bg-transparent text-center align-middle font-bold text-slate-700 shadow-none transition-all dark:text-white"><i class="ni ease-bounce text-2xs group-hover:translate-x-1.25 ni-bold-right transition-all duration-200" aria-hidden="true"></i></button>
+            
+            <!-- Corpo do Modal -->
+            <div class="overflow-y-auto p-4 sm:p-6">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                    <!-- Treino 1 -->
+                    <div class="bg-white border border-gray-200 rounded-xl p-5 shadow-sm hover:shadow-md transition-all duration-300">
+                        <div class="flex justify-between items-start mb-3">
+                            <div>
+                                <h3 class="text-lg font-semibold text-indigo-700 mb-1">Treino de Peito</h3>
+                                <div class="flex items-center text-sm text-gray-500">
+                                    <i class="far fa-calendar mr-2"></i>
+                                    <span>Seg, 15 Jan 2024</span>
+                                </div>
+                            </div>
+                            <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">Concluído</span>
+                        </div>
+                        
+                        <div class="mt-4">
+                            <h4 class="text-sm font-medium text-gray-700 mb-2">Exercícios:</h4>
+                            <ul class="space-y-2">
+                                <li class="text-sm text-gray-600">Supino Reto - 4x12 (40kg)</li>
+                                <li class="text-sm text-gray-600">Supino Inclinado - 3x10 (30kg)</li>
+                                <li class="text-sm text-gray-600">Crucifixo - 3x15 (12kg)</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <!-- Treino 2 -->
+                    <div class="bg-white border border-gray-200 rounded-xl p-5 shadow-sm hover:shadow-md transition-all duration-300">
+                        <div class="flex justify-between items-start mb-3">
+                            <div>
+                                <h3 class="text-lg font-semibold text-blue-700 mb-1">Treino de Perna</h3>
+                                <div class="flex items-center text-sm text-gray-500">
+                                    <i class="far fa-calendar mr-2"></i>
+                                    <span>Ter, 16 Jan 2024</span>
+                                </div>
+                            </div>
+                            <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">Concluído</span>
+                        </div>
+                        
+                        <div class="mt-4">
+                            <h4 class="text-sm font-medium text-gray-700 mb-2">Exercícios:</h4>
+                            <ul class="space-y-2">
+                                <li class="text-sm text-gray-600">Agachamento Livre - 4x10 (60kg)</li>
+                                <li class="text-sm text-gray-600">Leg Press - 3x12 (120kg)</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <!-- Treino 3 -->
+                    <div class="bg-white border border-gray-200 rounded-xl p-5 shadow-sm hover:shadow-md transition-all duration-300">
+                        <div class="flex justify-between items-start mb-3">
+                            <div>
+                                <h3 class="text-lg font-semibold text-purple-700 mb-1">Treino de Costas</h3>
+                                <div class="flex items-center text-sm text-gray-500">
+                                    <i class="far fa-calendar mr-2"></i>
+                                    <span>Qua, 17 Jan 2024</span>
+                                </div>
+                            </div>
+                            <span class="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full">Pendente</span>
+                        </div>
+                        
+                        <div class="mt-4">
+                            <h4 class="text-sm font-medium text-gray-700 mb-2">Exercícios:</h4>
+                            <ul class="space-y-2">
+                                <li class="text-sm text-gray-600">Barra Fixa - 4x8</li>
+                                <li class="text-sm text-gray-600">Remada Curvada - 3x10 (40kg)</li>
+                                <li class="text-sm text-gray-600">Puxada Alta - 3x12 (50kg)</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <!-- Treino 4 -->
+                    <div class="bg-white border border-gray-200 rounded-xl p-5 shadow-sm hover:shadow-md transition-all duration-300">
+                        <div class="flex justify-between items-start mb-3">
+                            <div>
+                                <h3 class="text-lg font-semibold text-red-700 mb-1">Treino de Braços</h3>
+                                <div class="flex items-center text-sm text-gray-500">
+                                    <i class="far fa-calendar mr-2"></i>
+                                    <span>Qui, 18 Jan 2024</span>
+                                </div>
+                            </div>
+                            <span class="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded-full">Agendado</span>
+                        </div>
+                        
+                        <div class="mt-4">
+                            <h4 class="text-sm font-medium text-gray-700 mb-2">Exercícios:</h4>
+                            <ul class="space-y-2">
+                                <li class="text-sm text-gray-600">Rosca Direta - 4x12 (15kg)</li>
+                                <li class="text-sm text-gray-600">Tríceps Testa - 3x10 (20kg)</li>
+                                <li class="text-sm text-gray-600">Rosca Martelo - 3x12 (12kg)</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
             </div>
-          </li>
-          <li class="relative flex justify-between py-2 pr-4 mb-2 border-0 rounded-xl text-inherit">
-            <div class="flex items-center">
-              <div class="inline-block w-8 h-8 mr-4 text-center text-black bg-center shadow-sm fill-current stroke-none bg-gradient-to-tl from-zinc-800 to-zinc-700 dark:bg-gradient-to-tl dark:from-slate-750 dark:to-gray-850 rounded-xl">
-                <i class="text-white ni ni-tag relative top-0.75 text-xxs"></i>
-              </div>
-              <div class="flex flex-col">
-                <h6 class="mb-1 text-sm leading-normal text-slate-700 dark:text-white">Tickets</h6>
-                <span class="text-xs leading-tight dark:text-white/80">123 closed, <span class="font-semibold">15 open</span></span>
-              </div>
+            
+            <!-- Rodapé do Modal -->
+            <div class="sticky bottom-0 bg-white border-t border-gray-200 p-4 flex justify-end z-10">
+                <button onclick="toggleModal()" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
+                    Fechar
+                </button>
             </div>
-            <div class="flex">
-              <button class="group ease-in leading-pro text-xs rounded-3.5xl p-1.2 h-6.5 w-6.5 mx-0 my-auto inline-block cursor-pointer border-0 bg-transparent text-center align-middle font-bold text-slate-700 shadow-none transition-all dark:text-white"><i class="ni ease-bounce text-2xs group-hover:translate-x-1.25 ni-bold-right transition-all duration-200" aria-hidden="true"></i></button>
-            </div>
-          </li>
-          <li class="relative flex justify-between py-2 pr-4 mb-2 border-0 rounded-b-lg rounded-xl text-inherit">
-            <div class="flex items-center">
-              <div class="inline-block w-8 h-8 mr-4 text-center text-black bg-center shadow-sm fill-current stroke-none bg-gradient-to-tl from-zinc-800 to-zinc-700 dark:bg-gradient-to-tl dark:from-slate-750 dark:to-gray-850 rounded-xl">
-                <i class="text-white ni ni-box-2 relative top-0.75 text-xxs"></i>
-              </div>
-              <div class="flex flex-col">
-                <h6 class="mb-1 text-sm leading-normal text-slate-700 dark:text-white">Error logs</h6>
-                <span class="text-xs leading-tight dark:text-white/80">1 is active, <span class="font-semibold">40 closed</span></span>
-              </div>
-            </div>
-            <div class="flex">
-              <button class="group ease-in leading-pro text-xs rounded-3.5xl p-1.2 h-6.5 w-6.5 mx-0 my-auto inline-block cursor-pointer border-0 bg-transparent text-center align-middle font-bold text-slate-700 shadow-none transition-all dark:text-white"><i class="ni ease-bounce text-2xs group-hover:translate-x-1.25 ni-bold-right transition-all duration-200" aria-hidden="true"></i></button>
-            </div>
-          </li>
-          <li class="relative flex justify-between py-2 pr-4 border-0 rounded-b-lg rounded-xl text-inherit">
-            <div class="flex items-center">
-              <div class="inline-block w-8 h-8 mr-4 text-center text-black bg-center shadow-sm fill-current stroke-none bg-gradient-to-tl from-zinc-800 to-zinc-700 dark:bg-gradient-to-tl dark:from-slate-750 dark:to-gray-850 rounded-xl">
-                <i class="text-white ni ni-satisfied relative top-0.75 text-xxs"></i>
-              </div>
-              <div class="flex flex-col">
-                <h6 class="mb-1 text-sm leading-normal text-slate-700 dark:text-white">Happy users</h6>
-                <span class="text-xs leading-tight dark:text-white/80"><span class="font-semibold">+ 430 </span></span>
-              </div>
-            </div>
-            <div class="flex">
-              <button class="group ease-in leading-pro text-xs rounded-3.5xl p-1.2 h-6.5 w-6.5 mx-0 my-auto inline-block cursor-pointer border-0 bg-transparent text-center align-middle font-bold text-slate-700 shadow-none transition-all dark:text-white"><i class="ni ease-bounce text-2xs group-hover:translate-x-1.25 ni-bold-right transition-all duration-200" aria-hidden="true"></i></button>
-            </div>
-          </li>
-        </ul>
-      </div>
+        </div>
     </div>
-  </div>
-</div>
 
-   
-  </div>
-</div>
-</div>
-  <!-- end cards -->
-{% endblock content %}
+    <script>
+        // Função para alternar o modal
+        function toggleModal() {
+            const modal = document.getElementById('modalTreinos');
+            modal.classList.toggle('hidden');
+            
+            // Adiciona/remove a classe para evitar rolagem do body quando o modal está aberto
+            if (modal.classList.contains('hidden')) {
+                document.body.style.overflow = 'auto';
+            } else {
+                document.body.style.overflow = 'hidden';
+            }
+        }
+        
+        // Simula o envio de um formulário de checkbox
+        document.querySelectorAll('.custom-checkbox').forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                if (this.checked) {
+                    // Simula uma mensagem de sucesso
+                    const successMsg = `
+                        <div class="p-4 rounded-lg bg-green-50 border border-green-200 flex items-start animate-fade-in">
+                            <i class="fas fa-check-circle text-green-500 mt-1 mr-3"></i>
+                            <p class="text-green-800">Exercício concluído com sucesso!</p>
+                        </div>
+                    `;
+                    document.getElementById('messages').innerHTML = successMsg;
+                    
+                    // Remove a mensagem após 5 segundos
+                    setTimeout(() => {
+                        document.getElementById('messages').innerHTML = '';
+                    }, 5000);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

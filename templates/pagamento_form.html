@@ -1,0 +1,17 @@
+<div class="bg-white rounded-xl shadow-xl w-full max-w-lg p-6">
+    <h2 class="text-2xl font-bold mb-4">Pagamento via PIX</h2>
+    <form action="{% url 'criar_pagamento_pix' cod_aluno=cod_aluno %}" method="POST" class="space-y-4">
+        {% csrf_token %}
+        <input name="nome" placeholder="Nome" required class="border p-2 w-full">
+        <input name="sobrenome" placeholder="Sobrenome" required class="border p-2 w-full">
+        <input name="email" placeholder="Email" type="email" required class="border p-2 w-full">
+        <select name="identificationType" class="border p-2 w-full">
+            <option value="CPF">CPF</option>
+            <option value="CNPJ">CNPJ</option>
+        </select>
+        <input name="identificationNumber" placeholder="Número do documento" required class="border p-2 w-full">
+        <input name="valor" placeholder="Valor" value="100" required class="border p-2 w-full">
+
+        <button class="bg-indigo-600 text-white px-4 py-2 rounded w-full">Gerar PIX</button>
+    </form>
+</div>

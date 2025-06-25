@@ -16,3 +16,12 @@ class Aula(models.Model):
 
     def __str__(self):
         return f"Aula de {self.aluno.username} em {self.data_hora.strftime('%d/%m/%Y %H:%M')}"
+    
+    
+class ProdutoAdmin(models.Model):
+    cod_treino = models.IntegerField(unique=True)  # novo campo para usar como identificador
+    nome = models.CharField(max_length=100)
+    status = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.nome

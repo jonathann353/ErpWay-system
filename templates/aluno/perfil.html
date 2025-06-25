@@ -6,580 +6,1068 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard do Aluno</title>
-    <link rel="stylesheet" href="{% static 'css/base.css' %}">
-    <link rel="stylesheet" href="{% static 'css/aluno.css' %}">
+    <title>Meu Perfil | ERP Way</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            200: '#bae6fd',
+                            300: '#7dd3fc',
+                            400: '#38bdf8',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
     <style>
-        /* Estilos personalizados para o layout moderno */
-        body {
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-            /* Imagem de fundo sutil e esmaecida */
-            background-image: url('{% static "img/hero1-min.jpg" %}');
-            /* Imagem aleatória de fitness */
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
-            background-color: #1a202c;
-            /* Cor de fallback para navegadores antigos ou caso a imagem não carregue */
-            color: #e2e8f0;
-            /* Cor de texto padrão clara */
+        .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            transition: all 0.3s ease;
         }
 
-        .overlay-bg {
-            background-color: rgba(0, 0, 0, 0.6);
-            /* Overlay escuro para melhorar a legibilidade do texto */
-            min-height: 100%;
-            width: 100%;
-            display: flex;
-            flex-direction: column;
+        .card:hover {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
         }
 
-        /* Estilo para as seções de conteúdo */
-        section {
-            background-color: rgba(255, 255, 255, 0.95);
-            /* Fundo branco semi-transparente para as seções */
-            backdrop-filter: blur(5px);
-            /* Efeito de desfoque para um visual moderno */
-            border-radius: 1.25rem;
-            /* Bordas mais arredondadas (20px) */
-            padding: 1.75rem;
-            /* Padding ligeiramente maior */
+        .btn-primary {
+            background: linear-gradient(to right, #3b82f6, #2563eb);
+            transition: all 0.3s ease;
         }
 
-        /* Cores e gradientes para botões e títulos */
-        .header-gradient {
-            background-image: linear-gradient(to right, #6366f1, #8b5cf6);
-            /* Gradiente roxo/azul */
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            color: transparent;
-            /* Necessário para browsers que não suportam -webkit-text-fill-color */
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.3);
         }
 
-        .button-gradient {
-            background-image: linear-gradient(to right, #4f46e5, #7c3aed);
-            /* Gradiente para botões */
+        .workout-tag {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
         }
 
-        .button-gradient:hover {
-            background-image: linear-gradient(to right, #6366f1, #8b5cf6);
+        .strength-tag {
+            background-color: #e0e7ff;
+            color: #4f46e5;
         }
 
-        /* Estilos para animação de modal */
-        .modal-fade-in {
-            transition: opacity 0.3s ease-out;
+        .cardio-tag {
+            background-color: #dcfce7;
+            color: #16a34a;
         }
 
-        .modal-scale-in {
-            transition: transform 0.3s ease-out, opacity 0.3s ease-out;
+        .flexibility-tag {
+            background-color: #fef3c7;
+            color: #d97706;
+        }
+
+        /* Adicione estas animações no seu arquivo CSS ou em um bloco <style> no template */
+        @keyframes fade-in-down {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fade-out-up {
+            from {
+                opacity: 1;
+                transform: translateY(0);
+            }
+
+            to {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+        }
+
+        .animate-fade-in-down {
+            animation: fade-in-down 0.5s ease-out forwards;
+        }
+
+        .animate-fade-out-up {
+            animation: fade-out-up 0.5s ease-in forwards;
         }
     </style>
 </head>
 
-<body class="font-sans antialiased">
-    <div class="overlay-bg">
-        <header class="bg-gray-900 bg-opacity-80 text-white py-5 shadow-lg">
-            <div
-                class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row md:justify-between md:items-center">
-                <div class="mb-3 md:mb-0 text-center md:text-left">
-                    <h1
-                        class="text-3xl md:text-4xl font-extrabold flex items-center justify-center md:justify-start gap-3">
-                        <span class="text-purple-400">🏋️</span> <span class="header-gradient">Área do Aluno</span>
-                    </h1>
+<body class="bg-gray-50 min-h-screen flex flex-col">
+    <header class="bg-gray-800 text-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div class="flex justify-between items-center">
+                <!-- Logo -->
+                <div class="flex items-center gap-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-400" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                    </svg>
+                    <h1 class="text-xl md:text-2xl font-bold">ERP Way</h1>
                 </div>
 
-                <form method="post" action="{% url 'logout' %}" class="flex justify-center md:justify-end">
-                    {% csrf_token %}
-                    <button type="submit"
-                        class="px-6 py-2.5 button-gradient text-white font-semibold rounded-full shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105">
-                        Logout
-                    </button>
-                </form>
-            </div>
-        </header>
+                <!-- Botão Hamburger (mobile) -->
+                <button id="menuBtn" class="md:hidden focus:outline-none" aria-label="Abrir menu">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                </button>
 
-        <main class="flex-grow py-10 px-4 sm:px-6 lg:px-8">
-            <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Ações Header (desktop) -->
+                <div class="hidden md:flex items-center gap-6">
+                    <!-- Dropdown Perfil -->
+                    <div class="relative">
+                        <button onclick="toggleDropdown()"
+                            class="flex items-center gap-2 hover:bg-gray-700 px-3 py-2 rounded-full transition">
+                            <span class="text-xl md:text-2xl font-bold uppercase">{{ aluno.nome }}</span>
+                            <svg id="gearIcon" class="w-5 h-5 text-white transition-transform" fill="none"
+                                stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M11.049 2.927c.3-.921 1.603-.921 1.902 0...zM12 15a3 3 0 100-6 3 3 0 000 6z" />
+                            </svg>
+                        </button>
 
-                <section class="lg:col-span-3 text-gray-800">
-                    <h2 class="text-2xl font-bold mb-6 text-gray-900 border-b-2 border-indigo-400 pb-2">🎯 Informações
-                        Pessoais</h2>
-                    <div class="flex flex-col md:flex-row items-center md:items-start gap-8">
-                        <img src="{{ aluno.foto_url }}" alt="Foto de perfil"
-                            class="w-36 h-36 rounded-full object-cover border-4 border-indigo-500 shadow-xl flex-shrink-0">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-3 w-full text-lg">
-                            <p><strong class="text-gray-900">Nome:</strong> {{ aluno.nome }}</p>
-                            <p><strong class="text-gray-900">CPF:</strong> {{ aluno.cpf }}</p>
-                            <p><strong class="text-gray-900">Email:</strong> {{ aluno.email }}</p>
-                            <p><strong class="text-gray-900">Telefone:</strong> {{ aluno.telefone }}</p>
-                            <p><strong class="text-gray-900">Sexo:</strong> {{ aluno.sexo }}</p>
-                            <p><strong class="text-gray-900">Nascimento:</strong> {{ aluno.data_nascimento }}</p>
-                            <p><strong class="text-gray-900">Status:</strong> <span class="font-bold text-green-600">{{
-                                aluno.status }}</span></p>
-                            <p><strong class="text-gray-900">Instrutor:</strong> {{ aluno.cod_instrutor }} - {{
-                                aluno.nome_instrutor }}</p>
+                        <!-- Dropdown -->
+                        <div id="dropdownProfile"
+                            class="hidden absolute right-0 mt-2 w-80 bg-white text-gray-800 border border-gray-200 rounded-xl shadow-2xl z-50">
+                            <div class="flex flex-col items-center p-5">
+                                <h3 class="text-xl font-semibold mt-2 uppercase">{{ aluno.nome }}</h3>
+                                <p class="text-gray-500 text-sm">Membro desde {{ aluno.data_cadastro }}</p>
+
+                                <div class="w-full mt-5 space-y-3 text-sm">
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-500">📧 Email:</span>
+                                        <span class="font-medium">{{ aluno.email }}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-500">📱 Telefone:</span>
+                                        <span class="font-medium">{{ aluno.telefone }}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-500">👨‍🏫 Instrutor:</span>
+                                        <span class="font-medium">{{ aluno.nome_instrutor }}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-500">✔️ Status:</span>
+                                        <span
+                                            class="font-bold {% if aluno.status == 'Ativo' %}text-green-600{% else %}text-red-600{% endif %}">
+                                            {{ aluno.status }}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <button onclick="openModal('editProfileModal')"
+                                    class="mt-6 w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition">
+                                    Editar Perfil
+                                </button>
+                            </div>
                         </div>
                     </div>
-                </section>
 
-                <section class="lg:col-span-3 text-gray-800">
-                    <h2 class="text-2xl font-bold mb-6 text-gray-900 border-b-2 border-indigo-400 pb-2">🏋️ Treinos do
-                        Aluno</h2>
-                    {% if treinos %}
-                    <div class="overflow-x-auto pb-2">
-                        <div class="flex gap-x-6 min-w-full">
-                            {% for treino in treinos %}
+                    <!-- Botão Sair -->
+                    <form method="post" action="{% url 'logout' %}">
+                        {% csrf_token %}
+                        <button type="submit"
+                            class="flex items-center gap-2 bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 text-white px-5 py-2 rounded-md text-sm font-semibold shadow-md hover:shadow-lg transition">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H7a2 2 0 01-2-2V7a2 2 0 012-2h4a2 2 0 012 2v1" />
+                            </svg>
+                            Sair
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Menu Mobile -->
+        <div id="mobileMenu"
+            class="fixed top-0 left-0 h-full w-64 bg-gray-900 text-white transform -translate-x-full transition-transform duration-300 z-[100] p-5 flex flex-col">
+            <button id="closeMenuBtn" class="self-end mb-5 focus:outline-none" aria-label="Fechar menu">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" stroke="currentColor"
+                    viewBox="0 0 24 24" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+
+            <div class="mb-8">
+                <h3 class="text-xl font-semibold uppercase">{{ aluno.nome }}</h3>
+                <p class="text-gray-400 text-sm mb-2">Membro desde {{ aluno.data_cadastro }}</p>
+
+                <div class="space-y-2 text-sm">
+                    <div class="flex justify-between">
+                        <span class="text-gray-400">📧 Email:</span>
+                        <span>{{ aluno.email }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-400">📱 Telefone:</span>
+                        <span>{{ aluno.telefone }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-400">👨‍🏫 Instrutor:</span>
+                        <span>{{ aluno.nome_instrutor }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-400">✔️ Status:</span>
+                        <span
+                            class="{% if aluno.status == 'Ativo' %}text-green-500{% else %}text-red-500{% endif %} font-bold">
+                            {{ aluno.status }}</span>
+                    </div>
+                </div>
+
+                <button onclick="openModal('editProfileModal')"
+                    class="mt-6 w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition">
+                    Editar Perfil
+                </button>
+            </div>
+
+            <form method="post" action="{% url 'logout' %}">
+                {% csrf_token %}
+                <button type="submit"
+                    class="flex items-center gap-2 bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 text-white px-5 py-2 rounded-md text-sm font-semibold shadow-md hover:shadow-lg w-full">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H7a2 2 0 01-2-2V7a2 2 0 012-2h4a2 2 0 012 2v1" />
+                    </svg>
+                    Sair
+                </button>
+            </form>
+        </div>
+    </header>
+
+    <script>
+        const menuBtn = document.getElementById('menuBtn');
+        const closeMenuBtn = document.getElementById('closeMenuBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+
+        menuBtn.addEventListener('click', () => {
+            mobileMenu.classList.remove('-translate-x-full');
+        });
+
+        closeMenuBtn.addEventListener('click', () => {
+            mobileMenu.classList.add('-translate-x-full');
+        });
+
+        function toggleDropdown() {
+            const dropdown = document.getElementById('dropdownProfile');
+            dropdown.classList.toggle('hidden');
+        }
+    </script>
+
+    <!-- Main Content -->
+    <main class="flex-grow py-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <!-- Welcome Section -->
+            <div class="card p-6 mb-8 bg-white rounded-xl shadow-md">
+                <div class="flex flex-col md:flex-row items-center justify-between space-y-4 md:space-y-0">
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-900">Bem-vindo, {{ aluno.nome }}!</h2>
+                        <p class="text-gray-600 mt-1">Seu progresso está incrível esta semana! Continue assim.</p>
+                    </div>
+                    <div>
+                        <button
+                            class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md font-medium flex items-center transition">
+                            <i class="fas fa-calendar-alt mr-2"></i> Agendar Treino
+                        </button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-8 mb-10">
+  <!-- Card Treinos Semana -->
+  <div
+    class="bg-gradient-to-r from-blue-600 to-blue-800 rounded-2xl shadow-lg p-6 flex flex-col items-center justify-center gap-4 hover:scale-105 transform transition duration-300">
+    <div class="bg-white/20 p-4 rounded-xl">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none"
+        viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M8 21h4m-2-4v4m0-4V5m0 0l-2 2m2-2l2 2M12 5V3m6 18h-4m2-4v4m0-4V5m0 0l-2 2m2-2l2 2" />
+      </svg>
+    </div>
+    <div class="text-center">
+      <p class="text-white text-sm">Total de treinos na semana</p>
+      <p class="text-white text-2xl font-semibold mt-1">{{ alunos|length }}</p>
+    </div>
+  </div>
+
+  <!-- Card IMC Atual -->
+  <div
+    class="bg-gradient-to-r from-green-500 to-green-700 rounded-2xl shadow-lg p-6 flex flex-col items-center justify-center gap-4 hover:scale-105 transform transition duration-300">
+    <div class="bg-white/20 p-4 rounded-xl">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none"
+        viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+      </svg>
+    </div>
+    <div class="text-center">
+      <p class="text-white text-sm">IMC Atual</p>
+      <p class="text-white text-2xl font-semibold mt-1">{{ ultima_avaliacao.imc }}</p>
+    </div>
+  </div>
+
+  <!-- Card Expiração do Treino -->
+  <div
+    class="bg-gradient-to-r from-amber-500 to-amber-700 rounded-2xl shadow-lg p-6 flex flex-col items-center justify-center gap-4 hover:scale-105 transform transition duration-300">
+    <div class="bg-white/20 p-4 rounded-xl">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none"
+        viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+      </svg>
+    </div>
+    <div class="text-center">
+      <p class="text-white text-sm">Seu treino expira em</p>
+      <p class="text-white text-2xl font-semibold mt-1">3 dias</p>
+    </div>
+  </div>
+
+  <!-- Card Vencimento Pagamento -->
+  <div
+    class="bg-gradient-to-r from-purple-600 to-purple-800 rounded-2xl shadow-lg p-6 flex flex-col items-center justify-center gap-4 hover:scale-105 transform transition duration-300">
+    <div class="bg-white/20 p-4 rounded-xl">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none"
+        viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+      </svg>
+    </div>
+    <div class="text-center">
+      <p class="text-white text-sm">Vencimento em</p>
+      <p class="text-white text-2xl font-semibold mt-1">{{dias_restantes_treino}} dias</p>
+    </div>
+  </div>
+</div>
+
+
+                <!-- Main Grid -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+                    <div id="message-container"
+                        class="fixed top-0 left-1/2 -translate-x-1/2 mt-4 z-50 w-11/12 max-w-sm">
+                    </div>
+
+                    <div class="card p-4 sm:p-6 lg:col-span-2">
+                        <div class="flex justify-between items-center mb-4 sm:mb-6">
+                            <h2 class="text-lg sm:text-xl font-bold text-gray-900">Seus Treinos</h2>
+                            <button onclick="document.getElementById('modalTreinos').classList.remove('hidden')"
+                                class="text-sm text-indigo-600 hover:text-indigo-800 font-medium">
+                                Ver todos
+                            </button>
+                        </div>
+
+                        <section class="lg:col-span-3 text-gray-800">
+                            <h2
+                                class="text-xl sm:text-2xl font-bold mb-4 text-gray-900 border-b-2 border-indigo-500 pb-2">
+                                🏋️ Treinos do Dia {{ data_formatada }}
+                            </h2>
+
+                            {% if messages %}
+                            {% for message in messages %}
                             <div
-                                class="min-w-[300px] max-w-sm bg-white border border-gray-200 rounded-xl p-6 shadow-md hover:shadow-lg transition-all duration-300 flex-shrink-0 relative overflow-hidden">
-                                <div class="absolute inset-0 bg-gradient-to-br from-indigo-50 to-purple-50 opacity-75">
-                                </div>
-                                <div class="relative z-10">
-                                    <h3 class="text-xl font-bold text-indigo-700 mb-3">{{ treino.tipo_treino }}</h3>
-                                    <p class="text-gray-700 mb-1"><span class="font-medium">Início:</span> {{
-                                        treino.data_inicio }}</p>
-                                    <p class="text-gray-700 mb-1"><span class="font-medium">Fim:</span> {{
-                                        treino.data_final|default:"Sem data de término" }}</p>
+                                class="p-3 rounded-lg {% if message.tags == 'success' %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-800{% endif %}">
+                                {{ message }}
+                            </div>
+                            {% endfor %}
+                            {% endif %}
 
-                                    {% if treino.observacoes %}
-                                    <p class="mt-3 text-sm text-gray-600">
-                                        <span class="font-medium">Observações:</span> {{ treino.observacoes }}
+                            {% if treinos %}
+                            <div class="overflow-x-auto pb-2">
+                                <div class="flex gap-4 sm:gap-6 min-w-full">
+                                    {% for treino in treinos|slice:":5" %}
+                                    <div class="min-w-[280px] max-w-sm bg-white border border-gray-200 rounded-2xl p-4 sm:p-6 
+                        shadow-md hover:shadow-xl transition-all duration-300 flex-shrink-0 relative overflow-hidden">
+
+                                        <div
+                                            class="absolute inset-0 bg-gradient-to-br from-indigo-50 to-purple-100 opacity-60">
+                                        </div>
+
+                                        <div class="relative z-10">
+                                            <h3 class="text-base sm:text-lg font-semibold text-indigo-700 mb-2 sm:mb-3">
+                                                {{ treino.tipo_treino }}
+                                            </h3>
+
+                                            <div class="space-y-1">
+                                                <p class="text-gray-700"><span class="font-medium">Início:</span> {{
+                                                    treino.data_inicio }}</p>
+                                                <p class="text-gray-700"><span class="font-medium">Fim:</span> {{
+                                                    treino.data_final }}</p>
+                                            </div>
+
+                                            {% if treino.observacoes %}
+                                            <p class="mt-2 sm:mt-3 text-sm text-gray-600">
+                                                <span class="font-medium">Observações:</span> {{ treino.observacoes }}
+                                            </p>
+                                            {% endif %}
+
+                                            <div class="mt-4">
+                                                <h4 class="text-sm font-medium text-indigo-700 mb-2">Exercícios:</h4>
+                                                <ul class="space-y-2">
+                                                    {% for ex in treino.exercicios %}
+                                                    <li
+                                                        class="flex items-center justify-between bg-gray-50 p-2 rounded-lg">
+                                                        <div>
+                                                            <p class="text-sm font-medium text-gray-800">{{
+                                                                ex.nome_exercicio }}</p>
+                                                            <p class="text-xs text-gray-600">
+                                                                {{ ex.serie }} séries • {{ ex.repeticoes }} repetições •
+                                                                {{
+                                                                ex.carga }}kg
+                                                            </p>
+                                                        </div>
+                                                        <div>
+                                                            {% if ex.concluido %}
+                                                            <input type="checkbox" checked disabled
+                                                                class="accent-green-600">
+                                                            {% else %}
+                                                            <form method="post"
+                                                                action="{% url 'atualizar_status' cod_aluno ex.cod_exercicio %}">
+                                                                {% csrf_token %}
+                                                                <input type="checkbox" name="status"
+                                                                    onchange="this.form.submit()"
+                                                                    class="accent-indigo-600">
+                                                            </form>
+                                                            {% endif %}
+                                                        </div>
+                                                    </li>
+                                                    {% endfor %}
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% else %}
+                            <p class="text-gray-600">Nenhum treino cadastrado para este aluno.</p>
+                            {% endif %}
+                        </section>
+                    </div>
+
+                    <!-- 🔥 Modal de Todos os Treinos -->
+                    <div id="modalTreinos"
+                        class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+                        <div
+                            class="bg-white rounded-xl shadow-xl w-full max-w-6xl max-h-[90vh] overflow-y-auto p-4 sm:p-6 relative">
+
+                            <button onclick="document.getElementById('modalTreinos').classList.add('hidden')"
+                                class="absolute top-4 right-4 text-gray-500 hover:text-red-600 text-2xl">
+                                ✕
+                            </button>
+
+                            <h2
+                                class="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6 border-b-2 border-indigo-500 pb-2">
+                                Todos os Treinos
+                            </h2>
+
+                            {% if treinos %}
+                            <div
+                                class="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+                                {% for treino in treinos %}
+                                <div class="bg-white border border-gray-200 rounded-2xl p-4 sm:p-5 shadow-md hover:shadow-xl 
+                transition-all relative overflow-hidden">
+
+                                    <div
+                                        class="absolute inset-0 bg-gradient-to-br from-indigo-50 to-purple-100 opacity-60">
+                                    </div>
+
+                                    <div class="relative z-10">
+                                        <h3 class="text-base sm:text-lg font-semibold text-indigo-700 mb-2 sm:mb-3">
+                                            {{ treino.tipo_treino }}
+                                        </h3>
+
+                                        <div class="space-y-1">
+                                            <p class="text-gray-700"><span class="font-medium">Início:</span> {{
+                                                treino.data_inicio }}</p>
+                                            <p class="text-gray-700"><span class="font-medium">Fim:</span> {{
+                                                treino.data_final }}</p>
+                                        </div>
+
+                                        {% if treino.observacoes %}
+                                        <p class="mt-2 sm:mt-3 text-sm text-gray-600">
+                                            <span class="font-medium">Observações:</span> {{ treino.observacoes }}
+                                        </p>
+                                        {% endif %}
+
+                                        <div class="mt-4">
+                                            <h4 class="text-sm font-medium text-indigo-700 mb-2">Exercícios:</h4>
+                                            <ul class="space-y-2">
+                                                {% for ex in treino.exercicios %}
+                                                <li class="flex items-center justify-between bg-gray-50 p-2 rounded-lg">
+                                                    <div>
+                                                        <p class="text-sm font-medium text-gray-800">{{
+                                                            ex.nome_exercicio }}
+                                                        </p>
+                                                        <p class="text-xs text-gray-600">
+                                                            {{ ex.serie }} séries • {{ ex.repeticoes }} repetições • {{
+                                                            ex.carga }}kg
+                                                        </p>
+                                                    </div>
+                                                    <div>
+                                                        {% if ex.concluido %}
+                                                        <input type="checkbox" checked disabled
+                                                            class="accent-green-600">
+                                                        {% else %}
+                                                        <form method="post"
+                                                            action="{% url 'atualizar_status' cod_aluno ex.cod_exercicio %}">
+                                                            {% csrf_token %}
+                                                            <input type="checkbox" name="status"
+                                                                onchange="this.form.submit()" class="accent-indigo-600">
+                                                        </form>
+                                                        {% endif %}
+                                                    </div>
+                                                </li>
+                                                {% endfor %}
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% else %}
+                            <p class="text-gray-600">Nenhum treino cadastrado para este aluno.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+
+                    <!-- Progress Section -->
+                    <div class="card p-6 lg:col-span-1">
+                        <h2 class="text-xl font-bold text-gray-900 mb-6">Seu Progresso</h2>
+                        <div class="space-y-4">
+
+                            <!-- Peso -->
+                            <div class="bg-gray-50 p-4 rounded-lg">
+                                <p class="text-sm text-gray-500">Peso Atual</p>
+                                <p class="text-2xl font-bold mt-1">{{ ultima_avaliacao.peso }} kg</p>
+                                {% if peso_diferenca is not None %}
+                                <p class="text-xs mt-1 
+                    {% if peso_diferenca > 0 %}text-green-600
+                    {% elif peso_diferenca < 0 %}text-red-600
+                    {% else %}text-gray-500{% endif %} 
+                    flex items-center">
+                                    <i class="fas 
+                        {% if peso_diferenca > 0 %}fa-arrow-up
+                        {% elif peso_diferenca < 0 %}fa-arrow-down
+                        {% endif %} mr-1"></i>
+                                    {{ peso_diferenca|floatformat:1 }} kg
+                                    ({{ peso_percentual|floatformat:1 }}%)
+                                </p>
+                                {% else %}
+                                <p class="text-xs mt-1 text-gray-500">Dados insuficientes</p>
+                                {% endif %}
+                            </div>
+
+                            <!-- IMC -->
+                            <div class="bg-gray-50 p-4 rounded-lg">
+                                <p class="text-sm text-gray-500">IMC</p>
+                                <p class="text-2xl font-bold mt-1">{{ ultima_avaliacao.imc }}</p>
+                                {% if imc_diferenca is not None %}
+                                <p class="text-xs mt-1 
+                    {% if imc_diferenca > 0 %}text-green-600
+                    {% elif imc_diferenca < 0 %}text-red-600
+                    {% else %}text-gray-500{% endif %} 
+                    flex items-center">
+                                    <i class="fas 
+                        {% if imc_diferenca > 0 %}fa-arrow-up
+                        {% elif imc_diferenca < 0 %}fa-arrow-down
+                        {% endif %} mr-1"></i>
+                                    {{ imc_diferenca|floatformat:2 }}
+                                    ({{ imc_percentual|floatformat:1 }}%)
+                                </p>
+                                {% else %}
+                                <p class="text-xs mt-1 text-gray-500">Dados insuficientes</p>
+                                {% endif %}
+                            </div>
+
+                            <!-- Meta -->
+                            <div class="bg-gray-50 p-4 rounded-lg">
+                                <p class="text-sm text-gray-500">Meta</p>
+                                <p class="text-2xl font-bold mt-1">
+                                    {{ ultima_avaliacao.meta }} kg
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <!-- 🔥 Card de Avaliação Física -->
+                    <div class="bg-white rounded-xl shadow-md p-6 border border-gray-200">
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-2xl font-bold text-gray-900">Avaliações Físicas</h2>
+                            <button
+                                onclick="document.getElementById('modalHistoricoAvaliacao').classList.remove('hidden')"
+                                class="text-sm px-4 py-2 bg-indigo-100 text-indigo-700 rounded-lg hover:bg-indigo-200 transition">
+                                Ver histórico
+                            </button>
+                        </div>
+
+                        {% if ultima_avaliacao %}
+                        <div class="border-l-4 border-indigo-500 bg-indigo-50/40 rounded-lg p-6 shadow-sm">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="text-lg md:text-xl font-semibold text-indigo-700">
+                                    Avaliação de {{ ultima_avaliacao.data_avaliacao|date:"d/m/Y" }}
+                                </h3>
+                                <span
+                                    class="text-xs md:text-sm px-3 py-1 bg-green-100 text-green-800 rounded-full font-medium border border-green-200">
+                                    ✅ Completa
+                                </span>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-gray-700 text-sm">
+                                <div class="space-y-1">
+                                    <p><span class="font-semibold">Peso:</span> {{ ultima_avaliacao.peso }} kg</p>
+                                    <p><span class="font-semibold">Altura:</span> {{ ultima_avaliacao.altura }} m</p>
+                                    <p><span class="font-semibold">IMC:</span> {{ ultima_avaliacao.imc }}</p>
+                                    <p><span class="font-semibold">Meta:</span> {{ ultima_avaliacao.meta }}</p>
+                                </div>
+                                <div class="space-y-1">
+                                    <p><span class="font-semibold">Instrutor:</span> {{ instrutor.nome }}
+                                    </p>
+                                    <p><span class="font-semibold">Aluno:</span> {{ aluno.nome }}</p>
+                                </div>
+                            </div>
+                            {% if ultima_avaliacao.observacoes %}
+                            <p class="mt-4 text-gray-600">
+                                <span class="font-semibold">Observações:</span> {{ ultima_avaliacao.observacoes }}
+                            </p>
+                            {% endif %}
+                        </div>
+                        {% else %}
+                        <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-md">
+                            <p class="text-sm text-yellow-700">Nenhuma avaliação cadastrada para este aluno.</p>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- 🔥 Modal Histórico de Avaliações -->
+                    <div id="modalHistoricoAvaliacao"
+                        class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+                        <div
+                            class="bg-white rounded-xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto p-6 relative">
+
+                            <!-- Botão Fechar -->
+                            <button onclick="document.getElementById('modalHistoricoAvaliacao').classList.add('hidden')"
+                                class="absolute top-4 right-4 text-gray-500 hover:text-red-600 text-2xl">
+                                ✕
+                            </button>
+
+                            <h2 class="text-2xl font-bold text-gray-900 mb-6 border-b-2 border-indigo-500 pb-2">
+                                Histórico de Avaliações
+                            </h2>
+
+                            {% if avaliacoes %}
+                            <div class="space-y-4">
+                                {% for avaliacao in avaliacoes %}
+                                <div class="border-l-4 border-indigo-500 bg-indigo-50/30 rounded-lg p-4 shadow-sm">
+                                    <div class="flex justify-between items-center mb-2">
+                                        <h3 class="text-lg md:text-xl font-semibold text-indigo-700">
+                                            Avaliação de {{ avaliacao.data_avaliacao|date:"d/m/Y" }}
+                                        </h3>
+                                        <span
+                                            class="text-xs md:text-sm px-2 py-1 bg-green-100 text-green-800 rounded-full border border-green-200">
+                                            ✅ Completa
+                                        </span>
+                                    </div>
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-gray-700 text-sm">
+                                        <div class="space-y-1">
+                                            <p><span class="font-semibold">Peso:</span> {{ avaliacao.peso }} kg</p>
+                                            <p><span class="font-semibold">Altura:</span> {{ avaliacao.altura }} m</p>
+                                            <p><span class="font-semibold">IMC:</span> {{ avaliacao.imc }}</p>
+                                            <p><span class="font-semibold">Meta:</span> {{ avaliacao.meta }}</p>
+                                        </div>
+                                        <div class="space-y-1">
+                                            <p><span class="font-semibold">Instrutor:</span> {{ avaliacao.cod_instrutor
+                                                }}
+                                            </p>
+                                            <p><span class="font-semibold">Aluno:</span> {{ aluno.nome }}</p>
+                                        </div>
+                                    </div>
+                                    {% if avaliacao.observacoes %}
+                                    <p class="mt-2 text-sm text-gray-600">
+                                        <span class="font-semibold">Observações:</span> {{ avaliacao.observacoes }}
                                     </p>
                                     {% endif %}
                                 </div>
+                                {% endfor %}
                             </div>
+                            {% else %}
+                            <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-md">
+                                <p class="text-sm text-yellow-700">Nenhuma avaliação cadastrada.</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Documents -->
+                    <div class="card p-6">
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-xl font-bold text-gray-900">Documentos</h2>
+                            <a href="#" class="text-sm text-primary-600 hover:text-primary-800">Ver todos</a>
+                        </div>
+
+                        <div class="space-y-3">
+                            {% for documento in documentos %}
+                            <a href="{{ documento.url }}"
+                                class="flex items-center p-3 hover:bg-gray-50 rounded-lg transition">
+                                <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center mr-3">
+                                    <i class="fas fa-file-pdf text-red-500"></i>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-medium">{{ documento.nome }}</p>
+                                    <p class="text-xs text-gray-500">{{ documento.data }}</p>
+                                </div>
+                            </a>
                             {% endfor %}
                         </div>
                     </div>
-                    {% else %}
-                    <p class="text-gray-600">Nenhum treino cadastrado para este aluno.</p>
-                    {% endif %}
-                </section>
+                    <!-- 🔥 Pagamento -->
+                    <div class="card p-6 bg-white rounded-xl shadow-lg max-w-4xl w-full mx-auto">
+                        <div class="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
+                            <h2 class="text-2xl font-semibold text-gray-900">Pagamentos de {{ aluno.nome }}</h2>
 
-                <section class="col-span-1 lg:col-span-1 text-gray-800">
-                    <h2 class="text-2xl font-bold mb-6 text-gray-900 border-b-2 border-indigo-400 pb-2">🧠 Histórico de
-                        Treinos</h2>
-                    {% if historico %}
-                    <ul class="divide-y divide-gray-200">
-                        {% for hist in historico %}
-                        <li class="py-4">
-                            <p class="text-gray-700 mb-1"><strong class="text-gray-900">Período:</strong> {{ hist.inicio
-                                }} - {{ hist.fim }}</p>
-                            <p class="text-gray-700 mb-1"><strong class="text-gray-900">Avaliação:</strong> {{
-                                hist.avaliacao }}</p>
-                            <p class="text-gray-700"><strong class="text-gray-900">Instrutor:</strong> {{ hist.instrutor
-                                }}</p>
-                        </li>
-                        {% endfor %}
-                    </ul>
-                    {% else %}
-                    <p class="text-gray-600">Nenhum histórico de treino disponível.</p>
-                    {% endif %}
-                </section>
+                            <div class="flex flex-wrap gap-3">
+                                <button id="btnListarPagamentos"
+                                    class="px-4 py-2 rounded-md bg-gray-200 text-gray-700 hover:bg-gray-300 font-medium">
+                                    Listar Pagamentos
+                                </button>
+                                <button id="btnNovoPagamento"
+                                    class="px-4 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-700 font-medium">
+                                    Novo Pagamento
+                                </button>
+                            </div>
+                        </div>
 
-                <section class="col-span-1 lg:col-span-1 text-gray-800">
-                    <h2 class="text-2xl font-bold mb-6 text-gray-900 border-b-2 border-indigo-400 pb-2">💳 Pagamentos
-                    </h2>
-                    <div class="text-gray-700 mb-4 text-lg">
-                        <p class="mb-1"><strong class="text-gray-900">Status atual:</strong> <span
-                                class="font-bold text-blue-600">{{ pagamento.status }}</span></p>
-                        <p class="mb-1"><strong class="text-gray-900">Vencimento:</strong> {{ pagamento.vencimento }}
-                        </p>
-                        <p class="mb-1"><strong class="text-gray-900">Forma:</strong> {{ pagamento.forma }}</p>
-                        <p class="mb-1"><strong class="text-gray-900">Valor:</strong> R$ {{ pagamento.valor }}</p>
+                        <!-- 🔄 Lista dos 3 últimos pagamentos -->
+                        <div class="bg-white rounded-lg border border-gray-200 shadow-sm">
+                            <ul class="divide-y divide-gray-100">
+                                {% for pagamento in pagamentos|slice:":3" %}
+                                <li
+                                    class="flex flex-col sm:flex-row justify-between sm:items-center px-6 py-4 gap-2 hover:bg-gray-50">
+                                    <div class="flex flex-col">
+                                        <span class="text-sm font-medium text-gray-700">
+                                            {% if pagamento.criado_em %}
+                                            {{ pagamento.criado_em|date:"d/m/Y H:i" }}
+                                            {% else %}
+                                            Sem data
+                                            {% endif %}
+                                        </span>
+                                        <span class="text-xs text-gray-500">Valor: R$ {{ pagamento.valor }}</span>
+                                    </div>
+                                    <span class="px-3 py-1 text-xs font-semibold rounded-full text-center
+                    {% if pagamento.status == 'approved' %}
+                        bg-green-100 text-green-800
+                    {% elif pagamento.status == 'pending' %}
+                        bg-yellow-100 text-yellow-800
+                    {% else %}
+                        bg-red-100 text-red-800
+                    {% endif %}">
+                                        {{ pagamento.status|upper }}
+                                    </span>
+                                </li>
+                                {% empty %}
+                                <li class="py-4 text-center text-gray-400 italic">
+                                    Nenhum pagamento registrado.
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
                     </div>
-                    <h3 class="font-semibold text-xl mt-4 mb-3 text-gray-900">Histórico de Pagamentos:</h3>
-                    {% if historico_pagamentos %}
-                    <ul class="mt-2 text-base list-disc ml-6 text-gray-700">
-                        {% for pag in historico_pagamentos %}
-                        <li>{{ pag.data }} - {{ pag.status }} - R$ {{ pag.valor }}</li>
-                        {% endfor %}
-                    </ul>
-                    {% else %}
-                    <p class="text-gray-600">Nenhum pagamento registrado.</p>
-                    {% endif %}
-                </section>
 
-                <section class="col-span-1 lg:col-span-1 text-gray-800">
-                    <h2 class="text-2xl font-bold mb-6 text-gray-900 border-b-2 border-indigo-400 pb-2">📥 Documentos
-                    </h2>
-                    {% if documentos %}
-                    <ul class="list-disc list-inside space-y-3 text-lg">
-                        {% for doc in documentos %}
-                        <li><a href="{{ doc.url }}"
-                                class="text-blue-600 hover:text-blue-800 underline transition-colors duration-200">{{
-                                doc.nome }}</a></li>
-                        {% endfor %}
-                    </ul>
-                    {% else %}
-                    <p class="text-gray-600">Nenhum documento disponível.</p>
-                    {% endif %}
-                </section>
+                    <!-- 🔥 Modal Listar Pagamentos -->
+                    <div id="modalListarPagamentos"
+                        class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+                        <div class="bg-white rounded-xl shadow-xl max-w-lg w-full p-6 relative">
+                            <button id="fecharModalListar"
+                                class="absolute top-4 right-4 text-gray-500 hover:text-red-600 text-2xl">
+                                ✕
+                            </button>
 
-                <section class="lg:col-span-2 text-gray-800">
-                    <h2 class="text-2xl font-bold mb-6 text-gray-900 border-b-2 border-indigo-400 pb-2">📊 Avaliações
-                        Físicas</h2>
-                    <form method="post" class="space-y-5">
-                        {% csrf_token %}
-                        <div>
-                            <label for="peso" class="block font-semibold mb-2 text-gray-700 text-lg">Peso (kg):</label>
-                            <input type="number" step="0.1" id="peso" name="peso" required
-                                value="{{ avaliacao.peso|default:'' }}"
-                                class="w-full p-3.5 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 text-gray-800 bg-gray-50" />
+                            <h3 class="text-xl font-semibold mb-4">Lista de Pagamentos de {{ aluno.nome }}</h3>
+
+                            <div class="overflow-y-auto max-h-80">
+                                <ul class="divide-y divide-gray-200">
+                                    {% for pagamento in pagamentos %}
+                                    <li class="flex flex-col sm:flex-row justify-between sm:items-center py-3 gap-2">
+                                        <div class="flex flex-col">
+                                            <span class="text-sm font-medium text-gray-700">
+                                                {% if pagamento.criado_em %}
+                                                {{ pagamento.criado_em|date:"d/m/Y H:i" }}
+                                                {% else %}
+                                                Sem data
+                                                {% endif %}
+                                            </span>
+                                            <span class="text-xs text-gray-500">Valor: R$ {{ pagamento.valor }}</span>
+                                        </div>
+                                        <span class="px-3 py-1 text-xs font-semibold rounded-full text-center
+                        {% if pagamento.status == 'approved' %}
+                            bg-green-100 text-green-800
+                        {% elif pagamento.status == 'pending' %}
+                            bg-yellow-100 text-yellow-800
+                        {% else %}
+                            bg-red-100 text-red-800
+                        {% endif %}">
+                                            {{ pagamento.status|upper }}
+                                        </span>
+                                    </li>
+                                    {% empty %}
+                                    <li class="py-3 text-center text-gray-400 italic">Nenhum pagamento para mostrar.
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
                         </div>
+                    </div>
 
-                        <div>
-                            <label for="altura" class="block font-semibold mb-2 text-gray-700 text-lg">Altura
-                                (m):</label>
-                            <input type="number" step="0.01" id="altura" name="altura" required
-                                value="{{ avaliacao.altura|default:'' }}"
-                                class="w-full p-3.5 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 text-gray-800 bg-gray-50" />
+                    <!-- 🔥 Modal Novo Pagamento -->
+                    <div id="modalPagamento"
+                        class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+                        <div class="bg-white rounded-xl shadow-xl max-w-lg w-full p-6 relative">
+                            <button id="fecharModalPagamento"
+                                class="absolute top-4 right-4 text-gray-500 hover:text-red-600 text-2xl">
+                                ✕
+                            </button>
+
+                            <h2 class="text-2xl font-semibold mb-5">Pagamento via PIX</h2>
+
+                            <form id="formPagamento" action="{% url 'criar_pagamento_pix' cod_aluno=cod_aluno %}"
+                                method="POST" class="space-y-4">
+                                {% csrf_token %}
+                                <input name="nome" placeholder="Nome" required value="{{ aluno.nome }}"
+                                    class="border border-gray-300 rounded-md p-3 w-full focus:ring-indigo-500 focus:border-indigo-500" />
+                                <input name="sobrenome" placeholder="Sobrenome" required value="{{ aluno.sobrenome }}"
+                                    class="border border-gray-300 rounded-md p-3 w-full focus:ring-indigo-500 focus:border-indigo-500" />
+                                <input name="email" placeholder="Email" type="email" required value="{{ aluno.email }}"
+                                    class="border border-gray-300 rounded-md p-3 w-full focus:ring-indigo-500 focus:border-indigo-500" />
+                                <select name="identificationType"
+                                    class="border border-gray-300 rounded-md p-3 w-full focus:ring-indigo-500 focus:border-indigo-500">
+                                    <option value="CPF" {% if aluno.identificationType == "CPF" %}selected{% endif %}>CPF
+                                    </option>
+                                    <option value="CNPJ" {% if aluno.identificationType == "CNPJ" %}selected{% endif %}>
+                                        CNPJ
+                                    </option>
+                                </select>
+                                <input name="identificationNumber" placeholder="Número do documento" required
+                                    value="{{ aluno.identificationNumber }}"
+                                    class="border border-gray-300 rounded-md p-3 w-full focus:ring-indigo-500 focus:border-indigo-500" />
+                                <input name="valor" placeholder="Valor" required value="{{ aluno.valor_mensalidade }}"
+                                    class="border border-gray-300 rounded-md p-3 w-full focus:ring-indigo-500 focus:border-indigo-500" />
+
+                                <button id="btnGerarPix" type="button"
+                                    class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-md">
+                                    Gerar PIX
+                                </button>
+                            </form>
                         </div>
+                    </div>
 
-                        <div>
-                            <label for="observacoes"
-                                class="block font-semibold mb-2 text-gray-700 text-lg">Observações:</label>
-                            <textarea id="observacoes" name="observacoes" rows="4"
-                                class="w-full p-3.5 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 resize-y text-gray-800 bg-gray-50">{{ avaliacao.observacoes|default:'' }}</textarea>
+                    <!-- 🔥 Modal QRCode PIX -->
+                    <div id="modalQrCode"
+                        class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+                        <div class="bg-white rounded-xl shadow-xl max-w-lg w-full p-6 relative">
+                            <button id="fecharModalQrCode"
+                                class="absolute top-4 right-4 text-gray-500 hover:text-red-600 text-2xl">
+                                ✕
+                            </button>
+
+                            <h2 class="text-2xl font-semibold mb-5">Pagamento via PIX</h2>
+
+                            {% if qr_code %}
+                            <img src="data:image/png;base64,{{ qr_code_base64 }}" alt="QRCode PIX"
+                                class="w-60 h-60 mx-auto mb-6" />
+                            <p class="text-gray-600 text-sm mb-2 text-center">Ou copie e cole o código:</p>
+                            <textarea readonly
+                                class="w-full p-3 border border-gray-300 rounded-md text-xs font-mono resize-none"
+                                rows="3" onclick="this.select()">{{ qr_code }}</textarea>
+
+                            <p class="mt-4 text-center text-sm">
+                                Status: <strong>{{ status }}</strong>
+                            </p>
+                            <p class="text-center text-sm">
+                                Valor: <strong>R$ {{ valor }}</strong>
+                            </p>
+                            {% else %}
+                            <p class="text-center text-gray-500">Nenhum QRCode disponível.</p>
+                            {% endif %}
                         </div>
+                    </div>
 
-                        <p class="text-xl text-gray-800"><strong class="text-gray-900">IMC:</strong> <span
-                                id="imcDisplay" class="font-bold text-indigo-700">{{ avaliacao.imc|default:"-" }}</span>
-                        </p>
+                    <!-- 🔥 Scripts -->
+                    <script>
+                        const btnListarPagamentos = document.getElementById('btnListarPagamentos');
+                        const modalListarPagamentos = document.getElementById('modalListarPagamentos');
+                        const fecharModalListar = document.getElementById('fecharModalListar');
 
-                        <button type="submit"
-                            class="mt-4 px-8 py-3 button-gradient text-white font-semibold rounded-full shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105">
-                            Salvar Avaliação
-                        </button>
-                    </form>
-                </section>
+                        btnListarPagamentos.addEventListener('click', () => {
+                            modalListarPagamentos.classList.remove('hidden');
+                        });
+                        fecharModalListar.addEventListener('click', () => {
+                            modalListarPagamentos.classList.add('hidden');
+                        });
 
-                <section class="lg:col-span-3 flex flex-wrap justify-center md:justify-start gap-4 p-6">
-                    <a href="#" id="abrirModalEditarDados"
-                        class="px-6 py-2.5 button-gradient text-white font-semibold rounded-full shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105 flex items-center gap-2">
-                        <span class="text-lg">✏️</span> Editar Dados
+                        const btnNovoPagamento = document.getElementById('btnNovoPagamento');
+                        const modalPagamento = document.getElementById('modalPagamento');
+                        const fecharModalPagamento = document.getElementById('fecharModalPagamento');
+
+                        btnNovoPagamento.addEventListener('click', () => {
+                            modalPagamento.classList.remove('hidden');
+                        });
+                        fecharModalPagamento.addEventListener('click', () => {
+                            modalPagamento.classList.add('hidden');
+                        });
+
+                        const btnGerarPix = document.getElementById('btnGerarPix');
+                        const modalQrCode = document.getElementById('modalQrCode');
+                        const fecharModalQrCode = document.getElementById('fecharModalQrCode');
+
+                        btnGerarPix.addEventListener('click', () => {
+                            document.getElementById('formPagamento').submit();
+                        });
+
+                        fecharModalQrCode.addEventListener('click', () => {
+                            modalQrCode.classList.add('hidden');
+                        });
+                    </script>
+                </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-6 mt-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-4 md:mb-0">
+                    <p class="text-sm">© {{ano}} ERP Way. Todos os direitos reservados.</p>
+                </div>
+                <div class="flex space-x-6">
+                    <a href="#" class="text-gray-300 hover:text-white">
+                        <span class="text-sm">Termos de uso</span>
                     </a>
-                    <a href="#"
-                        class="bg-gray-700 text-white px-6 py-2.5 rounded-full shadow-md hover:bg-gray-800 hover:shadow-lg transition-all duration-300 transform hover:scale-105 flex items-center gap-2">
-                        <span class="text-lg">🔑</span> Trocar Senha
+                    <a href="#" class="text-gray-300 hover:text-white">
+                        <span class="text-sm">Política de privacidade</span>
                     </a>
-                    <a href="#"
-                        class="bg-red-600 text-white px-6 py-2.5 rounded-full shadow-md hover:bg-red-700 hover:shadow-lg transition-all duration-300 transform hover:scale-105 flex items-center gap-2">
-                        <span class="text-lg">❌</span> Encerrar Matrícula
+                    <a href="#" class="text-gray-300 hover:text-white">
+                        <span class="text-sm">Contato</span>
                     </a>
-                    <a href="#"
-                        class="bg-green-600 text-white px-6 py-2.5 rounded-full shadow-md hover:bg-green-700 hover:shadow-lg transition-all duration-300 transform hover:scale-105 flex items-center gap-2">
-                        <span class="text-lg">🔄</span> Atualizar Plano
-                    </a>
-
-                    <button onclick="openModal('modal-pagamento')"
-                        class="bg-purple-600 text-white px-6 py-2.5 rounded-full shadow-md hover:bg-purple-700 hover:shadow-lg transition-all duration-300 transform hover:scale-105 flex items-center gap-2">
-                        <span class="text-lg">💳</span> Ver Pagamentos
-                    </button>
-                </section>
-
+                </div>
             </div>
-        </main>
+        </div>
+    </footer>
 
-        <div id="modalEditarDados"
-            class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4 hidden modal-fade-in opacity-0">
-            <div
-                class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl p-8 space-y-6 text-gray-800 relative modal-scale-in transform scale-95 opacity-0">
-                <button onclick="closeModal('modalEditarDados')"
-                    class="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-4xl font-bold leading-none">&times;</button>
-
-                <h2 class="text-3xl font-bold text-center text-blue-900 border-b-2 border-indigo-400 pb-3">
-                    Editar Perfil</h2>
-
-                <div class="flex flex-col items-center mb-5">
-                    <img src="https://i.pravatar.cc/300" alt="Profile Picture"
-                        class="rounded-full w-32 h-32 mx-auto border-4 border-indigo-800 mb-4 transition-transform duration-300 hover:scale-105 ring ring-gray-300">
-                    <input type="file" name="profile" id="upload_profile_modal" hidden> <label
-                        for="upload_profile_modal"
-                        class="inline-flex items-center cursor-pointer text-blue-700 hover:text-blue-900 transition-colors duration-300">
-                        <svg data-slot="icon" class="w-5 h-5 mr-2" fill="none" stroke-width="1.5"
-                            stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"
-                            aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z">
-                            </path>
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0ZM18.75 10.5h.008v.008h-.008V10.5Z">
-                            </path>
-                        </svg>
-                        Alterar Foto de Perfil
-                    </label>
+    <!-- Edit Profile Modal -->
+    <div id="editProfileModal"
+        class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black bg-opacity-50">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-md">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-bold text-gray-800">Editar Perfil</h3>
+                    <button onclick="closeModal('editProfileModal')" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times"></i>
+                    </button>
                 </div>
 
-                <form class="space-y-4" id="formEditarDados">
-                    {% csrf_token %}
+                <div class="flex flex-col items-center mb-6">
+                    <img src="{{ aluno.foto_url }}" alt="Profile"
+                        class="w-20 h-20 rounded-full object-cover border-4 border-white shadow-md mb-3">
+                    <button class="text-sm text-primary-600 hover:text-primary-800 font-medium">
+                        Alterar Foto
+                    </button>
+                </div>
+
+                <form class="space-y-4">
                     <div>
-                        <label for="nome_perfil"
-                            class="block text-sm font-medium text-gray-700">Nome</label>
-                        <input type="text" id="nome_perfil" name="nome"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
-                            value="{{ aluno.nome|default:'Nome do Aluno' }}">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Nome</label>
+                        <input type="text"
+                            class="w-full px-3 py-2 border border-gray-200 rounded-md focus:ring-primary-500 focus:border-primary-500"
+                            value="{{ aluno.nome }}">
                     </div>
                     <div>
-                        <label for="email_perfil"
-                            class="block text-sm font-medium text-gray-700">Email</label>
-                        <input type="email" id="email_perfil" name="email"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
-                            value="{{ aluno.email|default:'aluno@example.com' }}">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                        <input type="email"
+                            class="w-full px-3 py-2 border border-gray-200 rounded-md focus:ring-primary-500 focus:border-primary-500"
+                            value="{{ aluno.email }}">
                     </div>
                     <div>
-                        <label for="telefone_perfil"
-                            class="block text-sm font-medium text-gray-700">Telefone</label>
-                        <input type="tel" id="telefone_perfil" name="telefone"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
-                            value="{{ aluno.telefone|default:'+55 (XX) XXXXX-XXXX' }}">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Telefone</label>
+                        <input type="tel"
+                            class="w-full px-3 py-2 border border-gray-200 rounded-md focus:ring-primary-500 focus:border-primary-500"
+                            value="{{ aluno.telefone }}">
                     </div>
                     <div>
-                        <label for="data_nascimento_perfil"
-                            class="block text-sm font-medium text-gray-700">Data de Nascimento</label>
-                        <input type="date" id="data_nascimento_perfil" name="data_nascimento"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
-                            value="{{ aluno.data_nascimento|date:'Y-m-d'|default:'' }}">
-                    </div>
-                    <div>
-                        <label for="sexo_perfil" class="block text-sm font-medium text-gray-700">Sexo</label>
-                        <select id="sexo_perfil" name="sexo"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
-                            <option value="M" {% if aluno.sexo == 'M' %}selected{% endif %}>Masculino</option>
-                            <option value="F" {% if aluno.sexo == 'F' %}selected{% endif %}>Feminino</option>
-                            <option value="O" {% if aluno.sexo == 'O' %}selected{% endif %}>Outro</option>
-                        </select>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Data de Nascimento</label>
+                        <input type="date"
+                            class="w-full px-3 py-2 border border-gray-200 rounded-md focus:ring-primary-500 focus:border-primary-500"
+                            value="{{ aluno.data_nascimento }}">
                     </div>
 
-                    <div class="flex justify-end space-x-4 mt-6">
-                        <button type="button" onclick="closeModal('modalEditarDados')"
-                            class="px-6 py-2.5 bg-gray-300 text-gray-700 rounded-full hover:bg-gray-400 transition-colors duration-200 shadow-md">Cancelar</button>
-                        <button type="submit"
-                            class="px-6 py-2.5 bg-indigo-800 text-white rounded-full hover:bg-indigo-700 transition-colors duration-300 shadow-md">Salvar
-                            Alterações</button>
+                    <div class="pt-4 flex justify-end space-x-3">
+                        <button type="button" onclick="closeModal('editProfileModal')"
+                            class="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-800">
+                            Cancelar
+                        </button>
+                        <button type="submit" class="btn-primary text-white px-6 py-2 rounded-md text-sm font-medium">
+                            Salvar Alterações
+                        </button>
                     </div>
                 </form>
             </div>
         </div>
-
-        <div id="modal-pagamento"
-            class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4 hidden modal-fade-in opacity-0">
-            <div
-                class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-lg relative modal-scale-in transform scale-95 opacity-0">
-                <button onclick="closeModal('modal-pagamento')"
-                    class="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-4xl font-bold leading-none">&times;</button>
-
-                <h2 class="text-2xl font-bold mb-6 text-gray-900 border-b-2 border-indigo-400 pb-2">💳 Detalhes de
-                    Pagamento</h2>
-
-                <div class="text-gray-700 mb-6 text-lg">
-                    <p class="mb-1"><strong class="text-gray-900">Status atual:</strong> <span
-                            class="font-bold text-blue-600">{{ pagamento.status }}</span></p>
-                    <p class="mb-1"><strong class="text-gray-900">Vencimento:</strong> {{ pagamento.vencimento }}</p>
-                    <p class="mb-1"><strong class="text-gray-900">Forma:</strong> {{ pagamento.forma }}</p>
-                    <p class="mb-1"><strong class="text-gray-900">Valor:</strong> R$ {{ pagamento.valor }}</p>
-                </div>
-
-                <h3 class="font-semibold text-xl mt-4 mb-3 text-gray-900">Histórico de Pagamentos:</h3>
-                {% if historico_pagamentos %}
-                <ul class="mt-2 text-base list-disc ml-6 text-gray-700 max-h-60 overflow-y-auto pr-2">
-                    {% for pag in historico_pagamentos %}
-                    <li class="py-1">{{ pag.data }} - {{ pag.status }} - R$ {{ pag.valor }}</li>
-                    {% endfor %}
-                </ul>
-                {% else %}
-                <p class="text-gray-600">Nenhum pagamento registrado.</p>
-                {% endif %}
-            </div>
-        </div>
-
     </div>
-    <footer class="bg-gray-900 bg-opacity-80 text-white py-5 mt-8">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-sm text-gray-400 text-center">
-            © {{ year|default:"2025" }} ERPWAY SYSTEM — Todos os direitos reservados.
-        </div>
-    </footer>
+
     <script>
-        // --- Funções de Modal Reutilizáveis ---
+        // Modal functions
         function openModal(modalId) {
-            const modal = document.getElementById(modalId);
-            if (modal) {
-                modal.classList.remove('hidden');
-                setTimeout(() => {
-                    modal.classList.add('opacity-100');
-                    modal.querySelector('.modal-scale-in').classList.add('scale-100', 'opacity-100');
-                    modal.querySelector('.modal-scale-in').classList.remove('scale-95', 'opacity-0');
-                }, 10);
-            }
+            document.getElementById(modalId).classList.remove('hidden');
         }
 
         function closeModal(modalId) {
-            const modal = document.getElementById(modalId);
-            if (modal) {
-                modal.classList.remove('opacity-100');
-                modal.querySelector('.modal-scale-in').classList.remove('scale-100', 'opacity-100');
-                modal.querySelector('.modal-scale-in').classList.add('scale-95', 'opacity-0');
-                setTimeout(() => {
-                    modal.classList.add('hidden');
-                }, 300); // Should match the transition duration
-            }
+            document.getElementById(modalId).classList.add('hidden');
         }
 
-
+        // Initialize event listeners
         document.addEventListener('DOMContentLoaded', function () {
-            // --- Lógica do Gráfico Chart.js (seu script existente) ---
-            // Certifique-se de que Chart.js esteja carregado para esta parte
-            // const ctx = document.getElementById('graficoTreinos').getContext('2d');
-            // new Chart(ctx, {
-            //     type: 'bar',
-            //     data: {
-            //         labels: ['Semana 1', 'Semana 2', 'Semana 3', 'Semana 4'],
-            //         datasets: [{
-            //             label: 'Treinos Aplicados',
-            //             data: [5, 8, 7, 10], // Dados de exemplo
-            //             backgroundColor: [
-            //                 'rgba(75, 192, 192, 0.7)',
-            //                 'rgba(153, 102, 255, 0.7)',
-            //                 'rgba(255, 159, 64, 0.7)',
-            //                 'rgba(54, 162, 235, 0.7)'
-            //             ],
-            //             borderColor: [
-            //                 'rgba(75, 192, 192, 1)',
-            //                 'rgba(153, 102, 255, 1)',
-            //                 'rgba(255, 159, 64, 1)',
-            //                 'rgba(54, 162, 235, 1)'
-            //             ],
-            //             borderWidth: 1
-            //         }]
-            //     },
-            //     options: {
-            //         responsive: true,
-            //         maintainAspectRatio: false,
-            //         scales: {
-            //             y: {
-            //                 beginAtZero: true,
-            //                 ticks: {
-            //                     color: '#4a5568'
-            //                 },
-            //                 grid: {
-            //                     color: 'rgba(200, 200, 200, 0.2)'
-            //                 }
-            //             },
-            //             x: {
-            //                 ticks: {
-            //                     color: '#4a5568'
-            //                 },
-            //                 grid: {
-            //                     color: 'rgba(200, 200, 200, 0.2)'
-            //                 }
-            //             }
-            //         },
-            //         plugins: {
-            //             legend: {
-            //                 labels: {
-            //                     color: '#4a5568'
-            //                 }
-            //             }
-            //         }
-            //     }
-            // });
-            // ... outras funções e inicializações ...
-            // calcularIMCAvaliacao(); // Se essa função existir e for chamada aqui
-
-            // --- Lógica para o Modal de Edição de Dados ---
-            const btnAbrirEditarDados = document.getElementById("abrirModalEditarDados");
-            if (btnAbrirEditarDados) {
-                btnAbrirEditarDados.addEventListener("click", function (e) {
-                    e.preventDefault();
-                    openModal("modalEditarDados");
-
-                    // Preenche os campos do formulário com os dados atuais do aluno
-                    // Certifique-se de que `aluno` está disponível no contexto do Django
-                    document.getElementById('nome_perfil').value = '{{ aluno.nome|default:"Nome do Aluno" }}';
-                    document.getElementById('email_perfil').value = '{{ aluno.email|default:"aluno@example.com" }}';
-                    document.getElementById('telefone_perfil').value = '{{ aluno.telefone|default:"+55 (XX) XXXXX-XXXX" }}';
-                    // Converte a data para o formato YYYY-MM-DD para o input type="date"
-                    const dataNascimento = '{{ aluno.data_nascimento|date:"Y-m-d" }}';
-                    if (dataNascimento) {
-                        document.getElementById('data_nascimento_perfil').value = dataNascimento;
-                    }
-                    const sexoAluno = '{{ aluno.sexo|default:"" }}';
-                    if (sexoAluno) {
-                        document.getElementById('sexo_perfil').value = sexoAluno;
-                    }
-                });
-            }
-
-            // Lógica para Salvar Alterações (você precisará implementar a integração com seu backend aqui)
-            const formEditarDados = document.getElementById('formEditarDados');
-            if (formEditarDados) {
-                formEditarDados.addEventListener('submit', async function (e) {
-                    e.preventDefault(); // Impede o comportamento padrão do formulário
-
-                    const dadosAtualizados = {
-                        nome: document.getElementById('nome_perfil').value.trim(),
-                        email: document.getElementById('email_perfil').value.trim(),
-                        telefone: document.getElementById('telefone_perfil').value.trim(),
-                        data_nascimento: document.getElementById('data_nascimento_perfil').value.trim(),
-                        sexo: document.getElementById('sexo_perfil').value.trim(),
-                        // Adicione outros campos conforme necessário para o seu modelo de aluno
-                    };
-
-                    // Exemplo de como você enviaria os dados para uma API Django
-                    try {
-                        // Substitua `/api/aluno/{{ aluno.id }}/` pelo seu endpoint real para atualizar o aluno
-                        const response = await fetch(`/api/aluno/{{ aluno.id }}/`, {
-                            method: 'PATCH', // Ou 'PUT' para atualização completa
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRFToken': '{{ csrf_token }}' // Não esqueça do CSRF token
-                            },
-                            body: JSON.stringify(dadosAtualizados)
-                        });
-
-                        if (!response.ok) {
-                            const errorData = await response.json();
-                            throw new Error(errorData.message || 'Erro ao salvar alterações.');
-                        }
-
-                        alert('Dados atualizados com sucesso!');
-                        closeModal('modalEditarDados');
-                        // Opcional: Recarregar a página ou atualizar os elementos que exibem os dados do aluno
-                        window.location.reload();
-
-                    } catch (error) {
-                        alert('Erro ao salvar alterações: ' + error.message);
-                        console.error('Erro na API:', error);
-                    }
-                });
-            }
-
-            // Lógica para upload de imagem de perfil (opcional)
-            const uploadProfileModal = document.getElementById('upload_profile_modal');
-            const profileImageModal = document.querySelector('#modalEditarDados img');
-
-            if (uploadProfileModal && profileImageModal) {
-                uploadProfileModal.addEventListener('change', function (event) {
-                    const file = event.target.files[0];
+            // Profile image upload
+            const profileImageUpload = document.querySelector('input[type="file"]');
+            if (profileImageUpload) {
+                profileImageUpload.addEventListener('change', function (e) {
+                    const file = e.target.files[0];
                     if (file) {
                         const reader = new FileReader();
-                        reader.onload = function (e) {
-                            profileImageModal.src = e.target.result;
+                        reader.onload = function (event) {
+                            const profileImage = document.querySelector('#editProfileModal img');
+                            if (profileImage) {
+                                profileImage.src = event.target.result;
+                            }
                         };
                         reader.readAsDataURL(file);
-
-                        // TODO: Implementar a lógica para enviar a nova imagem para o servidor.
-                        // Isso provavelmente envolverá um novo endpoint de API e um `FormData` para enviar o arquivo.
-                        console.log('Imagem selecionada para upload:', file.name);
-                        // Exemplo: uploadProfile(file);
                     }
                 });
             }
         });
+    </script>
+    <script src="https://sdk.mercadopago.com/js/v2"></script>
+    <script>
+        const mp = new MercadoPago("YOUR_PUBLIC_KEY");
     </script>
 </body>
 

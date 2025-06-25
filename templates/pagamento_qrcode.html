@@ -1,0 +1,43 @@
+<!-- Modal QRCode PIX -->
+<div
+  id="modalQrCode"
+  class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden"
+  aria-hidden="true"
+>
+  <div class="bg-white rounded-xl shadow-xl max-w-lg w-full p-6 relative">
+    <button
+      id="fecharModalQrCode"
+      class="absolute top-4 right-4 text-gray-500 hover:text-red-600 text-2xl font-bold focus:outline-none"
+      aria-label="Fechar"
+      type="button"
+    >
+      ✕
+    </button>
+
+    <h2 class="text-2xl font-semibold mb-5 text-gray-900">Pagamento via PIX</h2>
+
+    {% if qr_code %}
+    <img
+      src="data:image/png;base64,{{ qr_code_base64 }}"
+      alt="QRCode PIX"
+      class="w-60 h-60 mx-auto mb-6"
+    />
+    <p class="text-gray-600 text-sm mb-2 text-center">Ou copie e cole o código:</p>
+    <textarea
+      readonly
+      class="w-full p-3 border border-gray-300 rounded-md text-xs font-mono resize-none focus:outline-indigo-500 transition"
+      rows="3"
+      onclick="this.select()"
+    >{{ qr_code }}</textarea>
+
+    <p class="mt-4 text-center text-sm text-gray-700">
+      Status do pagamento: <strong>{{ status }}</strong>
+    </p>
+    <p class="text-center text-sm text-gray-700">
+      Valor: <strong>R$ {{ valor }}</strong>
+    </p>
+    {% else %}
+    <p class="text-center text-gray-500">Nenhum QRCode disponível.</p>
+    {% endif %}
+  </div>
+</div>

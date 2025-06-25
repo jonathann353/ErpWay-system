@@ -1,614 +1,710 @@
-{% extends "base.html" %}
-
 {% load static %}
 
-{% block title %}
-    {{ block.super }} - Lista de Alunos
-{% endblock title %}
-
 {% block style %}
-    <link rel="stylesheet" href="{% static 'css/base.css' %}">
-    <link rel="stylesheet" href="{% static 'css/aluno.css' %}">
-     <!-- Tailwind CSS CDN -->
-     <script src="https://cdn.tailwindcss.com"></script>
-     <!-- Alpine.js CDN -->
-     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+<link rel="stylesheet" href="{% static 'css/base.css' %}">
+<link rel="stylesheet" href="{% static 'css/aluno.css' %}">
+<script src="https://cdn.tailwindcss.com"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+<script src="https://code.highcharts.com/highcharts.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    
+    :root {
+        --primary: #4f46e5;
+        --primary-light: #6366f1;
+        --secondary: #10b981;
+        --accent: #f59e0b;
+        --dark: #1e293b;
+        --light: #f8fafc;
+    }
+    
+    body {
+        font-family: 'Inter', sans-serif;
+        background-color: var(--light);
+    }
+    
+    .sidebar-link {
+        position: relative;
+        transition: all 0.3s ease;
+    }
+    
+    .sidebar-link::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        height: 100%;
+        width: 4px;
+        background: var(--primary);
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+    }
+    
+    .sidebar-link:hover::after,
+    .sidebar-link.active::after {
+        transform: translateX(0);
+    }
+    
+    .card-hover {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .card-hover:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    }
+    
+    .scrollbar-thin::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+    }
+    
+    .scrollbar-thin::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 3px;
+    }
+    
+    .animate-float {
+        animation: float 3s ease-in-out infinite;
+    }
+    
+    @keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-5px); }
+    }
+    
+    .status-badge {
+        font-size: 0.75rem;
+        padding: 0.25rem 0.75rem;
+        border-radius: 9999px;
+    }
+    
+    .status-active {
+        background-color: #d1fae5;
+        color: #065f46;
+    }
+    
+    .status-inactive {
+        background-color: #fee2e2;
+        color: #991b1b;
+    }
+</style>
 {% endblock style %}
 
-{% block navegacao %}
-{% block logo %}
-     
-{% endblock logo %}
-{% endblock navegacao %}
-
 {% block content %}
-<!-- component -->
-<div>
-    <script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.x.x/dist/alpine.min.js" defer></script>
-    
-    <div x-data="{ sidebarOpen: false }" class="flex h-screen bg-gray-200">
-        <div :class="sidebarOpen ? 'block' : 'hidden'" @click="sidebarOpen = false" class="fixed inset-0 z-20 transition-opacity bg-black opacity-50 lg:hidden"></div>
-    
-        <div :class="sidebarOpen ? 'translate-x-0 ease-out' : '-translate-x-full ease-in'" class="fixed inset-y-0 left-0 z-30 w-64 overflow-y-auto transition duration-300 transform bg-gray-900 lg:translate-x-0 lg:static lg:inset-0">
-            <div class="flex items-center justify-center mt-8">
-                <div class="flex items-center">
-                    <svg class="w-12 h-12" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M364.61 390.213C304.625 450.196 207.37 450.196 147.386 390.213C117.394 360.22 102.398 320.911 102.398 281.6C102.398 242.291 117.394 202.981 147.386 172.989C147.386 230.4 153.6 281.6 230.4 307.2C230.4 256 256 102.4 294.4 76.7999C320 128 334.618 142.997 364.608 172.989C394.601 202.981 409.597 242.291 409.597 281.6C409.597 320.911 394.601 360.22 364.61 390.213Z" fill="#4C51BF" stroke="#4C51BF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
-                        <path d="M201.694 387.105C231.686 417.098 280.312 417.098 310.305 387.105C325.301 372.109 332.8 352.456 332.8 332.8C332.8 313.144 325.301 293.491 310.305 278.495C295.309 263.498 288 256 275.2 230.4C256 243.2 243.201 320 243.201 345.6C201.694 345.6 179.2 332.8 179.2 332.8C179.2 352.456 186.698 372.109 201.694 387.105Z" fill="white"></path>
-                    </svg>
-                    
-                    <span class="mx-2 text-2xl font-semibold text-white">Dashboard</span>
+<div x-data="{ sidebarOpen: false, darkMode: false }" :class="{ 'dark': darkMode }" class="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <!-- Dark Mode Toggle -->
+    <button @click="darkMode = !darkMode" class="fixed bottom-6 right-6 z-50 w-12 h-12 rounded-full bg-indigo-600 shadow-lg flex items-center justify-center text-white hover:bg-indigo-700 transition-colors">
+        <i x-show="!darkMode" class="fas fa-moon"></i>
+        <i x-show="darkMode" class="fas fa-sun"></i>
+    </button>
+
+    <!-- Mobile Sidebar Overlay -->
+    <div x-show="sidebarOpen" @click="sidebarOpen = false" 
+         class="fixed inset-0 z-20 bg-black/50 lg:hidden transition-opacity duration-300"
+         x-transition:enter="ease-out duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="ease-in duration-200"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0">
+    </div>
+
+    <!-- Sidebar -->
+    <aside :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'"
+           class="fixed inset-y-0 left-0 z-30 w-72 bg-white dark:bg-gray-800 shadow-xl transition-transform duration-300 ease-in-out lg:static lg:inset-0">
+        <div class="flex flex-col h-full">
+            <!-- Logo -->
+            <div class="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-lg bg-indigo-600 flex items-center justify-center text-white">
+                        <i class="fas fa-dumbbell text-xl"></i>
+                    </div>
+                    <span class="text-xl font-bold text-gray-800 dark:text-white">ERPWAY</span>
+                </div>
+                <button @click="sidebarOpen = false" class="text-gray-500 dark:text-gray-400 lg:hidden">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <!-- User Profile -->
+            <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+                <div class="flex items-center space-x-4">
+                    <div class="w-12 h-12 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 dark:text-indigo-300">
+                        <i class="fas fa-user text-xl"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-medium text-gray-800 dark:text-white">
+                            {% if user.is_authenticated %}
+                            {{ user.username }}
+                            {% else %}
+                            Visitante
+                            {% endif %}
+                        </h4>
+                        <span class="text-sm text-gray-500 dark:text-gray-400">Administrador</span>
+                    </div>
                 </div>
             </div>
-    
-            <nav class="mt-10">
-                <a class="flex items-center px-6 py-2 mt-4 text-gray-100 bg-gray-700 bg-opacity-25" href="{% url 'dashboard' %}">
-                    <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path>
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"></path>
-                    </svg>
-        
-                    <span class="mx-3">Dashboard</span>
-                </a>
-        
-                <a class="flex items-center px-6 py-2 mt-4 text-gray-500 hover:bg-gray-700 hover:bg-opacity-25 hover:text-gray-100"
-                    href="../instrutores">
-                    <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M17 14v6m-3-3h6M6 10h2a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v2a2 2 0 002 2zm10 0h2a2 2 0 002-2V6a2 2 0 00-2-2h-2a2 2 0 00-2 2v2a2 2 0 002 2zM6 20h2a2 2 0 002-2v-2a2 2 0 00-2-2H6a2 2 0 00-2 2v2a2 2 0 002 2z">
-                        </path>
-                    </svg>
-        
-                    <span class="mx-3">Instrutor</span>
-                </a>
-        
-                <a class="flex items-center px-6 py-2 mt-4 text-gray-500 hover:bg-gray-700 hover:bg-opacity-25 hover:text-gray-100"
-                    href="../test">
-                    <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10">
-                        </path>
-                    </svg>
-        
-                    <span class="mx-3">Alunos</span>
-                </a>
-        
-                <a class="flex items-center px-6 py-2 mt-4 text-gray-500 hover:bg-gray-700 hover:bg-opacity-25 hover:text-gray-100"
-                    href="#">
-                    <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
-                        </path>
-                    </svg>
-        
-                    <span class="mx-3">Forms</span>
-                </a>
+
+            <!-- Navigation -->
+            <nav class="flex-1 p-4 overflow-y-auto">
+                <ul class="space-y-2">
+                    <li>
+                        <a href="{% url 'dashboard' %}" 
+                           class="sidebar-link flex items-center p-3 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors active">
+                            <i class="fas fa-tachometer-alt mr-3 text-indigo-600"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="../instrutores" 
+                           class="sidebar-link flex items-center p-3 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                            <i class="fas fa-chalkboard-teacher mr-3 text-blue-500"></i>
+                            <span>Instrutores</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="../test" 
+                           class="sidebar-link flex items-center p-3 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                            <i class="fas fa-users mr-3 text-emerald-500"></i>
+                            <span>Alunos</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" 
+                           class="sidebar-link flex items-center p-3 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                            <i class="fas fa-file-alt mr-3 text-purple-500"></i>
+                            <span>Formulários</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" 
+                           class="sidebar-link flex items-center p-3 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                            <i class="fas fa-calendar-alt mr-3 text-amber-500"></i>
+                            <span>Agendamentos</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" 
+                           class="sidebar-link flex items-center p-3 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                            <i class="fas fa-chart-line mr-3 text-red-500"></i>
+                            <span>Relatórios</span>
+                        </a>
+                    </li>
+                </ul>
             </nav>
-        </div>
-        <div class="flex flex-col flex-1 overflow-hidden">
-            <header class="flex items-center justify-between px-6 py-4 bg-white border-b-4 border-indigo-600">
-                <div class="flex items-center">
-                    <button @click="sidebarOpen = true" class="text-gray-500 focus:outline-none lg:hidden">
-                        <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M4 6H20M4 12H20M4 18H11" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                stroke-linejoin="round"></path>
-                        </svg>
+
+            <!-- Logout -->
+            <div class="p-4 border-t border-gray-200 dark:border-gray-700">
+                <form method="post" action="{% url 'logout' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="w-full flex items-center justify-center p-3 rounded-lg bg-red-500 text-white hover:bg-red-600 transition-colors">
+                        <i class="fas fa-sign-out-alt mr-2"></i>
+                        <span>Sair</span>
                     </button>
-    
-                    <div class="relative mx-4 lg:mx-0">
-                        <span class="absolute inset-y-0 left-0 flex items-center pl-3">
-                            <svg class="w-5 h-5 text-gray-500" viewBox="0 0 24 24" fill="none">
-                                <path
-                                    d="M21 21L15 15M17 10C17 13.866 13.866 17 10 17C6.13401 17 3 13.866 3 10C3 6.13401 6.13401 3 10 3C13.866 3 17 6.13401 17 10Z"
-                                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                </path>
-                            </svg>
-                        </span>
-    
-                        <input class="w-32 pl-10 pr-4 rounded-md form-input sm:w-64 focus:border-indigo-600" type="text"
-                            placeholder="Search">
-                    </div>
-                </div>
-    
+                </form>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="lg:ml-72">
+        <!-- Header -->
+        <header class="bg-white dark:bg-gray-800 shadow-sm sticky top-0 z-10">
+            <div class="flex items-center justify-between px-6 py-4">
                 <div class="flex items-center">
-                    <div x-data="{ notificationOpen: false }" class="relative">
-                        <button @click="notificationOpen = ! notificationOpen"
-                            class="flex mx-4 text-gray-600 focus:outline-none">
-                            <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path
-                                    d="M15 17H20L18.5951 15.5951C18.2141 15.2141 18 14.6973 18 14.1585V11C18 8.38757 16.3304 6.16509 14 5.34142V5C14 3.89543 13.1046 3 12 3C10.8954 3 10 3.89543 10 5V5.34142C7.66962 6.16509 6 8.38757 6 11V14.1585C6 14.6973 5.78595 15.2141 5.40493 15.5951L4 17H9M15 17V18C15 19.6569 13.6569 21 12 21C10.3431 21 9 19.6569 9 18V17M15 17H9"
-                                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                </path>
-                            </svg>
+                    <button @click="sidebarOpen = true" class="text-gray-500 dark:text-gray-400 focus:outline-none lg:hidden mr-4">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+                    <h1 class="text-xl font-semibold text-gray-800 dark:text-white">Dashboard Principal</h1>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="relative">
+                        <button class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-white">
+                            <i class="fas fa-bell text-xl"></i>
+                            <span class="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"></span>
                         </button>
-    
-                        <div x-show="notificationOpen" @click="notificationOpen = false"
-                            class="fixed inset-0 z-10 w-full h-full" style="display: none;"></div>
-    
-                        <div x-show="notificationOpen"
-                            class="absolute right-0 z-10 mt-2 overflow-hidden bg-white rounded-lg shadow-xl w-80"
-                            style="width: 20rem; display: none;">
-                            <a href="#"
-                                class="flex items-center px-4 py-3 -mx-2 text-gray-600 hover:text-white hover:bg-indigo-600">
-                                <img class="object-cover w-8 h-8 mx-1 rounded-full"
-                                    src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&amp;ixid=eyJhcHBfaWQiOjEyMDd9&amp;auto=format&amp;fit=crop&amp;w=334&amp;q=80"
-                                    alt="avatar">
-                                <p class="mx-2 text-sm">
-                                    <span class="font-bold" href="#">Sara Salah</span> replied on the <span
-                                        class="font-bold text-indigo-400" href="#">Upload Image</span> artical . 2m
-                                </p>
-                            </a>
-                            <a href="#"
-                                class="flex items-center px-4 py-3 -mx-2 text-gray-600 hover:text-white hover:bg-indigo-600">
-                                <img class="object-cover w-8 h-8 mx-1 rounded-full"
-                                    src="https://images.unsplash.com/photo-1531427186611-ecfd6d936c79?ixlib=rb-1.2.1&amp;ixid=eyJhcHBfaWQiOjEyMDd9&amp;auto=format&amp;fit=crop&amp;w=634&amp;q=80"
-                                    alt="avatar">
-                                <p class="mx-2 text-sm">
-                                    <span class="font-bold" href="#">Slick Net</span> start following you . 45m
-                                </p>
-                            </a>
-                            <a href="#"
-                                class="flex items-center px-4 py-3 -mx-2 text-gray-600 hover:text-white hover:bg-indigo-600">
-                                <img class="object-cover w-8 h-8 mx-1 rounded-full"
-                                    src="https://images.unsplash.com/photo-1450297350677-623de575f31c?ixlib=rb-1.2.1&amp;ixid=eyJhcHBfaWQiOjEyMDd9&amp;auto=format&amp;fit=crop&amp;w=334&amp;q=80"
-                                    alt="avatar">
-                                <p class="mx-2 text-sm">
-                                    <span class="font-bold" href="#">Jane Doe</span> Like Your reply on <span
-                                        class="font-bold text-indigo-400" href="#">Test with TDD</span> artical . 1h
-                                </p>
-                            </a>
-                            <a href="#"
-                                class="flex items-center px-4 py-3 -mx-2 text-gray-600 hover:text-white hover:bg-indigo-600">
-                                <img class="object-cover w-8 h-8 mx-1 rounded-full"
-                                    src="https://images.unsplash.com/photo-1580489944761-15a19d654956?ixlib=rb-1.2.1&amp;ixid=eyJhcHBfaWQiOjEyMDd9&amp;auto=format&amp;fit=crop&amp;w=398&amp;q=80"
-                                    alt="avatar">
-                                <p class="mx-2 text-sm">
-                                    <span class="font-bold" href="#">Abigail Bennett</span> start following you . 3h
-                                </p>
-                            </a>
-                        </div>
                     </div>
-    
-                    <div x-data="{ dropdownOpen: false }" class="relative">
-                        <button @click="dropdownOpen = ! dropdownOpen"
-                            class="relative block w-8 h-8 overflow-hidden rounded-full shadow focus:outline-none">
-                            <img class="object-cover w-full h-full"
-                                src="https://images.unsplash.com/photo-1528892952291-009c663ce843?ixlib=rb-1.2.1&amp;ixid=eyJhcHBfaWQiOjEyMDd9&amp;auto=format&amp;fit=crop&amp;w=296&amp;q=80"
-                                alt="Your avatar">
+                    <div class="relative">
+                        <button class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-white">
+                            <i class="fas fa-envelope text-xl"></i>
+                            <span class="absolute top-0 right-0 w-2 h-2 bg-blue-500 rounded-full"></span>
                         </button>
-    
-                        <div x-show="dropdownOpen" @click="dropdownOpen = false" class="fixed inset-0 z-10 w-full h-full"
-                            style="display: none;"></div>
-    
-                        <div x-show="dropdownOpen"
-                            class="absolute right-0 z-10 w-48 mt-2 overflow-hidden bg-white rounded-md shadow-xl"
-                            style="display: none;">
-                            <a href="#"
-                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-600 hover:text-white">Profile</a>
-                            <a href="#"
-                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-600 hover:text-white">Products</a>
-                            <a href="#"
-                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-600 hover:text-white">Logout</a>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content Area -->
+        <main class="p-6">
+            <!-- Welcome Banner -->
+            <div class="bg-gradient-to-r from-indigo-600 to-blue-500 rounded-xl p-6 mb-6 text-white shadow-lg">
+                <div class="flex flex-col md:flex-row items-center justify-between">
+                    <div>
+                        <h2 class="text-2xl font-bold mb-2">Bem-vindo de volta, {% if user.is_authenticated %}{{ user.username }}{% else %}Visitante{% endif %}!</h2>
+                        <p class="opacity-90">Aqui está o resumo das atividades recentes da sua academia.</p>
+                    </div>
+                    <div class="mt-4 md:mt-0">
+                        <button class="bg-white text-indigo-600 px-4 py-2 rounded-lg font-medium hover:bg-opacity-90 transition">
+                            Ver relatório completo
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <!-- Active Students -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm card-hover">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Alunos Ativos</p>
+                            <h3 class="text-3xl font-bold mt-2 text-gray-800 dark:text-white">{{ total_alunos }}</h3>
+                            <p class="text-sm text-emerald-500 mt-1 flex items-center">
+                                <i class="fas fa-arrow-up mr-1"></i> 12% desde o último mês
+                            </p>
+                        </div>
+                        <div class="p-3 bg-emerald-100 dark:bg-emerald-900/30 rounded-full text-emerald-600 dark:text-emerald-400">
+                            <i class="fas fa-user-check text-xl"></i>
                         </div>
                     </div>
                 </div>
-            </header>
-            <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-200">
-                <div class="container px-6 py-8 mx-auto">
-                    <h3 class="text-3xl font-medium text-gray-700">Dashboard</h3>
-    
-                    <div class="mt-4">
-                        <div class="flex flex-wrap -mx-6">
-                            <div class="w-full px-6 sm:w-1/2 xl:w-1/3">
-                                <div class="flex items-center px-5 py-6 bg-white rounded-md shadow-sm">
-                                    <div class="p-3 bg-indigo-600 bg-opacity-75 rounded-full">
-                                        <svg class="w-8 h-8 text-white" viewBox="0 0 28 30" fill="none"
-                                            xmlns="http://www.w3.org/2000/svg">
-                                            <path
-                                                d="M18.2 9.08889C18.2 11.5373 16.3196 13.5222 14 13.5222C11.6804 13.5222 9.79999 11.5373 9.79999 9.08889C9.79999 6.64043 11.6804 4.65556 14 4.65556C16.3196 4.65556 18.2 6.64043 18.2 9.08889Z"
-                                                fill="currentColor"></path>
-                                            <path
-                                                d="M25.2 12.0444C25.2 13.6768 23.9464 15 22.4 15C20.8536 15 19.6 13.6768 19.6 12.0444C19.6 10.4121 20.8536 9.08889 22.4 9.08889C23.9464 9.08889 25.2 10.4121 25.2 12.0444Z"
-                                                fill="currentColor"></path>
-                                            <path
-                                                d="M19.6 22.3889C19.6 19.1243 17.0927 16.4778 14 16.4778C10.9072 16.4778 8.39999 19.1243 8.39999 22.3889V26.8222H19.6V22.3889Z"
-                                                fill="currentColor"></path>
-                                            <path
-                                                d="M8.39999 12.0444C8.39999 13.6768 7.14639 15 5.59999 15C4.05359 15 2.79999 13.6768 2.79999 12.0444C2.79999 10.4121 4.05359 9.08889 5.59999 9.08889C7.14639 9.08889 8.39999 10.4121 8.39999 12.0444Z"
-                                                fill="currentColor"></path>
-                                            <path
-                                                d="M22.4 26.8222V22.3889C22.4 20.8312 22.0195 19.3671 21.351 18.0949C21.6863 18.0039 22.0378 17.9556 22.4 17.9556C24.7197 17.9556 26.6 19.9404 26.6 22.3889V26.8222H22.4Z"
-                                                fill="currentColor"></path>
-                                            <path
-                                                d="M6.64896 18.0949C5.98058 19.3671 5.59999 20.8312 5.59999 22.3889V26.8222H1.39999V22.3889C1.39999 19.9404 3.2804 17.9556 5.59999 17.9556C5.96219 17.9556 6.31367 18.0039 6.64896 18.0949Z"
-                                                fill="currentColor"></path>
-                                        </svg>
-                                    </div>
-    
-                                    <div class="mx-5">
-                                        <h4 class="text-2xl font-semibold text-gray-700">{{aluno.soma_valores}}</h4>
-                                        <div class="text-gray-500">New Users</div>
-                                    </div>
-                                </div>
-                            </div>
-    
-                            <div class="w-full px-6 mt-6 sm:w-1/2 xl:w-1/3 sm:mt-0">
-                                <div class="flex items-center px-5 py-6 bg-white rounded-md shadow-sm">
-                                    <div class="p-3 bg-orange-600 bg-opacity-75 rounded-full">
-                                        <svg class="w-8 h-8 text-white" viewBox="0 0 28 28" fill="none"
-                                            xmlns="http://www.w3.org/2000/svg">
-                                            <path
-                                                d="M4.19999 1.4C3.4268 1.4 2.79999 2.02681 2.79999 2.8C2.79999 3.57319 3.4268 4.2 4.19999 4.2H5.9069L6.33468 5.91114C6.33917 5.93092 6.34409 5.95055 6.34941 5.97001L8.24953 13.5705L6.99992 14.8201C5.23602 16.584 6.48528 19.6 8.97981 19.6H21C21.7731 19.6 22.4 18.9732 22.4 18.2C22.4 17.4268 21.7731 16.8 21 16.8H8.97983L10.3798 15.4H19.6C20.1303 15.4 20.615 15.1004 20.8521 14.6261L25.0521 6.22609C25.2691 5.79212 25.246 5.27673 24.991 4.86398C24.7357 4.45123 24.2852 4.2 23.8 4.2H8.79308L8.35818 2.46044C8.20238 1.83722 7.64241 1.4 6.99999 1.4H4.19999Z"
-                                                fill="currentColor"></path>
-                                            <path
-                                                d="M22.4 23.1C22.4 24.2598 21.4598 25.2 20.3 25.2C19.1403 25.2 18.2 24.2598 18.2 23.1C18.2 21.9402 19.1403 21 20.3 21C21.4598 21 22.4 21.9402 22.4 23.1Z"
-                                                fill="currentColor"></path>
-                                            <path
-                                                d="M9.1 25.2C10.2598 25.2 11.2 24.2598 11.2 23.1C11.2 21.9402 10.2598 21 9.1 21C7.9402 21 7 21.9402 7 23.1C7 24.2598 7.9402 25.2 9.1 25.2Z"
-                                                fill="currentColor"></path>
-                                        </svg>
-                                    </div>
-    
-                                    <div class="mx-5">
-                                        <h4 class="text-2xl font-semibold text-gray-700">200,521</h4>
-                                        <div class="text-gray-500">Total Orders</div>
-                                    </div>
-                                </div>
-                            </div>
-    
-                            <div class="w-full px-6 mt-6 sm:w-1/2 xl:w-1/3 xl:mt-0">
-                                <div class="flex items-center px-5 py-6 bg-white rounded-md shadow-sm">
-                                    <div class="p-3 bg-pink-600 bg-opacity-75 rounded-full">
-                                        <svg class="w-8 h-8 text-white" viewBox="0 0 28 28" fill="none"
-                                            xmlns="http://www.w3.org/2000/svg">
-                                            <path d="M6.99998 11.2H21L22.4 23.8H5.59998L6.99998 11.2Z" fill="currentColor"
-                                                stroke="currentColor" stroke-width="2" stroke-linejoin="round"></path>
-                                            <path
-                                                d="M9.79999 8.4C9.79999 6.08041 11.6804 4.2 14 4.2C16.3196 4.2 18.2 6.08041 18.2 8.4V12.6C18.2 14.9197 16.3196 16.8 14 16.8C11.6804 16.8 9.79999 14.9197 9.79999 12.6V8.4Z"
-                                                stroke="currentColor" stroke-width="2"></path>
-                                        </svg>
-                                    </div>
-    
-                                    <div class="mx-5">
-                                        <h4 class="text-2xl font-semibold text-gray-700">215,542</h4>
-                                        <div class="text-gray-500">Available Products</div>
-                                    </div>
-                                </div>
-                            </div>
+
+                <!-- Inactive Students -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm card-hover">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Alunos Inativos</p>
+                            <h3 class="text-3xl font-bold mt-2 text-gray-800 dark:text-white">{{ total_inativos }}</h3>
+                            <p class="text-sm text-red-500 mt-1 flex items-center">
+                                <i class="fas fa-arrow-down mr-1"></i> 5% desde o último mês
+                            </p>
+                        </div>
+                        <div class="p-3 bg-red-100 dark:bg-red-900/30 rounded-full text-red-600 dark:text-red-400">
+                            <i class="fas fa-user-slash text-xl"></i>
                         </div>
                     </div>
-    
-                    <div class="mt-8">
-    
+                </div>
+
+                <!-- Monthly Revenue -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm card-hover">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Faturamento</p>
+                            <h3 class="text-3xl font-bold mt-2 text-gray-800 dark:text-white">R$ {{ soma_valores|floatformat:2 }}</h3>
+                            <p class="text-sm text-blue-500 mt-1 flex items-center">
+                                <i class="fas fa-arrow-up mr-1"></i> 8% desde o último mês
+                            </p>
+                        </div>
+                        <div class="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-full text-blue-600 dark:text-blue-400">
+                            <i class="fas fa-dollar-sign text-xl"></i>
+                        </div>
                     </div>
-    <!-- # -->      {% block list %}
-                    <div class="flex flex-col mt-8">
-                        <div class="py-2 -my-2 overflow-x-auto sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
-                            <div
-                                class="inline-block min-w-full overflow-hidden align-middle border-b border-gray-200 shadow sm:rounded-lg">
-                                <table class="min-w-full">
-                                    <thead>
+                </div>
+
+                <!-- Last Payment -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm card-hover">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Último Pagamento</p>
+                            <h3 class="text-3xl font-bold mt-2 text-gray-800 dark:text-white">R$ {{ ultimo_pagamento|floatformat:2 }}</h3>
+                            <p class="text-sm text-amber-500 mt-1 flex items-center">
+                                <i class="fas fa-clock mr-1"></i> Hoje às 14:30
+                            </p>
+                        </div>
+                        <div class="p-3 bg-amber-100 dark:bg-amber-900/30 rounded-full text-amber-600 dark:text-amber-400">
+                            <i class="fas fa-receipt text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts and Activity Section -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                <!-- Student Distribution Chart -->
+                <div class="lg:col-span-2 bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-lg font-semibold text-gray-800 dark:text-white">Distribuição de Alunos</h3>
+                        <div class="flex space-x-2">
+                            <button class="px-3 py-1 text-sm bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-300 rounded-lg">Mensal</button>
+                            <button class="px-3 py-1 text-sm bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-lg">Anual</button>
+                        </div>
+                    </div>
+                    <div class="h-64">
+                        <canvas id="statusChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm">
+                    <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-6">Atividades Recentes</h3>
+                    <div class="space-y-4">
+                        <div class="flex items-start">
+                            <div class="p-2 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg text-emerald-600 dark:text-emerald-400 mr-3">
+                                <i class="fas fa-user-plus"></i>
+                            </div>
+                            <div>
+                                <p class="font-medium text-gray-800 dark:text-white">Novo aluno cadastrado</p>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">João Silva acabou de se matricular</p>
+                                <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">2 minutos atrás</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg text-blue-600 dark:text-blue-400 mr-3">
+                                <i class="fas fa-dollar-sign"></i>
+                            </div>
+                            <div>
+                                <p class="font-medium text-gray-800 dark:text-white">Pagamento recebido</p>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">Maria Oliveira pagou mensalidade</p>
+                                <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">1 hora atrás</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg text-purple-600 dark:text-purple-400 mr-3">
+                                <i class="fas fa-calendar-check"></i>
+                            </div>
+                            <div>
+                                <p class="font-medium text-gray-800 dark:text-white">Aula agendada</p>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">Carlos marcou aula com instrutor</p>
+                                <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">3 horas atrás</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="p-2 bg-amber-100 dark:bg-amber-900/30 rounded-lg text-amber-600 dark:text-amber-400 mr-3">
+                                <i class="fas fa-exclamation-circle"></i> </div> <div> <p class="font-medium text-gray-800 dark:text-white">Aluno inativo</p> <p class="text-sm text-gray-500 dark:text-gray-400">Ana Rodrigues está há 30 dias sem treinar</p> <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">Ontem</p> </div> </div> </div> </div> </div>
+
+        <!-- Revenue Chart and Quick Actions -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+            <!-- Revenue Chart -->
+            <div class="lg:col-span-2 bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-lg font-semibold text-gray-800 dark:text-white">Faturamento Mensal</h3>
+                    <select class="bg-gray-100 dark:bg-gray-700 border-none text-gray-700 dark:text-gray-300 rounded-lg px-3 py-1 text-sm">
+                        <option>Últimos 6 meses</option>
+                        <option>Últimos 12 meses</option>
+                        <option>Este ano</option>
+                    </select>
+                </div>
+                <div class="h-64">
+                    <canvas id="faturamentoChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm">
+                <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-6">Ações Rápidas</h3>
+                <div class="grid grid-cols-1 gap-3">
+                    <button onclick="openModal('modalAluno')"
+                        class="flex items-center justify-center px-4 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors duration-200 text-sm font-medium">
+                        <i class="fas fa-user-plus mr-2"></i>Cadastrar Novo Aluno
+                    </button>
+                    <button
+                        class="flex items-center justify-center px-4 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors duration-200 text-sm font-medium">
+                        <i class="fas fa-file-alt mr-2"></i>Emitir Relatório
+                    </button>
+                    <button
+                        class="flex items-center justify-center px-4 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors duration-200 text-sm font-medium">
+                        <i class="fas fa-calendar-alt mr-2"></i>Agendar Aula
+                    </button>
+                    <button
+                        class="flex items-center justify-center px-4 py-3 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors duration-200 text-sm font-medium">
+                        <i class="fas fa-envelope mr-2"></i>Enviar Lembrete
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tables Section -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Students and Instructors Table -->
+            <div class="lg:col-span-2 bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden">
+                <div x-data="{ activeTab: 'alunos' }" class="h-full">
+                    <!-- Tabs -->
+                    <div class="border-b border-gray-200 dark:border-gray-700">
+                        <nav class="flex">
+                            <button @click="activeTab = 'alunos'" 
+                                    :class="{ 'border-b-2 border-indigo-600 text-indigo-600 dark:text-indigo-400': activeTab === 'alunos', 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300': activeTab !== 'alunos' }" 
+                                    class="px-4 py-3 text-sm font-medium">
+                                Alunos
+                            </button>
+                            <button @click="activeTab = 'instrutores'" 
+                                    :class="{ 'border-b-2 border-indigo-600 text-indigo-600 dark:text-indigo-400': activeTab === 'instrutores', 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300': activeTab !== 'instrutores' }" 
+                                    class="px-4 py-3 text-sm font-medium">
+                                Instrutores
+                            </button>
+                        </nav>
+                    </div>
+
+                    <!-- Tab Content -->
+                    <div class="p-4">
+                        <!-- Students Tab -->
+                        <div x-show="activeTab === 'alunos'" class="space-y-4">
+                            {% if messages %}
+                            {% for message in messages %}
+                            <div id="alertBox" class="p-4 mb-4 rounded-lg
+                            {% if message.tags == 'success' %}
+                                bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400
+                            {% elif message.tags == 'error' %}
+                                bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400
+                            {% endif %}">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex-1">
+                                        <strong class="font-medium">{{ message }}</strong>
+                                    </div>
+                                    <button type="button" class="ml-2" data-bs-dismiss="alert" aria-label="Close">
+                                        <span aria-hidden="true">×</span>
+                                    </button>
+                                </div>
+                            </div>
+                            {% endfor %}
+                            <script>
+                                setTimeout(function () {
+                                    var alertBox = document.getElementById('alertBox');
+                                    if (alertBox) {
+                                        alertBox.style.display = 'none';
+                                    }
+                                }, 3000);
+                            </script>
+                            {% endif %}
+
+                            <div class="overflow-x-auto scrollbar-thin">
+                                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                                    <thead class="bg-gray-50 dark:bg-gray-700">
                                         <tr>
-                                            <th
-                                                class="px-6 py-3 text-xs font-medium leading-4 tracking-wider text-left text-gray-500 uppercase border-b border-gray-200 bg-gray-50">
-                                                Name</th>
-                                            <th
-                                                class="px-6 py-3 text-xs font-medium leading-4 tracking-wider text-left text-gray-500 uppercase border-b border-gray-200 bg-gray-50">
-                                                Title</th>
-                                            <th
-                                                class="px-6 py-3 text-xs font-medium leading-4 tracking-wider text-left text-gray-500 uppercase border-b border-gray-200 bg-gray-50">
-                                                Status</th>
-                                            <th
-                                                class="px-6 py-3 text-xs font-medium leading-4 tracking-wider text-left text-gray-500 uppercase border-b border-gray-200 bg-gray-50">
-                                                Role</th>
-                                            <th class="px-6 py-3 border-b border-gray-200 bg-gray-50"></th>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Nome</th>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Email</th>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Ações</th>
                                         </tr>
                                     </thead>
-    
-                                    <tbody class="bg-white">
-                                        <tr>
-                                            <td class="px-6 py-4 whitespace-no-wrap border-b border-gray-200">
+                                    <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                                        {% for aluno in alunos %}
+                                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150">
+                                            <td class="px-6 py-4 whitespace-nowrap">
                                                 <div class="flex items-center">
-                                                    <div class="flex-shrink-0 w-10 h-10">
-                                                        <img class="w-10 h-10 rounded-full"
-                                                            src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&amp;ixid=eyJhcHBfaWQiOjEyMDd9&amp;auto=format&amp;fit=facearea&amp;facepad=2&amp;w=256&amp;h=256&amp;q=80"
-                                                            alt="">
+                                                    <div class="flex-shrink-0 h-10 w-10 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center">
+                                                        <i class="fas fa-user text-gray-500 dark:text-gray-400"></i>
                                                     </div>
-    
                                                     <div class="ml-4">
-                                                        <div class="text-sm font-medium leading-5 text-gray-900">John Doe
-                                                        </div>
-                                                        <div class="text-sm leading-5 text-gray-500">john@example.com</div>
+                                                        <div class="text-sm font-medium text-gray-900 dark:text-white">{{ aluno.nome }}</div>
+                                                        <div class="text-sm text-gray-500 dark:text-gray-400">{{ aluno.cpf }}</div>
                                                     </div>
                                                 </div>
                                             </td>
-    
-                                            <td class="px-6 py-4 whitespace-no-wrap border-b border-gray-200">
-                                                <div class="text-sm leading-5 text-gray-900">Software Engineer</div>
-                                                <div class="text-sm leading-5 text-gray-500">Web dev</div>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{{ aluno.email }}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <span class="status-badge {% if aluno.status == 'Ativo' %}status-active{% else %}status-inactive{% endif %}">
+                                                    {{ aluno.status }}
+                                                </span>
                                             </td>
-    
-                                            <td class="px-6 py-4 whitespace-no-wrap border-b border-gray-200">
-                                                <span
-                                                    class="inline-flex px-2 text-xs font-semibold leading-5 text-green-800 bg-green-100 rounded-full">Active</span>
-                                            </td>
-    
-                                            <td
-                                                class="px-6 py-4 text-sm leading-5 text-gray-500 whitespace-no-wrap border-b border-gray-200">
-                                                Owner</td>
-    
-                                            <td
-                                                class="px-6 py-4 text-sm font-medium leading-5 text-right whitespace-no-wrap border-b border-gray-200">
-                                                <a href="#" class="text-indigo-600 hover:text-indigo-900">Edit</a>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                                <a href="#" class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300 mr-3">Editar</a>
+                                                <a href="#" class="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300">Excluir</a>
                                             </td>
                                         </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Instructors Tab -->
+                        <div x-show="activeTab === 'instrutores'" class="space-y-4">
+                            <div class="overflow-x-auto scrollbar-thin">
+                                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                                    <thead class="bg-gray-50 dark:bg-gray-700">
                                         <tr>
-                                            <td class="px-6 py-4 whitespace-no-wrap border-b border-gray-200">
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Nome</th>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Registro</th>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Função</th>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                                        {% for instrutor in instrutores %}
+                                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150">
+                                            <td class="px-6 py-4 whitespace-nowrap">
                                                 <div class="flex items-center">
-                                                    <div class="flex-shrink-0 w-10 h-10">
-                                                        <img class="w-10 h-10 rounded-full"
-                                                            src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&amp;ixid=eyJhcHBfaWQiOjEyMDd9&amp;auto=format&amp;fit=facearea&amp;facepad=2&amp;w=256&amp;h=256&amp;q=80"
-                                                            alt="">
+                                                    <div class="flex-shrink-0 h-10 w-10 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center">
+                                                        <i class="fas fa-chalkboard-teacher text-gray-500 dark:text-gray-400"></i>
                                                     </div>
-    
                                                     <div class="ml-4">
-                                                        <div class="text-sm font-medium leading-5 text-gray-900">John Doe
-                                                        </div>
-                                                        <div class="text-sm leading-5 text-gray-500">john@example.com</div>
+                                                        <div class="text-sm font-medium text-gray-900 dark:text-white">{{ instrutor.nome }}</div>
+                                                        <div class="text-sm text-gray-500 dark:text-gray-400">{{ instrutor.telefone }}</div>
                                                     </div>
                                                 </div>
                                             </td>
-    
-                                            <td class="px-6 py-4 whitespace-no-wrap border-b border-gray-200">
-                                                <div class="text-sm leading-5 text-gray-900">Software Engineer</div>
-                                                <div class="text-sm leading-5 text-gray-500">Web dev</div>
-                                            </td>
-    
-                                            <td class="px-6 py-4 whitespace-no-wrap border-b border-gray-200">
-                                                <span
-                                                    class="inline-flex px-2 text-xs font-semibold leading-5 text-green-800 bg-green-100 rounded-full">Active</span>
-                                            </td>
-    
-                                            <td
-                                                class="px-6 py-4 text-sm leading-5 text-gray-500 whitespace-no-wrap border-b border-gray-200">
-                                                Owner</td>
-    
-                                            <td
-                                                class="px-6 py-4 text-sm font-medium leading-5 text-right whitespace-no-wrap border-b border-gray-200">
-                                                <a href="#" class="text-indigo-600 hover:text-indigo-900">Edit</a>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{{ instrutor.num_confef }}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{{ instrutor.funcao }}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                                <a href="#" class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300 mr-3">Editar</a>
+                                                <a href="#" class="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300">Excluir</a>
                                             </td>
                                         </tr>
-                                        <tr>
-                                            <td class="px-6 py-4 whitespace-no-wrap border-b border-gray-200">
-                                                <div class="flex items-center">
-                                                    <div class="flex-shrink-0 w-10 h-10">
-                                                        <img class="w-10 h-10 rounded-full"
-                                                            src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&amp;ixid=eyJhcHBfaWQiOjEyMDd9&amp;auto=format&amp;fit=facearea&amp;facepad=2&amp;w=256&amp;h=256&amp;q=80"
-                                                            alt="">
-                                                    </div>
-    
-                                                    <div class="ml-4">
-                                                        <div class="text-sm font-medium leading-5 text-gray-900">John Doe
-                                                        </div>
-                                                        <div class="text-sm leading-5 text-gray-500">john@example.com</div>
-                                                    </div>
-                                                </div>
-                                            </td>
-    
-                                            <td class="px-6 py-4 whitespace-no-wrap border-b border-gray-200">
-                                                <div class="text-sm leading-5 text-gray-900">Software Engineer</div>
-                                                <div class="text-sm leading-5 text-gray-500">Web dev</div>
-                                            </td>
-    
-                                            <td class="px-6 py-4 whitespace-no-wrap border-b border-gray-200">
-                                                <span
-                                                    class="inline-flex px-2 text-xs font-semibold leading-5 text-green-800 bg-green-100 rounded-full">Active</span>
-                                            </td>
-    
-                                            <td
-                                                class="px-6 py-4 text-sm leading-5 text-gray-500 whitespace-no-wrap border-b border-gray-200">
-                                                Owner</td>
-    
-                                            <td
-                                                class="px-6 py-4 text-sm font-medium leading-5 text-right whitespace-no-wrap border-b border-gray-200">
-                                                <a href="#" class="text-indigo-600 hover:text-indigo-900">Edit</a>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td class="px-6 py-4 whitespace-no-wrap border-b border-gray-200">
-                                                <div class="flex items-center">
-                                                    <div class="flex-shrink-0 w-10 h-10">
-                                                        <img class="w-10 h-10 rounded-full"
-                                                            src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&amp;ixid=eyJhcHBfaWQiOjEyMDd9&amp;auto=format&amp;fit=facearea&amp;facepad=2&amp;w=256&amp;h=256&amp;q=80"
-                                                            alt="">
-                                                    </div>
-    
-                                                    <div class="ml-4">
-                                                        <div class="text-sm font-medium leading-5 text-gray-900">John Doe
-                                                        </div>
-                                                        <div class="text-sm leading-5 text-gray-500">john@example.com</div>
-                                                    </div>
-                                                </div>
-                                            </td>
-    
-                                            <td class="px-6 py-4 whitespace-no-wrap border-b border-gray-200">
-                                                <div class="text-sm leading-5 text-gray-900">Software Engineer</div>
-                                                <div class="text-sm leading-5 text-gray-500">Web dev</div>
-                                            </td>
-    
-                                            <td class="px-6 py-4 whitespace-no-wrap border-b border-gray-200">
-                                                <span
-                                                    class="inline-flex px-2 text-xs font-semibold leading-5 text-green-800 bg-green-100 rounded-full">Active</span>
-                                            </td>
-    
-                                            <td
-                                                class="px-6 py-4 text-sm leading-5 text-gray-500 whitespace-no-wrap border-b border-gray-200">
-                                                Owner</td>
-    
-                                            <td
-                                                class="px-6 py-4 text-sm font-medium leading-5 text-right whitespace-no-wrap border-b border-gray-200">
-                                                <a href="#" class="text-indigo-600 hover:text-indigo-900">Edit</a>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td class="px-6 py-4 whitespace-no-wrap border-b border-gray-200">
-                                                <div class="flex items-center">
-                                                    <div class="flex-shrink-0 w-10 h-10">
-                                                        <img class="w-10 h-10 rounded-full"
-                                                            src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&amp;ixid=eyJhcHBfaWQiOjEyMDd9&amp;auto=format&amp;fit=facearea&amp;facepad=2&amp;w=256&amp;h=256&amp;q=80"
-                                                            alt="">
-                                                    </div>
-    
-                                                    <div class="ml-4">
-                                                        <div class="text-sm font-medium leading-5 text-gray-900">John Doe
-                                                        </div>
-                                                        <div class="text-sm leading-5 text-gray-500">john@example.com</div>
-                                                    </div>
-                                                </div>
-                                            </td>
-    
-                                            <td class="px-6 py-4 whitespace-no-wrap border-b border-gray-200">
-                                                <div class="text-sm leading-5 text-gray-900">Software Engineer</div>
-                                                <div class="text-sm leading-5 text-gray-500">Web dev</div>
-                                            </td>
-    
-                                            <td class="px-6 py-4 whitespace-no-wrap border-b border-gray-200">
-                                                <span
-                                                    class="inline-flex px-2 text-xs font-semibold leading-5 text-green-800 bg-green-100 rounded-full">Active</span>
-                                            </td>
-    
-                                            <td
-                                                class="px-6 py-4 text-sm leading-5 text-gray-500 whitespace-no-wrap border-b border-gray-200">
-                                                Owner</td>
-    
-                                            <td
-                                                class="px-6 py-4 text-sm font-medium leading-5 text-right whitespace-no-wrap border-b border-gray-200">
-                                                <a href="#" class="text-indigo-600 hover:text-indigo-900">Edit</a>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td class="px-6 py-4 whitespace-no-wrap border-b border-gray-200">
-                                                <div class="flex items-center">
-                                                    <div class="flex-shrink-0 w-10 h-10">
-                                                        <img class="w-10 h-10 rounded-full"
-                                                            src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&amp;ixid=eyJhcHBfaWQiOjEyMDd9&amp;auto=format&amp;fit=facearea&amp;facepad=2&amp;w=256&amp;h=256&amp;q=80"
-                                                            alt="">
-                                                    </div>
-    
-                                                    <div class="ml-4">
-                                                        <div class="text-sm font-medium leading-5 text-gray-900">John Doe
-                                                        </div>
-                                                        <div class="text-sm leading-5 text-gray-500">john@example.com</div>
-                                                    </div>
-                                                </div>
-                                            </td>
-    
-                                            <td class="px-6 py-4 whitespace-no-wrap border-b border-gray-200">
-                                                <div class="text-sm leading-5 text-gray-900">Software Engineer</div>
-                                                <div class="text-sm leading-5 text-gray-500">Web dev</div>
-                                            </td>
-    
-                                            <td class="px-6 py-4 whitespace-no-wrap border-b border-gray-200">
-                                                <span
-                                                    class="inline-flex px-2 text-xs font-semibold leading-5 text-green-800 bg-green-100 rounded-full">Active</span>
-                                            </td>
-    
-                                            <td
-                                                class="px-6 py-4 text-sm leading-5 text-gray-500 whitespace-no-wrap border-b border-gray-200">
-                                                Owner</td>
-    
-                                            <td
-                                                class="px-6 py-4 text-sm font-medium leading-5 text-right whitespace-no-wrap border-b border-gray-200">
-                                                <a href="#" class="text-indigo-600 hover:text-indigo-900">Edit</a>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td class="px-6 py-4 whitespace-no-wrap border-b border-gray-200">
-                                                <div class="flex items-center">
-                                                    <div class="flex-shrink-0 w-10 h-10">
-                                                        <img class="w-10 h-10 rounded-full"
-                                                            src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&amp;ixid=eyJhcHBfaWQiOjEyMDd9&amp;auto=format&amp;fit=facearea&amp;facepad=2&amp;w=256&amp;h=256&amp;q=80"
-                                                            alt="">
-                                                    </div>
-    
-                                                    <div class="ml-4">
-                                                        <div class="text-sm font-medium leading-5 text-gray-900">John Doe
-                                                        </div>
-                                                        <div class="text-sm leading-5 text-gray-500">john@example.com</div>
-                                                    </div>
-                                                </div>
-                                            </td>
-    
-                                            <td class="px-6 py-4 whitespace-no-wrap border-b border-gray-200">
-                                                <div class="text-sm leading-5 text-gray-900">Software Engineer</div>
-                                                <div class="text-sm leading-5 text-gray-500">Web dev</div>
-                                            </td>
-    
-                                            <td class="px-6 py-4 whitespace-no-wrap border-b border-gray-200">
-                                                <span
-                                                    class="inline-flex px-2 text-xs font-semibold leading-5 text-green-800 bg-green-100 rounded-full">Active</span>
-                                            </td>
-    
-                                            <td
-                                                class="px-6 py-4 text-sm leading-5 text-gray-500 whitespace-no-wrap border-b border-gray-200">
-                                                Owner</td>
-    
-                                            <td
-                                                class="px-6 py-4 text-sm font-medium leading-5 text-right whitespace-no-wrap border-b border-gray-200">
-                                                <a href="#" class="text-indigo-600 hover:text-indigo-900">Edit</a>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td class="px-6 py-4 whitespace-no-wrap border-b border-gray-200">
-                                                <div class="flex items-center">
-                                                    <div class="flex-shrink-0 w-10 h-10">
-                                                        <img class="w-10 h-10 rounded-full"
-                                                            src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&amp;ixid=eyJhcHBfaWQiOjEyMDd9&amp;auto=format&amp;fit=facearea&amp;facepad=2&amp;w=256&amp;h=256&amp;q=80"
-                                                            alt="">
-                                                    </div>
-    
-                                                    <div class="ml-4">
-                                                        <div class="text-sm font-medium leading-5 text-gray-900">John Doe
-                                                        </div>
-                                                        <div class="text-sm leading-5 text-gray-500">john@example.com</div>
-                                                    </div>
-                                                </div>
-                                            </td>
-    
-                                            <td class="px-6 py-4 whitespace-no-wrap border-b border-gray-200">
-                                                <div class="text-sm leading-5 text-gray-900">Software Engineer</div>
-                                                <div class="text-sm leading-5 text-gray-500">Web dev</div>
-                                            </td>
-    
-                                            <td class="px-6 py-4 whitespace-no-wrap border-b border-gray-200">
-                                                <span
-                                                    class="inline-flex px-2 text-xs font-semibold leading-5 text-green-800 bg-green-100 rounded-full">Active</span>
-                                            </td>
-    
-                                            <td
-                                                class="px-6 py-4 text-sm leading-5 text-gray-500 whitespace-no-wrap border-b border-gray-200">
-                                                Owner</td>
-    
-                                            <td
-                                                class="px-6 py-4 text-sm font-medium leading-5 text-right whitespace-no-wrap border-b border-gray-200">
-                                                <a href="#" class="text-indigo-600 hover:text-indigo-900">Edit</a>
-                                            </td>
-                                        </tr>
+                                        {% endfor %}
                                     </tbody>
                                 </table>
                             </div>
                         </div>
                     </div>
-                    {% endblock list %}<!-- # -->
                 </div>
-            </main>
+            </div>
+
+            <!-- Filters -->
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
+                <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-6">Filtrar Dados</h3>
+                <form method="get" action="#" class="space-y-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label for="filter_status" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status</label>
+                            <select id="filter_status" name="status"
+                                class="block w-full border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 sm:text-sm">
+                                <option value="">Todos</option>
+                                <option value="ativo">Ativo</option>
+                                <option value="inativo">Inativo</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label for="filter_unidade" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Unidade</label>
+                            <select id="filter_unidade" name="unidade"
+                                class="block w-full border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 sm:text-sm">
+                                <option value="">Todas</option>
+                                <option value="porto_alegre">Porto Alegre</option>
+                                <option value="caxias">Caxias do Sul</option>
+                                <option value="canoas">Canoas</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Período de Cadastro</label>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <input type="date" name="inicio"
+                                class="block w-full border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
+                            <input type="date" name="fim"
+                                class="block w-full border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="search_query" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Buscar</label>
+                        <input type="text" id="search_query" name="q" placeholder="Digite para buscar..."
+                            class="block w-full border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
+                    </div>
+
+                    <button type="submit"
+                        class="w-full flex items-center justify-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors duration-200 text-sm font-medium">
+                        <i class="fas fa-search mr-2"></i>Aplicar Filtros
+                    </button>
+                </form>
+            </div>
         </div>
-    </div>
+    </main>
 </div>
-{% endblock content %}
+<!-- Modal --> <div id="modalAluno" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4"> <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 w-full max-w-2xl animate-fade-in-up"> <div class="flex justify-between items-center mb-4"> <h2 class="text-xl font-bold text-gray-800 dark:text-white">Cadastrar Novo Aluno</h2> <button onclick="closeModal('modalAluno')" class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 text-2xl"> × </button> </div> <form action="{% url 'cadastrar_aluno' %}" method="post" class="space-y-4"> {% csrf_token %} <div class="grid grid-cols-1 sm:grid-cols-2 gap-4"> <div> <label for="nome" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nome Completo</label> <input type="text" id="nome" name="nome" required class="block w-full border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 sm:text-sm" /> </div> <div> <label for="cpf" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">CPF</label> <input type="text" id="cpf" name="cpf" required class="block w-full border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 sm:text-sm" /> </div> <div> <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email</label> <input type="email" id="email" name="email" required class="block w-full border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 sm:text-sm" /> </div> <div> <label for="telefone" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Telefone</label> <input type="text" id="telefone" name="telefone" required class="block w-full border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 sm:text-sm" /> </div> <div> <label for="instrutor" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Instrutor</label> <select id="instrutor" name="Cod_instrutor" required class="block w-full border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 sm:text-sm"> <option value="">Selecione um instrutor</option> {% for instrutor in instrutores %} <option value="{{ instrutor.cod_instrutor }}">{{ instrutor.nome }}</option> {% endfor %} </select> </div> <div> <label for="status" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status</label> <select id="status" name="status" required class="block w-full border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 sm:text-sm"> <option value="Ativo">Ativo</option> <option value="Inativo">Inativo</option> </select> </div> <div> <label for="data_nascimento" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Data de Nascimento</label> <input type="date" id="data_nascimento" name="data_nascimento" required class="block w-full border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 sm:text-sm" /> </div> <div> <label for="sexo" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Sexo</label> <select id="sexo" name="sexo" required class="block w-full border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 sm:text-sm"> <option value="Masculino">Masculino</option> <option value="Feminino">Feminino</option> <option value="Outro">Outro</option> </select> </div> </div> <div class="mt-6 flex justify-end space-x-3"> <button type="button" onclick="closeModal('modalAluno')" class="px-5 py-2 bg-gray-300 dark:bg-gray-600 rounded-lg hover:bg-gray-400 dark:hover:bg-gray-500 text-gray-800 dark:text-gray-300 font-medium transition-colors duration-200"> Cancelar </button> <button type="submit" class="px-5 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-medium transition-colors duration-200"> Salvar </button> </div> </form> </div> </div>
+
+<script> function openModal(id) { document.getElementById(id).classList.remove("hidden"); document.getElementById(id).classList.add("flex"); }
+
+function closeModal(id) {
+    document.getElementById(id).classList.remove("flex");
+    document.getElementById(id).classList.add("hidden");
+}
+
+// Initialize charts
+document.addEventListener('DOMContentLoaded', function() {
+    // Status Chart
+    const statusCtx = document.getElementById('statusChart').getContext('2d');
+    const statusChart = new Chart(statusCtx, {
+        type: 'bar',
+        data: {
+            labels: ['Ativos', 'Inativos'],
+            datasets: [{
+                label: 'Quantidade de Alunos',
+                data: [{{ total_alunos }}, {{ total_inativos }}],
+                backgroundColor: [
+                    'rgba(16, 185, 129, 0.7)',
+                    'rgba(239, 68, 68, 0.7)'
+                ],
+                borderColor: [
+                    'rgba(16, 185, 129, 1)',
+                    'rgba(239, 68, 68, 1)'
+                ],
+                borderWidth: 1,
+                borderRadius: 8,
+                barThickness: 40
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    },
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)'
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    }
+                }
+            }
+        }
+    });
+
+    // Revenue Chart
+    const revenueCtx = document.getElementById('faturamentoChart').getContext('2d');
+    const revenueChart = new Chart(revenueCtx, {
+        type: 'line',
+        data: {
+            labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul'],
+            datasets: [{
+                label: 'Faturamento (R$)',
+                data: [12000, 19000, 15000, 18000, 21000, 19000, 23000],
+                fill: true,
+                backgroundColor: 'rgba(79, 70, 229, 0.1)',
+                borderColor: 'rgba(79, 70, 229, 1)',
+                borderWidth: 2,
+                tension: 0.4,
+                pointBackgroundColor: 'rgba(79, 70, 229, 1)',
+                pointRadius: 4,
+                pointHoverRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: false,
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)'
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    }
+                }
+            }
+        }
+    });
+});
+</script> {% endblock content %}
+

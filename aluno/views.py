@@ -1,8 +1,15 @@
 import uuid
 import random
+import logging
+import mercadopago
+import json
+from dateutil import parser
+from django.conf import settings
 from datetime import datetime
+from django.core.paginator import Paginator
 from django.http import HttpResponseBadRequest, JsonResponse
 import requests
+from types import SimpleNamespace
 import hashlib
 from pyexpat.errors import messages
 from django.shortcuts import get_object_or_404, redirect, render
@@ -11,11 +18,16 @@ from supabase import create_client, Client
 from .decorators import login_required_custom
 from django.contrib import messages
 from django.views.decorators.csrf import csrf_exempt
+from datetime import datetime
 
 
+sdk = mercadopago.SDK(settings.MERCADO_PAGO_ACCESS_TOKEN)
 url = "https://pgdldfqzqgxowqedrldh.supabase.co"
 key = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBnZGxkZnF6cWd4b3dxZWRybGRoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzc1Nzk0MjksImV4cCI6MjA1MzE1NTQyOX0.jntDjoG90UW916FljiMlrmM4YqaNLeTphwTO2IPkY9E"
 supabase: Client = create_client(url, key)
+
+
+logger = logging.getLogger(__name__)
 
 @login_required_custom
 def Aluno(request):
@@ -56,74 +68,235 @@ def editar_aluno(request, cod_aluno):
 def perfil(request, cod_aluno):
     aluno = {}
     treinos = []
+    avaliacoes = []
+    ultima_avaliacao = None
+    mapa_instrutores = {}
+    dia = datetime.now()
+    data_formatada = dia.strftime('%d/%m/%Y')
+    ano = datetime.now().year
 
+    # 🔍 Buscar dados do aluno
     try:
-        # Buscar dados do aluno via API Flask
-        response = requests.get(f'https://api-flask-academia.onrender.com/busca/aluno/{cod_aluno}')
+        url_aluno = f'https://api-flask-academia.onrender.com/busca/aluno/{cod_aluno}'
+        response = requests.get(url_aluno)
 
         if response.status_code == 200:
-            dados = response.json().get('dados', [])
-            aluno = next((a for a in dados if str(a.get('cod_aluno')) == str(cod_aluno)), {})
+            dados = response.json()
+            dados_aluno = dados.get('dados', [])
+            aluno = dados_aluno[0] if dados_aluno else {}
         else:
-            error_message = response.json().get('message', 'Erro desconhecido')
-            messages.error(request, f"Erro ao buscar aluno: {error_message}")
+            messages.error(request, "Erro ao buscar dados do aluno.")
+    except Exception as e:
+        messages.error(request, f"Erro na API de aluno: {str(e)}")
 
-    except requests.exceptions.RequestException as e:
-        messages.error(request, f"Erro de conexão com a API: {str(e)}")
+    # 🔍 Buscar dados dos instrutores
+    try:
+        url_instrutor = 'https://api-flask-academia.onrender.com/listar/instrutor'
+        response = requests.get(url_instrutor)
+
+        if response.status_code == 200:
+            dados_instrutores = response.json()
+            if isinstance(dados_instrutores, list):
+                mapa_instrutores = {
+                    instrutor.get('cod_instrutor'): instrutor.get('nome')
+                    for instrutor in dados_instrutores
+                }
+        else:
+            messages.error(request, "Erro ao buscar dados dos instrutores.")
+    except Exception as e:
+        messages.error(request, f"Erro na API de instrutores: {str(e)}")
+
+    # 🔧 Ajustar status e nome do instrutor do aluno
+    if aluno:
+        aluno['status'] = 'Ativo' if aluno.get('status') else 'Inativo'
+
+        cod_instrutor = aluno.get('Cod_instrutor') or aluno.get('cod_instrutor')
+        try:
+            cod_instrutor = int(cod_instrutor) if cod_instrutor else None
+        except (ValueError, TypeError):
+            cod_instrutor = None
+
+        aluno['nome_instrutor'] = mapa_instrutores.get(cod_instrutor, 'Não atribuído')
+
+    # 🔍 Buscar treinos e exercícios
+    try:
+        url_treinos = f'https://api-flask-academia.onrender.com/detalhes/treino/aluno/{cod_aluno}'
+        response = requests.get(url_treinos)
+
+        if response.status_code == 200:
+            dados_treinos = response.json()
+
+            if isinstance(dados_treinos, list):
+                for item in dados_treinos:
+                    treino_data = item.get('treino', {})
+                    treino = {
+                        'cod_treino': treino_data.get('cod_treino'),
+                        'tipo_treino': treino_data.get('tipo_treino'),
+                        'objetivo': treino_data.get('objetivo'),
+                        'observacoes': treino_data.get('observacoes'),
+                        'data_inicio': treino_data.get('data_inicio'),
+                        'data_final': treino_data.get('data_final'),
+                        'exercicios': []
+                    }
+
+                    exercicios = treino_data.get('exercicios', [])
+                    for ex in exercicios:
+                        treino['exercicios'].append({
+                            'cod_exercicio': ex.get('cod_exercicio'),
+                            'nome_exercicio': ex.get('nome_exercicio'),
+                            'serie': ex.get('serie'),
+                            'repeticoes': ex.get('repeticoes'),
+                            'carga': ex.get('carga'),
+                            'observacao': ex.get('observacao'),
+                            'concluido': ex.get('concluido', False)
+                        })
+
+                    treinos.append(treino)
+        else:
+            messages.error(request, "Erro ao buscar dados dos treinos.")
+    except Exception as e:
+        messages.error(request, f"Erro na API de treinos: {str(e)}")
+
+    # 🔍 Buscar avaliações
+    try:
+        url = f'https://api-flask-academia.onrender.com/avaliacoes/do/aluno/{cod_aluno}'
+        response = requests.get(url, timeout=10)
+
+        if response.status_code == 200:
+            dados = response.json()
+            lista_avaliacoes = dados.get('avaliacoes', [])
+
+            for item in lista_avaliacoes:
+                avaliacao = SimpleNamespace(**item)
+                if hasattr(avaliacao, 'data_avaliacao') and isinstance(avaliacao.data_avaliacao, str):
+                    try:
+                        avaliacao.data_avaliacao = datetime.strptime(avaliacao.data_avaliacao, '%Y-%m-%d').date()
+                    except ValueError:
+                        pass
+                avaliacoes.append(avaliacao)
+
+            avaliacoes = sorted(avaliacoes, key=lambda x: x.data_avaliacao, reverse=True)
+            ultima_avaliacao = avaliacoes[0] if avaliacoes else None
+        else:
+            messages.error(request, "Erro ao buscar avaliações.")
+    except Exception as e:
+        messages.error(request, f"Erro na API de avaliações: {str(e)}")
+
+    # 🔥 Buscar pagamentos no Supabase
+    try:
+        pagamentos_resp = supabase.table('pagamentos').select("*").eq("aluno", cod_aluno).order("criado_em", desc=True).execute()
+        pagamentos = pagamentos_resp.data or []
+
+        for pag in pagamentos:
+            if 'criado_em' in pag and pag['criado_em']:
+                pag['criado_em'] = parser.parse(pag['criado_em'])
+    except Exception as e:
+        messages.error(request, f"Erro ao buscar pagamentos: {str(e)}")
+        pagamentos = []
+
+    # 🔍 Pega o último pagamento (se tiver)
+    ultimo_pagamento = pagamentos[0] if pagamentos else None
+
+    # 🔥 Calcular progresso (peso e IMC)
+    peso_diferenca = None
+    peso_percentual = None
+    imc_diferenca = None
+    imc_percentual = None
+
+    if len(avaliacoes) >= 2:
+        atual = avaliacoes[0]
+        anterior = avaliacoes[1]
+
+        try:
+            peso_diferenca = round(atual.peso - anterior.peso, 2)
+            peso_percentual = round((peso_diferenca / anterior.peso) * 100, 2)
+
+            imc_diferenca = round(atual.imc - anterior.imc, 2)
+            imc_percentual = round((imc_diferenca / anterior.imc) * 100, 2)
+
+        except (TypeError, ZeroDivisionError):
+            peso_diferenca = None
+            peso_percentual = None
+            imc_diferenca = None
+            imc_percentual = None
+
+    # 🔥 Contador decrescente do treino (dias restantes)
+    dias_restantes_treino = None
 
     try:
-        # Buscar treinos diretamente no Supabase
-        treino_result = supabase.table("treino").select("*").eq("cod_aluno", cod_aluno).execute()
-        treinos = treino_result.data if treino_result.data else []
-    except Exception as e:
-        messages.error(request, f"Erro ao buscar treinos: {str(e)}")
+        treino_ativo = None
+        hoje = datetime.now().date()
 
+        for treino in treinos:
+            data_final = treino.get('data_final')
+            if data_final:
+                try:
+                    data_final_convertida = datetime.strptime(data_final, '%Y-%m-%d').date()
+                    if data_final_convertida >= hoje:
+                        treino_ativo = treino
+                        break
+                except Exception:
+                    continue
+
+        if treino_ativo:
+            data_final = datetime.strptime(treino_ativo.get('data_final'), '%Y-%m-%d').date()
+            dias_restantes_treino = (data_final - hoje).days
+
+    except Exception as e:
+        dias_restantes_treino = None
+
+    # 🔥 Contexto final
     contexto = {
+        'cod_aluno': cod_aluno,
+        'treinos': treinos,
         'aluno': aluno,
-        'treinos': treinos
+        'data_formatada': data_formatada,
+        'ano': ano,
+        'avaliacoes': avaliacoes,
+        'ultima_avaliacao': ultima_avaliacao,
+        'peso_diferenca': peso_diferenca,
+        'peso_percentual': peso_percentual,
+        'imc_diferenca': imc_diferenca,
+        'imc_percentual': imc_percentual,
+
+        # 🔥 Pagamentos
+        'pagamentos': pagamentos,
+        'qr_code': ultimo_pagamento.get('qr_code') if ultimo_pagamento else None,
+        'qr_code_base64': ultimo_pagamento.get('qr_code_base64') if ultimo_pagamento else None,
+        'status': ultimo_pagamento.get('status') if ultimo_pagamento else None,
+        'valor': ultimo_pagamento.get('valor') if ultimo_pagamento else None,
+
+        # 🔥 Dias restantes do treino
+        'dias_restantes_treino': dias_restantes_treino,
     }
 
     return render(request, 'aluno/perfil.html', contexto)
 
+def atualizar_status(request, cod_exercicio, cod_aluno):
+    if request.method == 'POST':
+        status = request.POST.get('status') == 'on'  # Checkbox retorna 'on' se estiver marcado
 
-def treinos_peito(request):
-    url = "https://exercise-db-fitness-workout-gym.p.rapidapi.com/exercises"
-    headers = {
-        "x-rapidapi-key": "SUA_CHAVE_AQUI",
-        "x-rapidapi-host": "exercise-db-fitness-workout-gym.p.rapidapi.com"
-    }
+        dados = {
+            'concluido': status
+        }
 
-    response = requests.get(url, headers=headers)
-    try:
-        data = response.json()
-    except ValueError:
-        data = []  # falha no JSON, deixa vazio
+        url_api = f"https://api-flask-academia.onrender.com/atualizar/exercicio/{cod_exercicio}"
 
-    # Verifica se data é lista, se não é tenta extrair lista de dentro do dict
-    if isinstance(data, dict):
-        # exemplo: {'exercises': [...] } ou {'message': 'error'}
-        if "exercises" in data:
-            exercicios = data["exercises"]
-        else:
-            exercicios = []
-    elif isinstance(data, list):
-        exercicios = data
-    else:
-        exercicios = []
+        try:
+            response = requests.put(url_api, json=dados, timeout=5)
 
-    selected = request.GET.get('exercicio', '')
+            if response.status_code == 200:
+                messages.success(request, 'Status do exercício atualizado com sucesso!')
+            else:
+                erro = response.json().get('message', 'Erro desconhecido')
+                messages.error(request, f"Erro da API: {erro}")
+        except requests.exceptions.RequestException as e:
+            messages.error(request, f"Erro ao conectar com API: {e}")
 
-    if selected:
-        exercicios_filtrados = [e for e in exercicios if selected.lower() in e.get('name', '').lower()]
-    else:
-        exercicios_filtrados = exercicios
+        return redirect('perfil', cod_aluno=cod_aluno)
 
-    context = {
-        'exercicios': exercicios,
-        'treinos': exercicios_filtrados,
-        'selected': selected,
-    }
-    return render(request, "aluno/treinos_peito.html", context)
+    return render(request, 'aluno/perfil.html', {'cod_exercicio': cod_exercicio, 'cod_aluno': cod_aluno})
+
 
 @csrf_exempt
 def cadastrar_aluno(request):
@@ -150,22 +323,39 @@ def cadastrar_aluno(request):
 
     return redirect('dashboard')
 
+def graficos(request):
+    url = 'https://api-flask-academia.onrender.com/listar/aluno'
+
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+        alunos = response.json()
+
+        ativos = sum(1 for aluno in alunos if aluno.get('status') == True)
+        inativos = sum(1 for aluno in alunos if aluno.get('status') == False)
+
+        labels = ['Ativos', 'Inativos']
+        data = [ativos, inativos]
+
+    except Exception as e:
+        print(f"Erro na API: {e}")
+        labels = ['Ativos', 'Inativos']
+        data = [0, 0]
+
+    return render(request, 'aluno/dashboard.html', {
+        'labels': labels,
+        'data': data
+    })
+
+    
+
+
 @login_required_custom
 def dashboard(request):
-    def is_ativo(valor):
-        # Função para interpretar o campo 'ativo' em vários formatos possíveis
-        if isinstance(valor, bool):
-            return valor
-        if isinstance(valor, str):
-            return valor.lower() in ['true', '1', 'sim', 'ativo']
-        if isinstance(valor, int):
-            return valor == 1
-        return False
-
-    # --- Consulta de alunos ---
     alunos = []
     mapa_instrutores = {}
 
+    # --- Consulta de alunos ---
     try:
         response = requests.get('https://api-flask-academia.onrender.com/listar/aluno')
 
@@ -182,17 +372,13 @@ def dashboard(request):
 
     # --- Consulta de instrutores ---
     instrutores = []
-
     try:
         response_instrutor = requests.get('https://api-flask-academia.onrender.com/listar/instrutor')
 
         if response_instrutor.status_code == 200:
             dados_instrutor = response_instrutor.json().get('dados', [])
+            instrutores = dados_instrutor
 
-            for instrutor in dados_instrutor:
-                instrutores.append(instrutor)
-
-            # Mapeia cod_instrutor para nome
             mapa_instrutores = {
                 instrutor['cod_instrutor']: instrutor['nome']
                 for instrutor in instrutores
@@ -206,13 +392,19 @@ def dashboard(request):
         messages.error(request, f"Erro de conexão com a API (instrutores): {str(e)}")
 
     # --- Processa os alunos ---
-    for aluno in dados_api:
-                # Determina status como 'Ativo' ou 'Inativo' baseado no campo 'ativo'
-                status = 'Ativo' if aluno.get('ativo', False) else 'Inativo'
+    total_inativos = 0  # Variável para contar inativos
 
-                # Adiciona o status à estrutura de cada aluno
-                aluno['status'] = status
-                alunos.append(aluno)
+    for aluno in dados_api:
+        status = 'Ativo' if aluno.get('status') else 'Inativo'
+        aluno['status'] = status
+
+        if status == 'Inativo':
+            total_inativos += 1  # Incrementa se for inativo
+
+        cod_instrutor = aluno.get('Cod_instrutor')
+        aluno['nome_instrutor'] = mapa_instrutores.get(cod_instrutor, 'Não atribuído')
+
+        alunos.append(aluno)
 
     total_alunos = len(alunos)
     total_instrutores = len(instrutores)
@@ -234,10 +426,11 @@ def dashboard(request):
     return render(request, 'aluno/dashboard.html', {
         'alunos': alunos,
         'total_alunos': total_alunos,
-        'instrutores': instrutores,
         'total_instrutores': total_instrutores,
+        'total_inativos': total_inativos,  # Envia para o template
+        'instrutores': instrutores,
         'soma_valores': soma_valores,
-        'ultimo_pagamento': ultimo_valor_pago
+        'ultimo_pagamento': ultimo_valor_pago,
     })
  
 
@@ -324,50 +517,38 @@ def login_view(request):
 # URL base da API Flask hospedada no Render
 BASE_URL = 'https://api-flask-academia.onrender.com'
 
+def obter_nome_instrutor(data):
+    """Extrai o nome do instrutor, tentando vários formatos conhecidos."""
+    try:
+        nome = (
+            (data.get('instrutor') or {}).get('nome') or
+            (data.get('instrutor') or {}).get('nome_instrutor') or
+            data.get('instrutor_nome') or
+            data.get('nome_instrutor')
+        )
+        if not nome:
+            logger.warning(f'Nome do instrutor não encontrado nos dados: {data}')
+            return 'Nome não disponível'
+        return nome
+    except Exception as e:
+        logger.error(f'Erro ao obter nome do instrutor: {e}')
+        return 'Nome não disponível'
+
+
 def dashboard_instrutor(request, cod_instrutor):
-    if request.method == 'GET' and request.headers.get('x-requested-with') == 'XMLHttpRequest':
-        aluno_id = request.GET.get('aluno_id')
-        if aluno_id:
-            try:
-                url = f'{BASE_URL}/detalhes/aluno/e/instrutores/{aluno_id}'
-                response = requests.get(url)
-                response.raise_for_status()
-                data = response.json()
+    dia = datetime.today().strftime('%d/%m/%Y')
 
-                instrutor_nome = data.get('instrutor', {}).get('nome_instrutor', 'Não encontrado')
-
-                return JsonResponse({
-                    'instrutor_nome': instrutor_nome
-                })
-
-            except requests.exceptions.RequestException as e:
-                return JsonResponse({'error': 'Erro ao buscar instrutor.', 'exception': str(e)}, status=500)
-        else:
-            return JsonResponse({'error': 'ID do aluno não informado.'}, status=400)
-
-    # Requisição padrão para carregar dashboard
+    # Primeiro busca os dados dos alunos do instrutor
     try:
         url = f'{BASE_URL}/alunos/do/instrutor/{cod_instrutor}'
         response = requests.get(url)
         response.raise_for_status()
         data = response.json()
 
+        print(f"DEBUG dashboard instrutor cod_instrutor={cod_instrutor}: {data}")
+
         alunos = data.get('alunos', [])
-
-        # Tenta extrair dados do instrutor do JSON
-        instrutor = data.get('instrutor', {})
-
-        # Alguns endpoints podem usar chaves diferentes
-        instrutor_id = instrutor.get('cod_instrutor') or data.get('instrutor_id') or cod_instrutor
-        instrutor_nome = instrutor.get('nome') or instrutor.get('nome_instrutor') or data.get('instrutor_nome') or 'Nome não disponível'
-
-        context = {
-            'instrutor_id': instrutor_id,
-            'instrutor_nome': instrutor_nome,
-            'alunos': alunos,
-            'year': datetime.now().year
-        }
-        return render(request, 'instrutor/dashboard.html', context)
+        instrutor_id = data.get('instrutor_id') or cod_instrutor
 
     except requests.exceptions.RequestException as e:
         return render(request, 'instrutor/dashboard.html', {
@@ -375,82 +556,210 @@ def dashboard_instrutor(request, cod_instrutor):
             'exception': str(e)
         })
 
-    except Exception as e:
-        return render(request, 'instrutor/dashboard.html', {
-            'error': 'Erro inesperado ao carregar os dados.',
-            'exception': str(e)
-        })
-        
+    # Busca a lista de instrutores para obter o nome
+    try:
+        url_instrutor = 'https://api-flask-academia.onrender.com/listar/instrutor'
+        resp_instrutor = requests.get(url_instrutor)
+        resp_instrutor.raise_for_status()
+
+        dados_instrutor = resp_instrutor.json().get('dados', [])
+        mapa_instrutores = {
+            instrutor.get('cod_instrutor'): instrutor.get('nome')
+            for instrutor in dados_instrutor
+        }
+
+        instrutor_nome = mapa_instrutores.get(instrutor_id, 'Nome não disponível')
+
+    except requests.exceptions.RequestException as e:
+        instrutor_nome = 'Nome não disponível'
+        print(f"Erro ao buscar instrutor: {e}")
+
+    context = {
+        'cod_instrutor': cod_instrutor,
+        'instrutor_nome': instrutor_nome,
+        'alunos': alunos,
+        'dia': dia,
+        'year': datetime.now().year
+    }
+
+    return render(request, 'instrutor/dashboard.html', context)
+
+@csrf_exempt
+def salvar_avaliacao(request, cod_instrutor):
+    if request.method == 'POST':
+        try:
+            cod_aluno = request.POST.get('cod_aluno')
+            data_avaliacao = request.POST.get('data_avaliacao')
+            peso = request.POST.get('peso')
+            altura = request.POST.get('altura')
+            imc = request.POST.get('imc')
+            observacoes = request.POST.get('observacoes', '')
+
+            if not (cod_aluno and data_avaliacao and peso and altura):
+                messages.error(request, 'Preencha todos os campos obrigatórios.')
+                return redirect('dashboard_instrutor', cod_instrutor=cod_instrutor)
+
+            avaliacao = {
+                "cod_aluno": int(cod_aluno),
+                "data_avaliacao": data_avaliacao,
+                "peso": float(peso),
+                "altura": float(altura),
+                "imc": float(imc),
+                "observacoes": observacoes
+            }
+
+            url = f"https://api-flask-academia.onrender.com/avaliacao/do/instrutor/{cod_instrutor}"
+            response = requests.post(url, json=avaliacao)
+
+            if response.status_code == 201:
+                messages.success(request, 'Avaliação salva com sucesso!')
+            else:
+                erro_msg = response.json().get('message', 'Erro desconhecido ao salvar avaliação.')
+                messages.error(request, f'Erro ao salvar avaliação: {erro_msg}')
+        except Exception as e:
+            messages.error(request, f'Erro inesperado: {str(e)}')
+
+        return redirect('dashboard_instrutor', cod_instrutor=cod_instrutor)
+
+    messages.error(request, 'Método não permitido.')
+    return redirect('dashboard_instrutor', cod_instrutor=cod_instrutor)
+
+def listar_avaliacoes(request, cod_aluno):
+    try:
+        url = f'https://api-flask-academia.onrender.com/avaliacoes/do/aluno/{cod_aluno}'
+        response = requests.get(url, timeout=10)
+
+        if response.status_code == 200:
+            dados = response.json()
+            lista_avaliacoes = dados.get('avaliacoes', [])
+
+            if isinstance(lista_avaliacoes, list):
+                avaliacoes = []
+
+                for item in lista_avaliacoes:
+                    avaliacao = SimpleNamespace(**item)
+                    if hasattr(avaliacao, 'data_avaliacao') and isinstance(avaliacao.data_avaliacao, str):
+                        try:
+                            avaliacao.data_avaliacao = datetime.strptime(avaliacao.data_avaliacao, '%Y-%m-%d').date()
+                        except ValueError:
+                            pass
+                    avaliacoes.append(avaliacao)
+
+                avaliacoes = sorted(
+                    avaliacoes,
+                    key=lambda x: x.data_avaliacao,
+                    reverse=True
+                )
+
+                # 🔥 Salvar na sessão para usar na view perfil
+                request.session['avaliacoes'] = [
+                    {
+                        'data_avaliacao': str(av.data_avaliacao),
+                        'peso': av.peso,
+                        'altura': av.altura,
+                        'imc': av.imc,
+                        'cod_instrutor': av.cod_instrutor,
+                        'cod_aluno': av.cod_aluno,
+                        'observacoes': getattr(av, 'observacoes', '')
+                    }
+                    for av in avaliacoes
+                ]
+
+                request.session['ultima_avaliacao'] = request.session['avaliacoes'][0] if avaliacoes else None
+
+        else:
+            messages.error(request, "Erro ao buscar avaliações.")
+    except Exception:
+        messages.error(request, "Erro de conexão com a API de avaliações.")
+
+    # ✅ Corrigido — envia apenas o código do aluno
+    return redirect('perfil', cod_aluno=cod_aluno)
+
 @csrf_exempt
 def adicionar_treino(request):
     if request.method == 'POST':
         try:
-            cod_aluno = request.POST.get('cod_aluno')
-            cod_instrutor = request.POST.get('cod_instrutor')
+            try:
+                data = json.loads(request.body)
+            except Exception:
+                data = request.POST
 
-            if not cod_aluno or not cod_instrutor:
-                return HttpResponseBadRequest("Código do aluno ou instrutor ausente.")
+            nome_aluno = data.get('nome_aluno')
+            cod_aluno = data.get('cod_aluno')  # caso tenha, para fallback
+            cod_instrutor = data.get('cod_instrutor')
 
-            cod_aluno = int(cod_aluno)
+            if not cod_instrutor:
+                return HttpResponseBadRequest("Código do instrutor ausente.")
+
+            # Se veio só o nome do aluno, busca o código
+            if not cod_aluno and nome_aluno:
+                cod_aluno = buscar_cod_aluno_por_nome(nome_aluno)
+
+            if not cod_aluno:
+                return HttpResponseBadRequest("Código do aluno ausente ou não encontrado.")
+
             cod_treino = random.randint(100000, 999999)
-            request.session['cod_treino'] = cod_treino
 
             treino_payload = {
                 "cod_treino": cod_treino,
-                "tipo_treino": request.POST.get('tipo_treino'),
-                "cod_aluno": cod_aluno,
-                "cod_instrutor": cod_instrutor,
-                "objetivo": request.POST.get('objetivo', ''),
-                "observacoes": request.POST.get('observacoes', ''),
-                "data_inicio": request.POST.get('data_inicio'),
-                "data_final": request.POST.get('data_final') or None
+                "tipo_treino": data.get('tipo_treino'),
+                "cod_aluno": int(cod_aluno),
+                "cod_instrutor": int(cod_instrutor),
+                "objetivo": data.get('objetivo', ''),
+                "observacoes": data.get('observacoes', ''),
+                "data_inicio": data.get('data_inicio'),
+                "data_final": data.get('data_final') or None
             }
 
-            treino_response = requests.post(f"{BASE_URL}/criar/treino/aluno", json=treino_payload)
+            treino_response = requests.post(
+                f"{BASE_URL}/criar/treino/aluno",
+                json=treino_payload
+            )
 
             if treino_response.status_code not in [200, 201]:
                 print("Erro ao criar treino:", treino_response.text)
                 return HttpResponseBadRequest("Erro ao criar treino.")
 
-            # Retorna o código do treino criado para ser usado na próxima requisição
-            return JsonResponse({"cod_treino": cod_treino})
+            nomes = data.get('nome_exercicio[]') or []
+            series = data.get('serie[]') or []
+            repeticoes = data.get('repeticao[]') or []
+            intervalos = data.get('intervalo[]') or []
 
-        except ValueError:
-            return HttpResponseBadRequest("Código inválido.")
+            if isinstance(nomes, str):
+                nomes = [nomes]
+            if isinstance(series, str):
+                series = [series]
+            if isinstance(repeticoes, str):
+                repeticoes = [repeticoes]
+            if isinstance(intervalos, str):
+                intervalos = [intervalos]
+
+            for i in range(len(nomes)):
+                exercicio_payload = {
+                    "cod_treino": cod_treino,
+                    "tipo_treino": data.get('tipo_treino'),
+                    "serie": int(series[i]),
+                    "repeticao": int(repeticoes[i]),
+                    "intervalo": intervalos[i]
+                }
+
+                exercicio_response = requests.post(
+                    f"{BASE_URL}/criar/exercicio/treino",
+                    json=exercicio_payload
+                )
+
+                if exercicio_response.status_code not in [200, 201]:
+                    print("Erro ao criar exercício:", exercicio_response.text)
+                    return HttpResponseBadRequest("Erro ao criar exercício.")
+
+            return JsonResponse({
+                "status": "success",
+                "cod_treino": cod_treino
+            })
+
         except Exception as e:
             print("Erro inesperado:", e)
-            return HttpResponseBadRequest("Erro interno.")
-
-        
-@csrf_exempt
-def adicionar_exercicio(request):
-    if request.method == 'POST':
-        try:
-            # Recupera o cod_treino salvo anteriormente
-            cod_treino = request.session.get('cod_treino')
-
-            if not cod_treino:
-                return HttpResponseBadRequest("Código do treino ausente.")
-
-            exercicio_payload = {
-                "Cod_treino": cod_treino,
-                "serie": request.POST.get('nome_exercicio'),
-                "repeticao": request.POST.get('tipo_exercicio'),
-                "intervalo": request.POST.get('descricao_exercicio')  # ⚠️ com S, se a API exigir
-            }
-
-            exercicio_response = requests.post(f"{BASE_URL}/criar/exercicio/treino", json=exercicio_payload)
-
-            if exercicio_response.status_code not in [200, 201]:
-                print("Erro ao criar exercício:", exercicio_response.text)
-                return HttpResponseBadRequest("Erro ao criar exercício.")
-
-            return JsonResponse({"message": "Exercício criado com sucesso."})
-
-        except Exception as e:
-            print("Erro inesperado:", e)
-            return HttpResponseBadRequest("Erro interno.")
-        
+            return HttpResponseBadRequest(f"Erro interno: {e}")
 ###########
 
 def register_view(request):
@@ -515,3 +824,109 @@ def listar_instrutores(request):
     'instrutores': instrutores,
     'total_instrutores': total_instrutores
 })
+    
+# 🔥 Criar pagamento PIX
+def criar_pagamento_pix(request, cod_aluno):
+    if request.method == 'POST':
+        nome = request.POST.get('nome')
+        email = request.POST.get('email')
+        documento_tipo = request.POST.get('identificationType')
+        documento_numero = request.POST.get('identificationNumber')
+        valor = float(request.POST.get('valor'))
+
+        # 🎯 Dados do pagamento Mercado Pago
+        pagamento_data = {
+            "transaction_amount": valor,
+            "description": "Mensalidade Academia",
+            "payment_method_id": "pix",
+            "payer": {
+                "email": email,
+                "first_name": nome,
+                "last_name": "",
+                "identification": {
+                    "type": documento_tipo,
+                    "number": documento_numero.replace('.', '').replace('-', '').replace('/', '')
+                }
+            }
+        }
+
+        # 🔗 Criar pagamento Mercado Pago
+        pagamento_response = sdk.payment().create(pagamento_data)
+        pagamento = pagamento_response["response"]
+
+        if pagamento.get('id'):
+            qr_code = pagamento["point_of_interaction"]["transaction_data"]["qr_code"]
+            qr_code_base64 = pagamento["point_of_interaction"]["transaction_data"]["qr_code_base64"]
+            status = pagamento["status"]
+            mp_payment_id = str(pagamento["id"])
+
+            # 🔍 Buscar dados do aluno
+            aluno_response = supabase.table('aluno').select("nome").eq("cod_aluno", cod_aluno).single().execute()
+            nome_aluno = aluno_response.data.get('nome') if aluno_response.data else nome
+
+            # ➕ Salvar pagamento no Supabase
+            supabase.table('pagamentos').insert({
+                "aluno": cod_aluno,
+                "email": email,
+                "valor": valor,
+                "status": status,
+                "mp_payment_id": mp_payment_id,
+                "qr_code": qr_code,
+                "qr_code_base64": qr_code_base64,
+            }).execute()
+
+            # 🔄 Redirecionar para o perfil do aluno
+            return redirect('perfil', cod_aluno=cod_aluno)
+
+        return JsonResponse({'error': 'Erro ao criar pagamento.'}, status=400)
+
+    return redirect('perfil', cod_aluno=cod_aluno)
+
+@csrf_exempt
+def webhook_mercadopago(request):
+    if request.method == 'POST':
+        import json
+        data = json.loads(request.body)
+        payment_id = str(data.get('data', {}).get('id'))
+
+        if payment_id:
+            pagamento = sdk.payment().get(payment_id)
+            status = pagamento["response"]["status"]
+
+            supabase.table('pagamentos').update({"status": status}).eq("mp_payment_id", payment_id).execute()
+
+        return JsonResponse({"status": "updated"})
+
+    return JsonResponse({"message": "Only POST allowed"}, status=400)
+
+
+def listar_pagamentos(request, cod_aluno):
+    pagamentos_resp = supabase.table('pagamentos').select("*").eq("aluno", cod_aluno).execute()
+    pagamentos = pagamentos_resp.data or []
+
+    # Converter strings de criado_em para datetime
+    for pag in pagamentos:
+        if 'criado_em' in pag and pag['criado_em']:
+            pag['criado_em'] = parser.parse(pag['criado_em'])
+
+    aluno_resp = supabase.table('aluno').select("*").eq('cod_aluno', cod_aluno).single().execute()
+    aluno = aluno_resp.data
+
+    return render(request, 'dashboard_pagamentos.html', {
+        'pagamentos': pagamentos,
+        'aluno': aluno,
+        'cod_aluno': cod_aluno
+    })
+    
+def atualizar_status_pagamento(request, payment_id):
+    try:
+        pagamento = sdk.payment().get(payment_id)
+        status = pagamento["response"]["status"]
+
+        supabase.table('pagamentos').update({"status": status}).eq("mp_payment_id", payment_id).execute()
+
+        # ✅ Redireciona para o perfil do aluno depois de atualizar
+        cod_aluno = request.GET.get('cod_aluno')
+        return redirect('perfil', cod_aluno=cod_aluno)
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=400)

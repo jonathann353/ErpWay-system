@@ -6,710 +6,1176 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard do Instrutor</title>
+  <title>Painel do Instrutor | ERP Way</title>
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <style>
-    /* Estilos personalizados para o layout moderno */
-    body {
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
-      /* Imagem de fundo sutil e esmaecida */
-      background-image: url('{% static "img/hero1-min.jpg" %}');
-      /* Imagem aleatória de instrutor */
-      background-size: cover;
-      background-position: center;
-      background-attachment: fixed;
-      background-color: #1a202c;
-      /* Cor de fallback */
-      color: #e2e8f0;
-      /* Cor de texto padrão clara */
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              50: '#f0f9ff',
+              100: '#e0f2fe',
+              200: '#bae6fd',
+              300: '#7dd3fc',
+              400: '#38bdf8',
+              500: '#0ea5e9',
+              600: '#0284c7',
+              700: '#0369a1',
+              800: '#075985',
+              900: '#0c4a6e',
+            }
+          }
+        }
+      }
     }
-
-    .overlay-bg {
-      background-color: rgba(0, 0, 0, 0.6);
-      /* Overlay escuro para melhorar a legibilidade do texto */
-      min-height: 100%;
-      width: 100%;
-      display: flex;
-      flex-direction: column;
-    }
-
-    /* Estilo para as seções de conteúdo */
-    section,
-    .card-section {
-      background-color: rgba(255, 255, 255, 0.95);
-      /* Fundo branco semi-transparente para as seções */
-      backdrop-filter: blur(5px);
-      /* Efeito de desfoque para um visual moderno */
-      border-radius: 1.25rem;
-      /* Bordas mais arredondadas (20px) */
-      padding: 1.75rem;
-      /* Padding ligeiramente maior */
-    }
-
-    /* Cores e gradientes para botões e títulos */
-    .header-gradient {
-      background-image: linear-gradient(to right, #4ade80, #10b981);
-      /* Gradiente verde claro */
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      color: transparent;
-    }
-
-    .button-gradient {
-      background-image: linear-gradient(to right, #22c55e, #16a34a);
-      /* Gradiente verde para botões */
-    }
-
-    .button-gradient:hover {
-      background-image: linear-gradient(to right, #10b981, #059669);
-    }
-
-    /* Estilo para os cards rápidos */
-    .quick-access-card {
-      background-image: linear-gradient(to bottom right, var(--tw-gradient-stops));
-      transition: all 0.3s ease-in-out;
-      transform: translateY(0);
-    }
-
-    .quick-access-card:hover {
-      transform: translateY(-5px) scale(1.02);
-      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-    }
-
-    /* Animação de modal */
-    .modal-fade-in {
-      transition: opacity 0.3s ease-out;
-      opacity: 0;
-    }
-
-    .modal-scale-in {
-      transition: transform 0.3s ease-out, opacity 0.3s ease-out;
-      transform: scale(0.9);
-      opacity: 0;
-    }
-
-    .modal-active {
-      opacity: 1;
-    }
-
-    .modal-active .modal-scale-in {
-      transform: scale(1);
-      opacity: 1;
-    }
-  </style>
+  </script>
 </head>
 
-<body class="font-sans antialiased">
-  <div class="overlay-bg">
-    <header class="bg-gray-900 bg-opacity-80 text-white py-5 shadow-lg">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row md:justify-between md:items-center">
-        <div class="mb-3 md:mb-0 text-center md:text-left">
-          <h1 class="text-3xl md:text-4xl font-extrabold flex items-center justify-center md:justify-start gap-3">
-            <span class="text-green-400">🎓</span> <span class="header-gradient">Painel do Instrutor</span>
-          </h1>
+<body class="bg-gray-50 min-h-screen flex flex-col">
+  <header class="bg-gray-800 text-white shadow-lg sticky top-0 z-10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+      <div class="flex justify-between items-center">
+
+        <!-- Logo -->
+        <div class="flex items-center space-x-3">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-400" fill="none" viewBox="0 0 24 24"
+            stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+          </svg>
+          <h1 class="text-xl md:text-2xl font-bold">ERP Way - Instrutor</h1>
         </div>
 
-        <div class="flex items-center gap-4 mt-3 md:mt-0">
-          <p class="text-lg font-medium text-gray-300 hidden sm:block">Olá, {{instrutor_nome }}!</p>
-          <form method="post" action="{% url 'logout' %}">{% csrf_token %}
+        <!-- Botão Hamburger Mobile -->
+        <button id="menuBtn" class="md:hidden focus:outline-none" aria-label="Abrir menu">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+            stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+
+        <!-- Ações Desktop -->
+        <div class="hidden md:flex items-center space-x-4">
+
+          <!-- Dropdown de Alertas -->
+          <div class="relative">
+            <button id="btnAlertas"
+              class="relative p-2 bg-white rounded-full shadow hover:bg-gray-100 focus:outline-none">
+              <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0a3 3 0 11-6 0h6z">
+                </path>
+              </svg>
+              <span class="absolute -top-1 -right-1 bg-red-600 text-white text-xs font-bold px-1.5 py-0.5 rounded-full">
+                2
+              </span>
+            </button>
+
+            <div id="dropdownAlertas"
+              class="hidden absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+              <div class="p-4">
+                <h3 class="text-sm font-medium text-gray-700 mb-2">Alertas</h3>
+                <div class="space-y-4">
+                  <div class="p-3 bg-red-50 rounded-lg">
+                    <h4 class="font-medium text-red-800">Avaliação vencida</h4>
+                    <p class="text-sm text-red-600">João Silva está com avaliação física atrasada</p>
+                    <p class="text-xs text-red-500 mt-1">Venceu há 5 dias</p>
+                  </div>
+                  <div class="p-3 bg-yellow-50 rounded-lg">
+                    <h4 class="font-medium text-yellow-800">Treino expirando</h4>
+                    <p class="text-sm text-yellow-600">Treino de Maria Souza termina amanhã</p>
+                    <p class="text-xs text-yellow-500 mt-1">Criado em 15/05/2023</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Dropdown de Perfil -->
+          <div class="relative">
+            <button onclick="toggleDropdown()"
+              class="flex items-center gap-2 hover:bg-gray-700 px-3 py-2 rounded-full transition">
+              <span class="text-xl md:text-2xl font-bold uppercase text-white">
+                {{ instrutor_nome }}
+              </span>
+              <svg id="gearIcon" class="w-5 h-5 text-white transition-transform" fill="none" stroke="currentColor"
+                viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M11.049 2.927c.3-.921 1.603-.921 1.902 0a1.724 1.724 0 002.592 1.01c.829-.524 1.905.252 1.633 1.149a1.724 1.724 0 001.48 2.362c.958 0 1.45 1.151.747 1.809a1.724 1.724 0 000 2.52c.703.658.211 1.809-.747 1.809a1.724 1.724 0 00-1.48 2.362c.272.897-.804 1.673-1.633 1.149a1.724 1.724 0 00-2.592 1.01c-.3.921-1.603.921-1.902 0a1.724 1.724 0 00-2.592-1.01c-.829.524-1.905-.252-1.633-1.149a1.724 1.724 0 00-1.48-2.362c-.958 0-1.45-1.151-.747-1.809a1.724 1.724 0 000-2.52c-.703-.658-.211-1.809.747-1.809.672 0 1.265-.42 1.48-1.01.272-.897.804-1.673 1.633-1.149a1.724 1.724 0 002.592-1.01zM12 15a3 3 0 100-6 3 3 0 000 6z" />
+              </svg>
+            </button>
+
+            <div id="dropdownProfile"
+              class="hidden absolute right-0 mt-2 w-80 bg-white border border-gray-200 rounded-xl shadow-2xl z-50">
+              <div class="flex flex-col items-center p-5">
+                <h3 class="text-xl font-semibold uppercase text-gray-900">
+                  {{ instrutor_nome }}
+                </h3>
+                <p class="text-gray-500 text-sm">Bem-vindo ao painel do Instrutor</p>
+
+                <div class="w-full mt-5 space-y-3 text-sm">
+                  <div class="flex justify-between">
+                    <span class="text-gray-500">✔️ Função:</span>
+                    <span class="font-medium text-gray-700">Instrutor</span>
+                  </div>
+                </div>
+
+                <button onclick="openModal('editProfileModal')"
+                  class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium mt-6 w-full transition">
+                  Editar Perfil
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Botão Sair -->
+          <form method="post" action="{% url 'logout' %}">
+            {% csrf_token %}
             <button type="submit"
-              class="px-6 py-2.5 button-gradient text-white font-semibold rounded-full shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105">
-              Logout
+              class="flex items-center gap-2 bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1 text-white px-5 py-2 rounded-md text-sm font-semibold transition shadow-md hover:shadow-lg">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H7a2 2 0 01-2-2V7a2 2 0 012-2h4a2 2 0 012 2v1" />
+              </svg>
+              Sair
             </button>
           </form>
         </div>
       </div>
-    </header>
+    </div>
 
-    <main class="flex-grow py-10 px-4 sm:px-6 lg:px-8">
-      <div class="max-w-7xl mx-auto space-y-8">
+    <!-- Menu Mobile -->
+    <div id="mobileMenu"
+      class="fixed top-0 left-0 h-full w-64 bg-gray-900 text-white transform -translate-x-full transition-transform z-50 p-5 flex flex-col">
+      <button id="closeMenuBtn" class="self-end mb-5 focus:outline-none" aria-label="Fechar menu">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" stroke="currentColor"
+          viewBox="0 0 24 24" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-          <div class="card-section text-center text-gray-800">
-            <p class="text-gray-600 text-sm mb-1">Total de Alunos</p>
-            <p class="text-3xl font-extrabold text-blue-600">{{ alunos|length }}</p>
-          </div>
-          <div class="card-section text-center text-gray-800">
-            <p class="text-gray-600 text-sm mb-1">Treinos na Semana</p>
-            <p class="text-3xl font-extrabold text-green-600">12</p>
-          </div>
-          <div class="card-section text-center text-gray-800">
-            <p class="text-gray-600 text-sm mb-1">Avaliações Recentes</p>
-            <p class="text-3xl font-extrabold text-yellow-600">3</p>
-          </div>
-          <div class="card-section text-center text-gray-800">
-            <p class="text-gray-600 text-sm mb-1">Alertas</p>
-            <p class="text-3xl font-extrabold text-red-600">2</p>
-          </div>
-        </div>
+      <div class="mb-8">
+        <h3 class="text-xl font-semibold uppercase">{{ instrutor_nome }}</h3>
+        <p class="text-gray-400 text-sm mb-2">Bem-vindo ao painel do Instrutor</p>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-          <a href="#" id="abrirModalTreino"
-            class="quick-access-card bg-gradient-to-br from-blue-400 to-blue-600 text-white p-5 rounded-xl shadow-lg text-center font-bold flex flex-col items-center justify-center">
-            <span class="text-4xl mb-2">🏋️‍♂️</span>
-            <p class="text-xl">Cadastrar Treino</p>
-          </a>
-          <a href="#" id="abrirModalAvaliacao"
-            class="quick-access-card bg-gradient-to-br from-green-400 to-green-600 text-white p-5 rounded-xl shadow-lg text-center font-bold flex flex-col items-center justify-center">
-            <span class="text-4xl mb-2">📊</span>
-            <p class="text-xl">Fazer Avaliação</p>
-          </a>
-          <a href="#" id="abrirModalFeedback"
-            class="quick-access-card bg-gradient-to-br from-pink-400 to-pink-600 text-white p-5 rounded-xl shadow-lg text-center font-bold flex flex-col items-center justify-center">
-            <span class="text-4xl mb-2">💬</span>
-            <p class="text-xl">Enviar Feedback</p>
-          </a>
-          <a href="#"
-            class="quick-access-card bg-gradient-to-br from-purple-400 to-purple-600 text-white p-5 rounded-xl shadow-lg text-center font-bold flex flex-col items-center justify-center">
-            <span class="text-4xl mb-2">📝</span>
-            <p class="text-xl">Ver Relatórios</p>
-          </a>
-        </div>
-
-        <div id="modalAvaliacao"
-          class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4 hidden modal-fade-in">
-          <div
-            class="bg-white rounded-2xl shadow-2xl w-full max-w-3xl p-8 space-y-6 text-gray-800 modal-scale-in relative">
-            <button onclick="fecharModalAvaliacao()"
-              class="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-4xl font-bold leading-none">&times;</button>
-            <h2 class="text-3xl font-bold text-center text-gray-900 border-b-2 border-green-400 pb-3">Cadastrar
-              Avaliação Física</h2>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
-              <div>
-                <label for="avaliacaoAluno" class="block text-gray-700 font-semibold mb-1">Aluno:</label>
-                <select id="avaliacaoAluno"
-                  class="w-full p-3 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500">
-                  <option value="">Selecione o aluno</option>
-                  {% for aluno in alunos %}
-                  <option value="{{ aluno.id }}">{{ aluno.nome }}</option>
-                  {% endfor %}
-                </select>
-              </div>
-
-              <div>
-                <label for="avaliacaoData" class="block text-gray-700 font-semibold mb-1">Data:</label>
-                <input type="date" id="avaliacaoData"
-                  class="w-full p-3 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500">
-              </div>
-
-              <div>
-                <label for="peso" class="block text-gray-700 font-semibold mb-1">Peso (kg):</label>
-                <input type="number" id="peso" step="0.01" placeholder="Peso (kg)"
-                  class="w-full p-3 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500">
-              </div>
-
-              <div>
-                <label for="altura" class="block text-gray-700 font-semibold mb-1">Altura (m):</label>
-                <input type="number" id="altura" step="0.01" placeholder="Altura (m)"
-                  class="w-full p-3 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500">
-              </div>
-
-              <div>
-                <label for="imc" class="block text-gray-700 font-semibold mb-1">IMC:</label>
-                <input type="number" id="imc" step="0.01" placeholder="IMC"
-                  class="w-full p-3 border border-gray-300 rounded-lg bg-gray-100 text-gray-700" readonly>
-              </div>
-
-              <div>
-                <label for="gordura" class="block text-gray-700 font-semibold mb-1">% de Gordura:</label>
-                <input type="number" id="gordura" step="0.1" placeholder="% de Gordura"
-                  class="w-full p-3 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500">
-              </div>
-
-              <div>
-                <label for="massa_magra" class="block text-gray-700 font-semibold mb-1">Massa Magra (kg):</label>
-                <input type="number" id="massa_magra" step="0.1" placeholder="Massa Magra (kg)"
-                  class="w-full p-3 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500">
-              </div>
-
-              <div>
-                <label for="frequencia" class="block text-gray-700 font-semibold mb-1">Frequência Cardíaca:</label>
-                <input type="number" id="frequencia" placeholder="Frequência Cardíaca"
-                  class="w-full p-3 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500">
-              </div>
-
-              <div class="col-span-1 md:col-span-2">
-                <label for="pressao" class="block text-gray-700 font-semibold mb-1">Pressão Arterial (ex: 12/8):</label>
-                <input type="text" id="pressao" placeholder="Pressão Arterial (ex: 12/8)"
-                  class="w-full p-3 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500">
-              </div>
-            </div>
-
-            <div>
-              <label for="observacoesAvaliacao" class="block text-gray-700 font-semibold mb-1">Observações:</label>
-              <textarea id="observacoesAvaliacao"
-                class="w-full p-3 border border-gray-300 rounded-lg resize-y focus:ring-green-500 focus:border-green-500"
-                placeholder="Observações adicionais..." rows="3"></textarea>
-            </div>
-
-            <div class="flex justify-end space-x-3 mt-6">
-              <button onclick="fecharModalAvaliacao()"
-                class="bg-red-500 text-white px-6 py-2.5 rounded-full hover:bg-red-600 transition-all duration-200 shadow-md">Cancelar</button>
-              <button onclick="salvarAvaliacao()"
-                class="button-gradient text-white px-6 py-2.5 rounded-full shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105">Salvar
-                Avaliação</button>
-            </div>
+        <div class="space-y-2 text-sm">
+          <div class="flex justify-between">
+            <span class="text-gray-400">✔️ Função:</span>
+            <span>Instrutor</span>
           </div>
         </div>
 
-        <div id="modalFeedback"
-          class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4 hidden modal-fade-in">
-          <div
-            class="bg-white rounded-2xl shadow-2xl w-full max-w-xl p-8 space-y-6 text-gray-800 modal-scale-in relative">
-            <button onclick="fecharModalFeedback()"
-              class="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-4xl font-bold leading-none">&times;</button>
-            <h2 class="text-3xl font-bold text-center text-gray-900 border-b-2 border-pink-400 pb-3">Enviar Feedback
-            </h2>
+        <button onclick="openModal('editProfileModal')"
+          class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium mt-6 w-full transition">
+          Editar Perfil
+        </button>
+      </div>
 
-            <div class="grid grid-cols-1 gap-4">
-              <div>
-                <label for="feedbackAluno" class="block text-gray-700 font-semibold mb-1">Aluno:</label>
-                <select id="feedbackAluno"
-                  class="w-full p-3 border border-gray-300 rounded-lg focus:ring-pink-500 focus:border-pink-500">
-                  <option value="">Selecione o aluno</option>
-                  {% for aluno in alunos %}
-                  <option value="{{ aluno.id }}">{{ aluno.nome }}</option>
-                  {% endfor %}
-                </select>
-              </div>
+      <form method="post" action="{% url 'logout' %}">
+        {% csrf_token %}
+        <button type="submit"
+          class="flex items-center gap-2 bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1 text-white px-5 py-2 rounded-md text-sm font-semibold transition shadow-md hover:shadow-lg w-full">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+            stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H7a2 2 0 01-2-2V7a2 2 0 012-2h4a2 2 0 012 2v1" />
+          </svg>
+          Sair
+        </button>
+      </form>
+    </div>
+  </header>
+  <script>
+    const btn = document.getElementById('btnAlertas');
+    const dropdown = document.getElementById('dropdownAlertas');
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      dropdown.classList.toggle('hidden');
+    });
+    window.addEventListener('click', () => dropdown.classList.add('hidden'));
 
-              <div>
-                <label for="feedbackCategoria" class="block text-gray-700 font-semibold mb-1">Categoria:</label>
-                <select id="feedbackCategoria"
-                  class="w-full p-3 border border-gray-300 rounded-lg focus:ring-pink-500 focus:border-pink-500">
-                  <option value="">Categoria</option>
-                  <option value="Elogio">Elogio</option>
-                  <option value="Sugestão">Sugestão</option>
-                  <option value="Crítica">Crítica</option>
-                  <option value="Dúvida">Dúvida</option>
-                </select>
-              </div>
+    function toggleDropdown() {
+      const dropdown = document.getElementById('dropdownProfile');
+      const icon = document.getElementById('gearIcon');
+      dropdown.classList.toggle('hidden');
+      icon.classList.toggle('rotate-180');
+    }
 
-              <div>
-                <label for="feedbackTexto" class="block text-gray-700 font-semibold mb-1">Mensagem:</label>
-                <textarea id="feedbackTexto"
-                  class="w-full p-3 border border-gray-300 rounded-lg resize-y focus:ring-pink-500 focus:border-pink-500"
-                  rows="5" placeholder="Escreva seu feedback..."></textarea>
-              </div>
+    const menuBtn = document.getElementById('menuBtn');
+    const closeMenuBtn = document.getElementById('closeMenuBtn');
+    const mobileMenu = document.getElementById('mobileMenu');
+
+    menuBtn.addEventListener('click', () => {
+      mobileMenu.classList.remove('-translate-x-full');
+    });
+    closeMenuBtn.addEventListener('click', () => {
+      mobileMenu.classList.add('-translate-x-full');
+    });
+  </script>
+
+
+  <!-- Main Content -->
+  <main class="flex-grow py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <!-- Indicadores (NOVO VISUAL) -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-8">
+  <!-- Treinos na Semana -->
+  <div class="bg-white rounded-2xl shadow-md p-5 flex items-center gap-4 hover:shadow-xl transition-all duration-300 border-t-4 border-blue-600">
+    <div class="p-3 bg-blue-100 text-blue-600 rounded-xl">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none"
+        viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M8 21h4m-2-4v4m0-4V5m0 0l-2 2m2-2l2 2M12 5V3m6 18h-4m2-4v4m0-4V5m0 0l-2 2m2-2l2 2" />
+      </svg>
+    </div>
+    <div>
+      <p class="text-gray-500 text-sm">Total de treinos na semana</p>
+      <p class="text-3xl font-bold text-gray-900 mt-1">{{ alunos|length }}</p>
+    </div>
+  </div>
+
+  <!-- IMC Atual -->
+  <div class="bg-white rounded-2xl shadow-md p-5 flex items-center gap-4 hover:shadow-xl transition-all duration-300 border-t-4 border-green-600">
+    <div class="p-3 bg-green-100 text-green-600 rounded-xl">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none"
+        viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+      </svg>
+    </div>
+    <div>
+      <p class="text-gray-500 text-sm">IMC Atual</p>
+      <p class="text-3xl font-bold text-gray-900 mt-1">{{ ultima_avaliacao.imc }}</p>
+    </div>
+  </div>
+
+  <!-- Expiração do Treino -->
+  <div class="bg-white rounded-2xl shadow-md p-5 flex items-center gap-4 hover:shadow-xl transition-all duration-300 border-t-4 border-amber-500">
+    <div class="p-3 bg-amber-100 text-amber-600 rounded-xl">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none"
+        viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+      </svg>
+    </div>
+    <div>
+      <p class="text-gray-500 text-sm">Seu treino expira em</p>
+      <p class="text-3xl font-bold text-gray-900 mt-1">3 dias</p>
+    </div>
+  </div>
+
+  <!-- Vencimento Pagamento -->
+  <div class="bg-white rounded-2xl shadow-md p-5 flex items-center gap-4 hover:shadow-xl transition-all duration-300 border-t-4 border-purple-600">
+    <div class="p-3 bg-purple-100 text-purple-600 rounded-xl">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none"
+        viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+      </svg>
+    </div>
+    <div>
+      <p class="text-gray-500 text-sm">Vencimento em</p>
+      <p class="text-3xl font-bold text-gray-900 mt-1">{{dias_restantes_treino}} dias</p>
+    </div>
+  </div>
+</div>
+
+<!-- AÇÕES (estilo padrão solicitado com gradiente) -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-6 mt-8">
+  <button onclick="openModal('treinoModal')"
+    class="bg-gradient-to-r from-blue-600 to-blue-800 hover:scale-105 transition duration-300 text-white p-4 rounded-2xl shadow-lg flex flex-col items-center">
+    <div class="bg-white/20 p-2 rounded-xl mb-2">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none"
+        viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+      </svg>
+    </div>
+    <span>Novo Treino</span>
+  </button>
+
+  <button onclick="openModal('avaliacaoModal')"
+    class="bg-gradient-to-r from-green-500 to-green-700 hover:scale-105 transition duration-300 text-white p-4 rounded-2xl shadow-lg flex flex-col items-center">
+    <div class="bg-white/20 p-2 rounded-xl mb-2">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none"
+        viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10" />
+      </svg>
+    </div>
+    <span>Nova Avaliação</span>
+  </button>
+
+  <button onclick="openModal('feedbackModal')"
+    class="bg-gradient-to-r from-purple-600 to-purple-800 hover:scale-105 transition duration-300 text-white p-4 rounded-2xl shadow-lg flex flex-col items-center">
+    <div class="bg-white/20 p-2 rounded-xl mb-2">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none"
+        viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+      </svg>
+    </div>
+    <span>Enviar Feedback</span>
+  </button>
+
+  <button onclick="openModal('relatorioModal')"
+    class="bg-gradient-to-r from-indigo-500 to-indigo-700 hover:scale-105 transition duration-300 text-white p-4 rounded-2xl shadow-lg flex flex-col items-center">
+    <div class="bg-white/20 p-2 rounded-xl mb-2">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none"
+        viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+      </svg>
+    </div>
+    <span>Gerar Relatório</span>
+  </button>
+</div>
+
+
+      <!-- Main Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Alunos Recentes -->
+        <div class="bg-white rounded-xl shadow p-6 lg:col-span-2">
+          <div class="flex justify-between items-center mb-6">
+            <h2 class="text-xl font-bold text-gray-900">Seus Alunos</h2>
+            <a href="#" id="openAlunosModal" class="text-sm text-blue-600 hover:text-blue-800 font-medium">Ver todos</a>
+          </div>
+
+          <div class="overflow-x-auto max-h-96 overflow-y-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aluno</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Último
+                    Treino</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
+                </tr>
+              </thead>
+              <tbody class="bg-white divide-y divide-gray-200">
+                {% for aluno in alunos|slice:":5" %}
+                <tr>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="flex items-center">
+                      <div class="flex-shrink-0 h-10 w-10">
+                        <img class="h-10 w-10 rounded-full" src="{{ aluno.foto_url }}" alt="{{ aluno.nome }}">
+                      </div>
+                      <div class="ml-4">
+                        <div class="text-sm font-medium text-gray-900">{{ aluno.nome }}</div>
+                        <div class="text-sm text-gray-500">{{ aluno.email }}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <span
+                      class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {% if aluno.status == 'Ativo' %}bg-green-100 text-green-800{% else %}bg-yellow-100 text-yellow-800{% endif %}">
+                      {{ aluno.status }}
+                    </span>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {{ aluno.ultimo_treino|default:"Nenhum" }}
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    <a href="#" class="text-blue-600 hover:text-blue-900 mr-3" onclick="verAluno(
+              '{{ aluno.nome|escapejs }}',
+              '{{ aluno.email|escapejs }}',
+              '{{ aluno.telefone|default:''|escapejs }}',
+              '{{ aluno.cpf|default:''|escapejs }}',
+              '{{ aluno.status|escapejs }}',
+              '{{ aluno.ultimo_treino|default:'Nenhum'|escapejs }}',
+              '{{ aluno.foto_url|escapejs }}'
+            )">Ver</a>
+                    <a href="#" class="text-green-600 hover:text-green-900" onclick="editarAluno(
+              '{{ aluno.nome|escapejs }}',
+              '{{ aluno.email|escapejs }}',
+              '{{ aluno.telefone|default:''|escapejs }}',
+              '{{ aluno.cpf|default:''|escapejs }}',
+              '{{ aluno.status|escapejs }}',
+              '{{ aluno.ultimo_treino|default:'Nenhum'|escapejs }}',
+              '{{ aluno.foto_url|escapejs }}'
+            )">Editar</a>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Modal Alunos -->
+        <div id="alunosModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+          <div class="bg-white rounded-xl shadow-lg p-6 max-w-5xl w-full relative max-h-[90vh] overflow-auto">
+            <button id="closeAlunosModal"
+              class="absolute top-3 right-3 text-gray-500 hover:text-gray-700 font-bold text-xl">&times;</button>
+            <h3 class="text-lg font-bold mb-4">Lista Completa de Alunos</h3>
+
+            <div class="mb-4">
+              <input type="text" id="searchInput" placeholder="Buscar por nome, CPF, telefone ou e-mail..."
+                class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
             </div>
 
-            <div class="flex justify-end space-x-3 mt-6">
-              <button onclick="fecharModalFeedback()"
-                class="bg-red-500 text-white px-6 py-2.5 rounded-full hover:bg-red-600 transition-all duration-200 shadow-md">Cancelar</button>
-              <button onclick="salvarFeedback()"
-                class="bg-pink-600 text-white px-6 py-2.5 rounded-full shadow-md hover:bg-pink-700 transition-all duration-300 transform hover:scale-105">Enviar
-                Feedback</button>
+            <div class="overflow-x-auto">
+              <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                  <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aluno
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Último
+                      Treino</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações
+                    </th>
+                  </tr>
+                </thead>
+                <tbody id="alunosTableBody" class="bg-white divide-y divide-gray-200">
+                  <!-- Conteúdo gerado pelo JavaScript -->
+                </tbody>
+              </table>
+            </div>
+
+            <div class="flex justify-center items-center space-x-4 mt-4">
+              <button id="prevPage"
+                class="px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded disabled:opacity-50">Anterior</button>
+              <span id="pageInfo" class="text-sm text-gray-700"></span>
+              <button id="nextPage"
+                class="px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded disabled:opacity-50">Próxima</button>
             </div>
           </div>
         </div>
 
-        <div id="modalTreino"
-          class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4 hidden modal-fade-in">
-          <div
-            class="bg-white rounded-2xl shadow-2xl w-full max-w-3xl p-8 space-y-6 text-gray-800 modal-scale-in relative">
-            <button onclick="fecharModal()"
-              class="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-4xl font-bold leading-none">&times;</button>
-            <h2 class="text-3xl font-bold text-center text-gray-900 border-b-2 border-blue-400 pb-3">Cadastrar Novo
-              Treino</h2>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+        <!-- Modal Ver Aluno -->
+        <div id="verAlunoModal"
+          class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+          <div class="bg-white rounded-xl shadow-lg p-6 w-full max-w-lg relative">
+            <button onclick="fecharVerAluno()"
+              class="absolute top-3 right-3 text-gray-500 hover:text-gray-700 font-bold text-xl">&times;</button>
+            <div class="flex items-center space-x-4 mb-4">
+              <img id="verFoto" class="h-20 w-20 rounded-full" src="" alt="">
               <div>
-                <label for="tipo_treino" class="block text-gray-700 font-semibold mb-1">Tipo de Treino:</label>
-                <input id="tipo_treino" type="text" placeholder="Ex: Hipertrofia, Resistência"
-                  class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                <h2 id="verNome" class="text-xl font-bold"></h2>
+                <p id="verEmail" class="text-gray-600"></p>
+              </div>
+            </div>
+            <div class="space-y-2">
+              <p><strong>Telefone:</strong> <span id="verTelefone"></span></p>
+              <p><strong>CPF:</strong> <span id="verCpf"></span></p>
+              <p><strong>Status:</strong> <span id="verStatus"></span></p>
+              <p><strong>Último Treino:</strong> <span id="verTreino"></span></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Modal Editar Aluno -->
+        <div id="editarAlunoModal"
+          class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+          <div class="bg-white rounded-xl shadow-lg p-6 w-full max-w-lg relative">
+            <button onclick="fecharEditarAluno()"
+              class="absolute top-3 right-3 text-gray-500 hover:text-gray-700 font-bold text-xl">&times;</button>
+            <h3 class="text-lg font-bold mb-4">Editar Aluno</h3>
+            <form class="space-y-4" onsubmit="event.preventDefault(); salvarAluno();">
+              <div>
+                <label class="block text-sm font-medium text-gray-700">Nome</label>
+                <input id="editNome" type="text" class="w-full px-4 py-2 border rounded-md" required>
               </div>
               <div>
-                <label for="cod_aluno" class="block text-gray-700 font-semibold mb-1">Aluno:</label>
-                <select id="cod_aluno"
-                  class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
-                  <option value="">Selecione um aluno</option>
-                  {% for aluno in alunos %}
-                  <option value="{{ aluno.id }}">{{ aluno.nome }}</option>
-                  {% endfor %}
+                <label class="block text-sm font-medium text-gray-700">Email</label>
+                <input id="editEmail" type="email" class="w-full px-4 py-2 border rounded-md" required>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700">Telefone</label>
+                <input id="editTelefone" type="text" class="w-full px-4 py-2 border rounded-md">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700">CPF</label>
+                <input id="editCpf" type="text" class="w-full px-4 py-2 border rounded-md">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700">Status</label>
+                <select id="editStatus" class="w-full px-4 py-2 border rounded-md">
+                  <option>Ativo</option>
+                  <option>Inativo</option>
                 </select>
               </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700">Último Treino</label>
+                <input id="editTreino" type="text" class="w-full px-4 py-2 border rounded-md">
+              </div>
+              <div class="flex justify-end">
+                <button type="button" onclick="fecharEditarAluno()"
+                  class="px-4 py-2 bg-gray-300 rounded mr-2">Cancelar</button>
+                <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded">Salvar</button>
+              </div>
+            </form>
+          </div>
+        </div>
 
-              <div>
-                <label for="cod_instrutor_nome" class="block text-gray-700 font-semibold mb-1">Instrutor:</label>
-                <input type="text" id="cod_instrutor_nome" value="{{ instrutor_nome }}"
-                  class="w-full p-3 border border-gray-300 rounded-lg bg-gray-100 text-gray-700" readonly>
-                <input type="hidden" id="cod_instrutor" value="{{ instrutor_id }}">
-              </div>
-              <div>
-                <label for="objetivo" class="block text-gray-700 font-semibold mb-1">Objetivo:</label>
-                <input id="objetivo" type="text" placeholder="Ex: Ganho de massa, Emagrecimento"
-                  class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
-              </div>
+        <script>
+          const openModalBtn = document.getElementById('openAlunosModal');
+          const closeModalBtn = document.getElementById('closeAlunosModal');
+          const modal = document.getElementById('alunosModal');
+          const searchInput = document.getElementById('searchInput');
 
-              <div class="col-span-1 md:col-span-2">
-                <label for="observacoes" class="block text-gray-700 font-semibold mb-1">Observações:</label>
-                <textarea id="observacoes" placeholder="Observações adicionais para o treino..."
-                  class="w-full p-3 border border-gray-300 rounded-lg resize-y focus:ring-blue-500 focus:border-blue-500"
-                  rows="3"></textarea>
+          // Array de alunos carregado do backend via Django template tags
+          const alunos = [
+            {% for aluno in alunos %}
+          {
+            nome: "{{ aluno.nome|escapejs }}",
+              email: "{{ aluno.email|escapejs }}",
+                telefone: "{{ aluno.telefone|default:''|escapejs }}",
+                  cpf: "{{ aluno.cpf|default:''|escapejs }}",
+                    foto: "{{ aluno.foto_url|escapejs }}",
+                      status: "{{ aluno.status|escapejs }}",
+                        ultimo_treino: "{{ aluno.ultimo_treino|default:'Nenhum'|escapejs }}"
+          } {% if not forloop.last %}, {% endif %}
+          {% endfor %}
+  ];
+
+          const alunosPorPagina = 10;
+          let paginaAtual = 1;
+          let alunosFiltrados = alunos;
+
+          const tableBody = document.getElementById('alunosTableBody');
+          const pageInfo = document.getElementById('pageInfo');
+          const prevBtn = document.getElementById('prevPage');
+          const nextBtn = document.getElementById('nextPage');
+
+          function renderTabela() {
+            const inicio = (paginaAtual - 1) * alunosPorPagina;
+            const fim = inicio + alunosPorPagina;
+            const alunosPagina = alunosFiltrados.slice(inicio, fim);
+
+            tableBody.innerHTML = '';
+
+            if (alunosPagina.length === 0) {
+              const linha = document.createElement('tr');
+              linha.innerHTML = `
+        <td colspan="4" class="text-center px-6 py-4 text-sm text-gray-500">
+          Nenhum aluno encontrado.
+        </td>
+      `;
+              tableBody.appendChild(linha);
+            } else {
+              alunosPagina.forEach(aluno => {
+                const linha = document.createElement('tr');
+                linha.innerHTML = `
+          <td class="px-6 py-4 whitespace-nowrap">
+            <div class="flex items-center">
+              <div class="flex-shrink-0 h-10 w-10">
+                <img class="h-10 w-10 rounded-full" src="${aluno.foto}" alt="${aluno.nome}">
               </div>
-              <div>
-                <label for="data_inicio" class="block text-gray-700 font-semibold mb-1">Data de Início:</label>
-                <input id="data_inicio" type="date"
-                  class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
-              </div>
-              <div>
-                <label for="data_final" class="block text-gray-700 font-semibold mb-1">Data Final (Opcional):</label>
-                <input id="data_final" type="date"
-                  class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+              <div class="ml-4">
+                <div class="text-sm font-medium text-gray-900">${aluno.nome}</div>
+                <div class="text-sm text-gray-500">${aluno.email}</div>
               </div>
             </div>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap">
+            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${aluno.status === 'Ativo' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}">
+              ${aluno.status}
+            </span>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${aluno.ultimo_treino}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+            <a href="#" class="text-blue-600 hover:text-blue-900 mr-3" onclick="verAluno(
+              '${aluno.nome.replace(/'/g, "\\'")}',
+              '${aluno.email.replace(/'/g, "\\'")}',
+              '${aluno.telefone.replace(/'/g, "\\'")}',
+              '${aluno.cpf.replace(/'/g, "\\'")}',
+              '${aluno.status.replace(/'/g, "\\'")}',
+              '${aluno.ultimo_treino.replace(/'/g, "\\'")}',
+              '${aluno.foto.replace(/'/g, "\\'")}'
+            )">Ver</a>
+            <a href="#" class="text-green-600 hover:text-green-900" onclick="editarAluno(
+              '${aluno.nome.replace(/'/g, "\\'")}',
+              '${aluno.email.replace(/'/g, "\\'")}',
+              '${aluno.telefone.replace(/'/g, "\\'")}',
+              '${aluno.cpf.replace(/'/g, "\\'")}',
+              '${aluno.status.replace(/'/g, "\\'")}',
+              '${aluno.ultimo_treino.replace(/'/g, "\\'")}',
+              '${aluno.foto.replace(/'/g, "\\'")}'
+            )">Editar</a>
+          </td>
+        `;
+                tableBody.appendChild(linha);
+              });
+            }
 
-            <h3 class="text-xl font-bold mt-6 text-gray-900 border-b border-gray-300 pb-2">Detalhes dos Exercícios</h3>
-            <div id="exerciciosContainer" class="space-y-4">
-              <div class="grid grid-cols-2 md:grid-cols-4 gap-4 bg-gray-50 p-4 rounded-lg border border-gray-200">
-                <div><input type="text" placeholder="Exercício (ex: Supino)"
-                    class="ex-tipo_treino w-full p-2 border rounded-lg"></div>
-                <div><input type="number" placeholder="Séries" class="ex-serie w-full p-2 border rounded-lg"></div>
-                <div><input type="number" placeholder="Repetições" class="ex-repeticao w-full p-2 border rounded-lg">
-                </div>
-                <div><input type="text" placeholder="Intervalo (ex: 60s)"
-                    class="ex-intervalo w-full p-2 border rounded-lg"></div>
-              </div>
+            const totalPaginas = Math.ceil(alunosFiltrados.length / alunosPorPagina) || 1;
+            pageInfo.textContent = `Página ${paginaAtual} de ${totalPaginas}`;
+
+            prevBtn.disabled = paginaAtual === 1;
+            nextBtn.disabled = paginaAtual === totalPaginas;
+          }
+
+          function aplicarFiltro() {
+            const termo = searchInput.value.trim().toLowerCase();
+
+            alunosFiltrados = alunos.filter(aluno =>
+              aluno.nome.toLowerCase().includes(termo) ||
+              aluno.email.toLowerCase().includes(termo) ||
+              aluno.cpf.toLowerCase().includes(termo) ||
+              aluno.telefone.toLowerCase().includes(termo)
+            ).sort((a, b) => a.nome.localeCompare(b.nome));
+
+            paginaAtual = 1;
+            renderTabela();
+          }
+
+          searchInput.addEventListener('input', aplicarFiltro);
+
+          prevBtn.addEventListener('click', () => {
+            if (paginaAtual > 1) {
+              paginaAtual--;
+              renderTabela();
+            }
+          });
+
+          nextBtn.addEventListener('click', () => {
+            const totalPaginas = Math.ceil(alunosFiltrados.length / alunosPorPagina);
+            if (paginaAtual < totalPaginas) {
+              paginaAtual++;
+              renderTabela();
+            }
+          });
+
+          openModalBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            paginaAtual = 1;
+            alunosFiltrados = alunos.slice().sort((a, b) => a.nome.localeCompare(b.nome));
+            searchInput.value = '';
+            renderTabela();
+            modal.classList.remove('hidden');
+          });
+
+          closeModalBtn.addEventListener('click', () => {
+            modal.classList.add('hidden');
+          });
+
+          modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+              modal.classList.add('hidden');
+            }
+          });
+
+          function verAluno(nome, email, telefone, cpf, status, treino, foto) {
+            document.getElementById('verNome').textContent = nome;
+            document.getElementById('verEmail').textContent = email;
+            document.getElementById('verTelefone').textContent = telefone;
+            document.getElementById('verCpf').textContent = cpf;
+            document.getElementById('verStatus').textContent = status;
+            document.getElementById('verTreino').textContent = treino;
+            document.getElementById('verFoto').src = foto;
+            document.getElementById('verAlunoModal').classList.remove('hidden');
+          }
+
+          function fecharVerAluno() {
+            document.getElementById('verAlunoModal').classList.add('hidden');
+          }
+
+          function editarAluno(nome, email, telefone, cpf, status, treino, foto) {
+            document.getElementById('editNome').value = nome;
+            document.getElementById('editEmail').value = email;
+            document.getElementById('editTelefone').value = telefone;
+            document.getElementById('editCpf').value = cpf;
+            document.getElementById('editStatus').value = status;
+            document.getElementById('editTreino').value = treino;
+            document.getElementById('editarAlunoModal').classList.remove('hidden');
+          }
+
+          function fecharEditarAluno() {
+            document.getElementById('editarAlunoModal').classList.add('hidden');
+          }
+
+          // Função para salvar edição (exemplo, deve ser adaptada para seu backend)
+          function salvarAluno() {
+            alert('Salvar dados do aluno (implementar backend)');
+            fecharEditarAluno();
+          }
+        </script>
+        <!-- Agenda -->
+        <div class="bg-white rounded-xl shadow p-6">
+          <div class="flex justify-between items-center mb-6">
+            <h2 class="text-xl font-bold text-gray-900">Agenda {{dia}}</h2>
+            <button id="openCalendarBtn" class="text-sm text-blue-600 hover:text-blue-800 font-medium">
+              Ver calendário
+            </button>
+          </div>
+
+          <div class="space-y-4">
+            <div class="border-l-4 border-blue-500 pl-4 py-2">
+              <h3 class="font-medium text-gray-900">Treino com João Silva</h3>
+              <p class="text-sm text-gray-500">08:00 - 09:00</p>
             </div>
+            <div class="border-l-4 border-green-500 pl-4 py-2">
+              <h3 class="font-medium text-gray-900">Avaliação com Maria Souza</h3>
+              <p class="text-sm text-gray-500">10:30 - 11:00</p>
+            </div>
+            <div class="border-l-4 border-purple-500 pl-4 py-2">
+              <h3 class="font-medium text-gray-900">Reunião de equipe</h3>
+              <p class="text-sm text-gray-500">14:00 - 15:00</p>
+            </div>
+            <div class="border-l-4 border-yellow-500 pl-4 py-2">
+              <h3 class="font-medium text-gray-900">Treino com Pedro Alves</h3>
+              <p class="text-sm text-gray-500">17:00 - 18:00</p>
+            </div>
+          </div>
+        </div>
 
-            <button onclick="addExercicio()"
-              class="bg-gray-500 text-white px-5 py-2.5 rounded-full hover:bg-gray-600 transition-all duration-200 flex items-center gap-2 shadow-md">
-              <span class="text-lg">➕</span> Adicionar Exercício
+        <!-- Modal do Calendário -->
+        <div id="calendarModal"
+          class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+          <div class="bg-white rounded-xl shadow-lg p-6 max-w-md w-full relative">
+            <button id="closeCalendarBtn"
+              class="absolute top-3 right-3 text-gray-500 hover:text-gray-700 font-bold text-xl">&times;</button>
+            <h3 class="text-lg font-bold mb-4">Calendário</h3>
+            <div id="calendar"><!-- treinos dinamicos que seram exibidos dentro do modal --></div>
+          </div>
+        </div>
+
+        <!-- flatpickr CSS -->
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" />
+
+        <!-- flatpickr JS -->
+        <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+        <script>
+          const openBtn = document.getElementById('openCalendarBtn');
+          const closeBtn = document.getElementById('closeCalendarBtn');
+          const calendarModal = document.getElementById('calendarModal');
+
+          openBtn.addEventListener('click', () => {
+            calendarModal.classList.remove('hidden');
+          });
+
+          closeBtn.addEventListener('click', () => {
+            calendarModal.classList.add('hidden');
+          });
+
+          calendarModal.addEventListener('click', (e) => {
+            if (e.target === calendarModal) {
+              calendarModal.classList.add('hidden');
+            }
+          });
+
+          flatpickr("#calendar", {
+            inline: true,
+            dateFormat: "d/m/Y",
+          });
+        </script>
+
+        <!-- Card de Progresso dos Alunos + Estatísticas -->
+        <div class="bg-white rounded-xl shadow p-6 lg:col-span-3">
+          <!-- Cabeçalho -->
+          <div class="flex justify-between items-center mb-6">
+            <h2 class="text-xl font-bold text-gray-900">Progresso dos Alunos</h2>
+          </div>
+
+          <!-- Cards de Estatísticas -->
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+            <!-- Treinos na Semana -->
+            <button class="bg-blue-50 hover:bg-blue-100 p-4 rounded-lg w-full text-left shadow-sm transition">
+              <p class="text-sm text-blue-600 font-medium">Treinos na Semana</p>
+              <p class="text-2xl font-bold text-blue-800">24</p>
             </button>
 
-            <div class="flex justify-end space-x-3 mt-6">
-              <button onclick="fecharModal()"
-                class="bg-red-500 text-white px-6 py-2.5 rounded-full hover:bg-red-600 transition-all duration-200 shadow-md">Cancelar</button>
-              <button onclick="salvarTreino()"
-                class="button-gradient text-white px-6 py-2.5 rounded-full shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105">
-                Salvar Treino
-              </button>
-            </div>
+            <!-- Avaliações -->
+            <button class="bg-green-50 hover:bg-green-100 p-4 rounded-lg w-full text-left shadow-sm transition">
+              <p class="text-sm text-green-600 font-medium">Avaliações</p>
+              <p class="text-2xl font-bold text-green-800">5</p>
+            </button>
+
+            <!-- Novos Alunos -->
+            <button class="bg-purple-50 hover:bg-purple-100 p-4 rounded-lg w-full text-left shadow-sm transition">
+              <p class="text-sm text-purple-600 font-medium">Novos Alunos</p>
+              <p class="text-2xl font-bold text-purple-800">3</p>
+            </button>
+
+            <!-- Feedbacks -->
+            <button class="bg-yellow-50 hover:bg-yellow-100 p-4 rounded-lg w-full text-left shadow-sm transition">
+              <p class="text-sm text-yellow-600 font-medium">Feedbacks</p>
+              <p class="text-2xl font-bold text-yellow-800">7</p>
+            </button>
           </div>
-        </div>
 
-        <div class="card-section text-gray-800">
-          <h2 class="text-2xl font-bold mb-6 text-gray-900 border-b-2 border-indigo-400 pb-2">Treinos Aplicados por
-            Semana</h2>
-          <canvas id="graficoTreinos" height="100"></canvas>
-        </div>
-
-        <div class="card-section text-gray-800">
-          <h2 class="text-2xl font-bold mb-6 text-gray-900 border-b-2 border-indigo-400 pb-2">Progresso dos Alunos</h2>
-          <div class="space-y-5">
-            {% for aluno in alunos %}
-            <div>
-              <div class="flex justify-between items-center mb-1">
-                <span class="font-semibold text-lg text-gray-700">{{ aluno.nome }}</span>
-                <span class="text-base font-bold text-blue-600">{{ aluno.progresso|default:70 }}%</span>
-              </div>
-              <div class="w-full bg-gray-200 rounded-full h-3.5 overflow-hidden">
-                <div class="bg-blue-600 h-3.5 rounded-full transition-all duration-500 ease-out"
-                  style="width: {{ aluno.progresso|default:70 }}%;"></div>
-              </div>
-            </div>
-            {% endfor %}
+          <!-- Gráfico de Progresso -->
+          <div>
+            <canvas id="progressoChart" height="100"></canvas>
           </div>
-        </div>
-
-        <div class="card-section text-gray-800">
-          <h2 class="text-2xl font-bold mb-6 text-gray-900 border-b-2 border-indigo-400 pb-2">📢 Alertas Recentes</h2>
-          <ul class="list-disc ml-6 text-base text-gray-700 space-y-2">
-            <li>Avaliação física de <span class="font-semibold text-red-600">João da Silva</span> está vencida.</li>
-            <li>Treino de <span class="font-semibold text-yellow-600">Maria</span> está prestes a encerrar (3 dias).
-            </li>
-            <li>Novo feedback de <span class="font-semibold text-green-600">Pedro</span> sobre o treino de força.</li>
-          </ul>
         </div>
 
       </div>
-    </main>
+    </div>
+  </main>
 
-  </div>
-  <footer class="bg-gray-900 bg-opacity-80 text-white py-5 mt-auto">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-sm text-gray-400 text-center">
-      © {{ year|default:"2025" }} ERPWAY SYSTEM — Painel do Instrutor
+  <!-- Footer -->
+  <footer class="bg-gray-800 text-white py-6 mt-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-col md:flex-row justify-between items-center">
+        <div class="mb-4 md:mb-0">
+          <p class="text-sm">© {{year}} ERP Way. Todos os direitos reservados.</p>
+        </div>
+        <div class="flex space-x-6">
+          <a href="#" class="text-gray-300 hover:text-white">
+            <span class="text-sm">Termos de uso</span>
+          </a>
+          <a href="#" class="text-gray-300 hover:text-white">
+            <span class="text-sm">Política de privacidade</span>
+          </a>
+          <a href="#" class="text-gray-300 hover:text-white">
+            <span class="text-sm">Contato</span>
+          </a>
+        </div>
+      </div>
     </div>
   </footer>
 
-  <script>
-    // --- Funções e Lógica para Modais (Treino, Avaliação, Feedback) ---
+  <!-- Modal de Cadastro de Treino -->
+<div id="treinoModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+  <div class="bg-white rounded-xl shadow-xl w-full max-w-2xl p-6">
+    <div class="flex justify-between items-center mb-4">
+      <h3 class="text-xl font-bold text-gray-900">Cadastrar Novo Treino</h3>
+      <button onclick="closeModal('treinoModal')" class="text-gray-500 hover:text-gray-700">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
 
-    // Função genérica para abrir e fechar modais com animação
-    function toggleModal(modalId, show) {
-      const modal = document.getElementById(modalId);
-      if (show) {
-        modal.classList.remove("hidden");
-        setTimeout(() => {
-          modal.classList.add("modal-active");
-        }, 10); // Pequeno delay para permitir a transição
+    <form id="formTreino" method="POST" action="{% url 'adicionar_treino' %}">
+      {% csrf_token %}
+
+      <div class="space-y-4">
+        <!-- Aluno -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Aluno</label>
+          <select name="cod_aluno" required class="w-full p-2 border border-gray-300 rounded-md">
+            <option value="">Selecione um aluno</option>
+            {% for aluno in alunos %}
+            <option value="{{ aluno.id }}">{{ aluno.nome }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+<!-- Instrutor (fixo) -->
+<div>
+  <label class="block text-sm font-medium text-gray-700 mb-1">Instrutor</label>
+
+  <!-- Mostra o nome do instrutor -->
+  <input 
+    type="text" 
+    value="{{ instrutor_nome }}" 
+    disabled 
+    class="w-full p-2 border border-gray-200 rounded-md bg-gray-100 cursor-not-allowed">
+
+  <!-- Envia o código do instrutor no payload -->
+  <input 
+    type="hidden" 
+    name="cod_instrutor" 
+    value="{{ cod_instrutor }}">
+</div>
+
+
+        <!-- Dados do Treino -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de Treino</label>
+            <input name="tipo_treino" type="text" required class="w-full p-2 border border-gray-300 rounded-md"
+              placeholder="Ex: Hipertrofia">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Data de Início</label>
+            <input name="data_inicio" type="date" required class="w-full p-2 border border-gray-300 rounded-md">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Data Final (opcional)</label>
+            <input name="data_final" type="date" class="w-full p-2 border border-gray-300 rounded-md">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Observações (opcional)</label>
+            <input name="observacoes" type="text" class="w-full p-2 border border-gray-300 rounded-md"
+              placeholder="Observações do treino">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Objetivo</label>
+          <textarea name="objetivo" class="w-full p-2 border border-gray-300 rounded-md" rows="2"
+            placeholder="Descreva o objetivo do treino"></textarea>
+        </div>
+
+        <!-- Exercícios -->
+        <div class="border-t pt-4">
+          <h4 class="font-medium text-gray-700 mb-2">Exercícios</h4>
+          <div id="exerciciosContainer" class="space-y-3">
+            <div class="grid grid-cols-4 gap-2">
+              <input name="nome_exercicio[]" type="text" class="p-2 border border-gray-300 rounded-md"
+                placeholder="Exercício" required>
+              <input name="serie[]" type="number" class="p-2 border border-gray-300 rounded-md" placeholder="Séries"
+                min="1" required>
+              <input name="repeticao[]" type="number" class="p-2 border border-gray-300 rounded-md"
+                placeholder="Repetições" min="1" required>
+              <input name="intervalo[]" type="text" class="p-2 border border-gray-300 rounded-md"
+                placeholder="Intervalo" required>
+            </div>
+          </div>
+
+          <button type="button" onclick="addExercicio()"
+            class="mt-2 text-sm text-blue-600 hover:text-blue-800 flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24"
+              stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+            </svg>
+            Adicionar exercício
+          </button>
+        </div>
+
+        <!-- Ações -->
+        <div class="flex justify-end space-x-3 pt-4">
+          <button type="button" onclick="closeModal('treinoModal')"
+            class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
+            Cancelar
+          </button>
+          <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+            Salvar Treino
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+  <!-- Avaliação Modal -->
+  <div id="avaliacaoModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-xl shadow-xl w-full max-w-2xl p-6">
+      {% if mensagem_sucesso %}
+      <div class="mb-4 px-4 py-3 rounded-md bg-green-100 text-green-800 border border-green-300">
+        {{ mensagem_sucesso }}
+      </div>
+      {% endif %}
+
+      {% if mensagem_erro %}
+      <div class="mb-4 px-4 py-3 rounded-md bg-red-100 text-red-800 border border-red-300">
+        {{ mensagem_erro }}
+      </div>
+      {% endif %}
+      <form id="formAvaliacao" action="{% url 'salvar_avaliacao' cod_instrutor=cod_instrutor %}" method="POST">
+        {% csrf_token %}
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-xl font-bold text-gray-900">Nova Avaliação Física</h3>
+          <button type="button" onclick="closeModal('avaliacaoModal')" class="text-gray-500 hover:text-gray-700">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+              stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <div class="space-y-4">
+          <!-- Aluno -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Aluno</label>
+            <select name="cod_aluno" id="codAluno" class="w-full p-2 border border-gray-300 rounded-md" required>
+              <option value="">Selecione um aluno</option>
+              {% for aluno in alunos %}
+              <option value="{{ aluno.cod_aluno }}">{{ aluno.nome }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <!-- Instrutor (preenchido automaticamente) -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Instrutor</label>
+            <input type="text" class="w-full p-2 border border-gray-300 rounded-md bg-gray-100"
+              value="{{ instrutor_nome }}" readonly>
+            <input type="hidden" name="cod_instrutor" id="codInstrutorId" value="{{ instrutor_id }}">
+          </div>
+
+          <!-- Dados -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Data da Avaliação</label>
+              <input type="date" name="data_avaliacao" id="dataAvaliacao"
+                class="w-full p-2 border border-gray-300 rounded-md" required>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Peso (kg)</label>
+              <input type="number" name="peso" id="peso" step="0.1" class="w-full p-2 border border-gray-300 rounded-md"
+                oninput="calcularIMC()" required>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Altura (m)</label>
+              <input type="number" name="altura" id="altura" step="0.01"
+                class="w-full p-2 border border-gray-300 rounded-md" oninput="calcularIMC()" required>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">IMC</label>
+              <input type="number" name="imc" id="imc" step="0.01"
+                class="w-full p-2 border border-gray-300 rounded-md bg-gray-100" readonly>
+            </div>
+          </div>
+
+          <!-- Observações -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Observações</label>
+            <textarea name="observacoes" id="observacoes" class="w-full p-2 border border-gray-300 rounded-md"
+              rows="3"></textarea>
+          </div>
+
+          <!-- Botões -->
+          <div class="flex justify-end space-x-3 pt-4">
+            <button type="button" onclick="closeModal('avaliacaoModal')"
+              class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
+              Cancelar
+            </button>
+            <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">
+              Salvar Avaliação
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    function calcularIMC() {
+      const peso = parseFloat(document.getElementById('peso').value);
+      const altura = parseFloat(document.getElementById('altura').value);
+
+      if (peso > 0 && altura > 0) {
+        const imc = peso / (altura * altura);
+        document.getElementById('imc').value = imc.toFixed(2);
       } else {
-        modal.classList.remove("modal-active");
-        modal.querySelector('.modal-scale-in').classList.remove('scale-100', 'opacity-100'); // Reset scale for next open
-        setTimeout(() => {
-          modal.classList.add("hidden");
-        }, 300); // Espera a transição terminar antes de ocultar
+        document.getElementById('imc').value = '';
       }
     }
 
-    // Event Listeners para abrir Modais
-    document.getElementById("abrirModalTreino").addEventListener("click", function (e) {
-      e.preventDefault();
-      toggleModal("modalTreino", true);
-    });
-
-    document.getElementById("abrirModalAvaliacao").addEventListener("click", function (e) {
-      e.preventDefault();
-      toggleModal("modalAvaliacao", true);
-    });
-
-    document.getElementById("abrirModalFeedback").addEventListener("click", function (e) {
-      e.preventDefault();
-      toggleModal("modalFeedback", true);
-    });
-
-    // Funções para fechar Modais específicas (chamadas pelos botões de cancelar/fechar)
-    function fecharModal() { // Treino
-      toggleModal("modalTreino", false);
+    function closeModal(id) {
+      document.getElementById(id).classList.add('hidden');
     }
 
-    function fecharModalAvaliacao() {
-      toggleModal("modalAvaliacao", false);
+    function openModal(id) {
+      document.getElementById(id).classList.remove('hidden');
+    }
+  </script>
+
+
+
+  <!-- Feedback Modal -->
+  <div id="feedbackModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-xl shadow-xl w-full max-w-2xl p-6">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-xl font-bold text-gray-900">Enviar Feedback</h3>
+        <button onclick="closeModal('feedbackModal')" class="text-gray-500 hover:text-gray-700">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Aluno</label>
+          <select class="w-full p-2 border border-gray-300 rounded-md">
+            <option>Selecione um aluno</option>
+            {% for aluno in alunos %}
+            <option value="{{ aluno.id }}">{{ aluno.nome }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Tipo</label>
+          <select class="w-full p-2 border border-gray-300 rounded-md">
+            <option>Selecione o tipo</option>
+            <option>Elogio</option>
+            <option>Sugestão</option>
+            <option>Crítica</option>
+            <option>Dúvida</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Mensagem</label>
+          <textarea class="w-full p-2 border border-gray-300 rounded-md" rows="5"></textarea>
+        </div>
+
+        <div class="flex justify-end space-x-3 pt-4">
+          <button onclick="closeModal('feedbackModal')"
+            class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
+            Cancelar
+          </button>
+          <button class="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700">
+            Enviar Feedback
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Modal functions
+    function openModal(id) {
+      document.getElementById(id).classList.remove('hidden');
     }
 
-    function fecharModalFeedback() {
-      toggleModal("modalFeedback", false);
+    function closeModal(id) {
+      document.getElementById(id).classList.add('hidden');
     }
 
-    // Fechar modais ao clicar fora (no overlay)
-    document.querySelectorAll('.modal-fade-in').forEach(modal => {
-      modal.addEventListener('click', function (e) {
-        if (e.target === this) {
-          toggleModal(this.id, false);
+    // Add exercise function
+    function addExercicio() {
+      const container = document.getElementById('exerciciosContainer');
+      const div = document.createElement('div');
+      div.className = 'grid grid-cols-4 gap-2';
+      div.innerHTML = `
+        <input type="text" class="p-2 border border-gray-300 rounded-md" placeholder="Exercício">
+        <input type="number" class="p-2 border border-gray-300 rounded-md" placeholder="Séries">
+        <input type="number" class="p-2 border border-gray-300 rounded-md" placeholder="Repetições">
+        <input type="text" class="p-2 border border-gray-300 rounded-md" placeholder="Intervalo">
+      `;
+      container.appendChild(div);
+    }
+
+    // Chart initialization
+    document.addEventListener('DOMContentLoaded', function () {
+      const ctx = document.getElementById('progressoChart').getContext('2d');
+      const chart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'],
+          datasets: [{
+            label: 'Novos Alunos',
+            data: [12, 19, 3, 5, 2, 3],
+            backgroundColor: 'rgba(59, 130, 246, 0.5)',
+            borderColor: 'rgba(59, 130, 246, 1)',
+            borderWidth: 1
+          }, {
+            label: 'Treinos',
+            data: [8, 15, 10, 12, 18, 20],
+            backgroundColor: 'rgba(16, 185, 129, 0.5)',
+            borderColor: 'rgba(16, 185, 129, 1)',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            y: {
+              beginAtZero: true
+            }
+          }
         }
       });
     });
-
-    // --- Lógica de Cadastro de Treino ---
-    function addExercicio() {
-      const container = document.getElementById("exerciciosContainer");
-      const bloco = document.createElement("div");
-      bloco.className = "grid grid-cols-2 md:grid-cols-4 gap-4 bg-gray-50 p-4 rounded-lg border border-gray-200";
-
-      bloco.innerHTML = `
-                <div><input type="text" placeholder="Exercício (ex: Supino)" class="ex-tipo_treino w-full p-2 border rounded-lg"></div>
-                <div><input type="number" placeholder="Séries" class="ex-serie w-full p-2 border rounded-lg"></div>
-                <div><input type="number" placeholder="Repetições" class="ex-repeticao w-full p-2 border rounded-lg"></div>
-                <div><input type="text" placeholder="Intervalo (ex: 60s)" class="ex-intervalo w-full p-2 border rounded-lg"></div>
-            `;
-      container.appendChild(bloco);
-    }
-
-    async function salvarTreino() {
-      try {
-        const treino = {
-          tipo_treino: document.getElementById("tipo_treino").value.trim(),
-          cod_aluno: Number(document.getElementById("cod_aluno").value),
-          cod_instrutor: Number(document.getElementById("cod_instrutor").value),
-          objetivo: document.getElementById("objetivo").value.trim(),
-          observacoes: document.getElementById("observacoes").value.trim(),
-          data_inicio: document.getElementById("data_inicio").value,
-          data_final: document.getElementById("data_final").value,
-        };
-
-        if (!treino.tipo_treino || !treino.cod_aluno || !treino.cod_instrutor || !treino.data_inicio) {
-          alert("Por favor, preencha todos os campos obrigatórios do treino (Tipo, Aluno, Instrutor, Data Início).");
-          return;
-        }
-
-        const resTreino = await fetch("/api/treino", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "X-CSRFToken": "{{ csrf_token }}" // Incluir CSRF token
-          },
-          body: JSON.stringify(treino),
-        });
-
-        if (!resTreino.ok) {
-          const err = await resTreino.json();
-          throw new Error("Erro ao salvar treino: " + (err.message || resTreino.statusText));
-        }
-
-        const treinoData = await resTreino.json();
-        const cod_treino = treinoData.cod_treino;
-
-        if (!cod_treino) {
-          throw new Error("Erro: Código do treino não retornado pela API.");
-        }
-
-        const exerciciosDivs = document.querySelectorAll("#exerciciosContainer > div");
-        for (const div of exerciciosDivs) {
-          const tipo_exercicio = div.querySelector(".ex-tipo_treino").value.trim();
-          const serie = Number(div.querySelector(".ex-serie").value);
-          const repeticao = Number(div.querySelector(".ex-repeticao").value);
-          const intervalo = div.querySelector(".ex-intervalo").value.trim();
-
-          if (!tipo_exercicio || !serie || !repeticao || !intervalo) {
-            continue; // Permite exercícios vazios, mas valida se preenchidos
-          }
-
-          const exercicio = {
-            cod_treino,
-            tipo_exercicio, // Renomeado para consistência
-            serie,
-            repeticao,
-            intervalo,
-          };
-
-          const resExercicio = await fetch("/api/exercicio", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "X-CSRFToken": "{{ csrf_token }}" // Incluir CSRF token
-            },
-            body: JSON.stringify(exercicio),
-          });
-
-          if (!resExercicio.ok) {
-            const err = await resExercicio.json();
-            throw new Error("Erro ao salvar exercício: " + (err.message || resExercicio.statusText));
-          }
-        }
-
-        alert("Treino e exercícios salvos com sucesso!");
-        fecharModal();
-      } catch (error) {
-        alert("Erro inesperado: " + error.message);
-      }
-    }
-
-    // --- Lógica de Cadastro de Avaliação ---
-    const pesoInputAvaliacao = document.getElementById("peso");
-    const alturaInputAvaliacao = document.getElementById("altura");
-    const imcInputAvaliacao = document.getElementById("imc");
-
-    function calcularIMCAvaliacao() {
-      const peso = parseFloat(pesoInputAvaliacao.value);
-      const altura = parseFloat(alturaInputAvaliacao.value);
-      if (peso > 0 && altura > 0) {
-        const imc = peso / (altura * altura);
-        imcInputAvaliacao.value = imc.toFixed(2);
-      } else {
-        imcInputAvaliacao.value = "";
-      }
-    }
-    pesoInputAvaliacao.addEventListener("input", calcularIMCAvaliacao);
-    alturaInputAvaliacao.addEventListener("input", calcularIMCAvaliacao);
-
-    async function salvarAvaliacao() {
-      try {
-        const data = {
-          aluno_id: Number(document.getElementById("avaliacaoAluno").value),
-          data: document.getElementById("avaliacaoData").value,
-          peso: parseFloat(document.getElementById("peso").value),
-          altura: parseFloat(document.getElementById("altura").value),
-          imc: parseFloat(document.getElementById("imc").value),
-          gordura: parseFloat(document.getElementById("gordura").value),
-          massa_magra: parseFloat(document.getElementById("massa_magra").value),
-          frequencia: parseInt(document.getElementById("frequencia").value),
-          pressao: document.getElementById("pressao").value,
-          observacoes: document.getElementById("observacoesAvaliacao").value
-        };
-
-        if (!data.aluno_id || !data.data || !data.peso || !data.altura) {
-          alert("Preencha os campos obrigatórios da avaliação (Aluno, Data, Peso, Altura).");
-          return;
-        }
-
-        const response = await fetch("/api/avaliacoes/", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "X-CSRFToken": "{{ csrf_token }}"
-          },
-          body: JSON.stringify(data)
-        });
-
-        if (!response.ok) {
-          const err = await response.json();
-          throw new Error("Erro ao salvar avaliação: " + (err.message || response.statusText));
-        }
-
-        alert("Avaliação salva com sucesso!");
-        fecharModalAvaliacao();
-      } catch (error) {
-        alert("Erro: " + error.message);
-      }
-    }
-
-    // --- Lógica de Envio de Feedback ---
-    async function salvarFeedback() {
-      const data = {
-        aluno_id: Number(document.getElementById("feedbackAluno").value),
-        categoria: document.getElementById("feedbackCategoria").value,
-        mensagem: document.getElementById("feedbackTexto").value
-      };
-
-      if (!data.aluno_id || !data.categoria || !data.mensagem) {
-        alert("Preencha todos os campos do feedback.");
-        return;
-      }
-
-      try {
-        const response = await fetch("/api/feedbacks/", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "X-CSRFToken": "{{ csrf_token }}"
-          },
-          body: JSON.stringify(data)
-        });
-
-        if (!response.ok) {
-          const err = await response.json();
-          throw new Error("Erro ao enviar feedback: " + (err.message || response.statusText));
-        }
-
-        alert("Feedback enviado com sucesso!");
-        fecharModalFeedback();
-      } catch (error) {
-        alert("Erro: " + error.message);
-      }
-    }
-
-
-
   </script>
-  <script>
-document.getElementById('cod_aluno').addEventListener('change', function() {
-    const alunoId = this.value;
-    if (alunoId) {
-        fetch(`?aluno_id=${alunoId}`, {
-            headers: {
-                'x-requested-with': 'XMLHttpRequest'
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (!data.error) {
-                document.getElementById('cod_instrutor_nome').value = data.instrutor_nome;
-                document.getElementById('cod_instrutor').value = data.instrutor_id;
-            }
-        })
-        .catch(error => {
-            console.error('Erro ao buscar instrutor:', error);
-        });
-    }
-});
-</script>
-
 </body>
 
 </html>

@@ -5,7 +5,7 @@
 <link rel="stylesheet" href="{% static 'css/aluno.css' %}">
 <script src="https://cdn.tailwindcss.com"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://code.highcharts.com/highcharts.js"></script>
 {% endblock style %}
 
 {% block content %}
@@ -113,7 +113,7 @@
                     class="bg-white rounded-xl shadow-lg p-6 flex items-center justify-between transition-transform transform hover:scale-105">
                     <div>
                         <p class="text-sm font-medium text-gray-500 uppercase">Alunos Inativos</p>
-                        <h4 class="text-3xl font-bold text-gray-900 mt-1">{{ total_alunos_inativos }}</h4>
+                        <h4 class="text-3xl font-bold text-gray-900 mt-1">{{ total_inativos }}</h4>
                     </div>
                     <div class="p-3 bg-red-100 rounded-full text-red-600">
                         <i class="fas fa-user-slash text-2xl"></i>
@@ -158,9 +158,66 @@
             <h2 class="text-2xl font-semibold text-gray-800 mb-6 mt-8">Análises Visuais</h2>
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
                 <div class="bg-white rounded-xl shadow-lg p-6">
-                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Distribuição de Alunos por Status</h3>
-                    <canvas id="alunosStatusChart"></canvas>
-                </div>
+    <h3 class="text-lg font-semibold text-gray-800 mb-4">
+        Distribuição de Alunos por Status
+    </h3>
+    <div id="statusChart" class="h-68 w-full mx-auto"></div>
+</div>
+                <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        Highcharts.chart('statusChart', {
+            chart: {
+                type:  'column',
+                backgroundColor: 'transparent',
+                height: '60%'
+            },
+            title: { text: null },
+            tooltip: {
+                pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+            },
+            accessibility: {
+                point: { valueSuffix: '%' }
+            },
+            plotOptions: {
+                pie: {
+                    allowPointSelect: true,
+                    cursor: 'pointer',
+                    dataLabels: {
+                        enabled: true,
+                        format: '<b>{point.name}</b>: {point.y}'
+                    }
+                }
+            },
+            series: [{
+                name: 'Alunos',
+                colorByPoint: true,
+                data: [{
+                    name: 'Ativos',
+                    y: {{ total_alunos|default:0 }},
+                    color: '#10B981' // verde
+                }, {
+                    name: 'Inativos',
+                    y: {{ total_inativos|default:0 }},
+                    color: '#EF4444' // vermelho
+                }]
+            }],
+            credits: { enabled: false }
+        });
+
+        const btnMensal = document.getElementById('btnMensal');
+        const btnAnual = document.getElementById('btnAnual');
+
+        btnMensal.addEventListener('click', () => {
+            btnMensal.classList.add('bg-indigo-100', 'text-indigo-600');
+            btnAnual.classList.remove('bg-indigo-100', 'text-indigo-600');
+        });
+
+        btnAnual.addEventListener('click', () => {
+            btnAnual.classList.add('bg-indigo-100', 'text-indigo-600');
+            btnMensal.classList.remove('bg-indigo-100', 'text-indigo-600');
+        });
+    });
+</script>
 
                 <div class="bg-white rounded-xl shadow-lg p-6">
                     <h3 class="text-lg font-semibold text-gray-800 mb-4">Tendência de Faturamento Mensal</h3>
