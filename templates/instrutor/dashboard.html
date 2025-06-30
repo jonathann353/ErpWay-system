@@ -221,117 +221,70 @@
   <!-- Main Content -->
   <main class="flex-grow py-8">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <!-- Indicadores (NOVO VISUAL) -->
-<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-8">
-  <!-- Treinos na Semana -->
-  <div class="bg-white rounded-2xl shadow-md p-5 flex items-center gap-4 hover:shadow-xl transition-all duration-300 border-t-4 border-blue-600">
-    <div class="p-3 bg-blue-100 text-blue-600 rounded-xl">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none"
-        viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-          d="M8 21h4m-2-4v4m0-4V5m0 0l-2 2m2-2l2 2M12 5V3m6 18h-4m2-4v4m0-4V5m0 0l-2 2m2-2l2 2" />
-      </svg>
-    </div>
-    <div>
-      <p class="text-gray-500 text-sm">Total de treinos na semana</p>
-      <p class="text-3xl font-bold text-gray-900 mt-1">{{ alunos|length }}</p>
-    </div>
-  </div>
-
-  <!-- IMC Atual -->
-  <div class="bg-white rounded-2xl shadow-md p-5 flex items-center gap-4 hover:shadow-xl transition-all duration-300 border-t-4 border-green-600">
-    <div class="p-3 bg-green-100 text-green-600 rounded-xl">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none"
-        viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-          d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-      </svg>
-    </div>
-    <div>
-      <p class="text-gray-500 text-sm">IMC Atual</p>
-      <p class="text-3xl font-bold text-gray-900 mt-1">{{ ultima_avaliacao.imc }}</p>
-    </div>
-  </div>
-
-  <!-- Expiração do Treino -->
-  <div class="bg-white rounded-2xl shadow-md p-5 flex items-center gap-4 hover:shadow-xl transition-all duration-300 border-t-4 border-amber-500">
-    <div class="p-3 bg-amber-100 text-amber-600 rounded-xl">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none"
-        viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-          d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-      </svg>
-    </div>
-    <div>
-      <p class="text-gray-500 text-sm">Seu treino expira em</p>
-      <p class="text-3xl font-bold text-gray-900 mt-1">3 dias</p>
-    </div>
-  </div>
-
-  <!-- Vencimento Pagamento -->
-  <div class="bg-white rounded-2xl shadow-md p-5 flex items-center gap-4 hover:shadow-xl transition-all duration-300 border-t-4 border-purple-600">
-    <div class="p-3 bg-purple-100 text-purple-600 rounded-xl">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none"
-        viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-          d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
-      </svg>
-    </div>
-    <div>
-      <p class="text-gray-500 text-sm">Vencimento em</p>
-      <p class="text-3xl font-bold text-gray-900 mt-1">{{dias_restantes_treino}} dias</p>
-    </div>
-  </div>
-</div>
+    <div class="card p-6 mb-8 bg-white rounded-xl shadow-md">
+      <div class="flex flex-col md:flex-row items-center justify-between space-y-4 md:space-y-0">
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-900">Bem-vindo, {{ instrutor_nome }}!</h2>
+                        <p class="text-gray-600 mt-1">Seu progresso está incrível esta semana! Continue assim.</p>
+                    </div>
+                </div>
+      
 
 <!-- AÇÕES (estilo padrão solicitado com gradiente) -->
-<div class="grid grid-cols-2 md:grid-cols-4 gap-6 mt-8">
+<div class="grid grid-cols-2 md:grid-cols-4 gap-6 mt-10">
+
+  <!-- Botão: Novo Treino -->
   <button onclick="openModal('treinoModal')"
-    class="bg-gradient-to-r from-blue-600 to-blue-800 hover:scale-105 transition duration-300 text-white p-4 rounded-2xl shadow-lg flex flex-col items-center">
-    <div class="bg-white/20 p-2 rounded-xl mb-2">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none"
+    class="bg-gradient-to-r from-blue-600 to-blue-800 rounded-2xl shadow-lg p-6 flex flex-col items-center justify-center gap-4 hover:scale-105 transform transition duration-300">
+    <div class="bg-white/20 p-4 rounded-xl">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none"
         viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
       </svg>
     </div>
-    <span>Novo Treino</span>
+    <span class="text-white text-sm text-center">Novo Treino</span>
   </button>
 
+  <!-- Botão: Nova Avaliação -->
   <button onclick="openModal('avaliacaoModal')"
-    class="bg-gradient-to-r from-green-500 to-green-700 hover:scale-105 transition duration-300 text-white p-4 rounded-2xl shadow-lg flex flex-col items-center">
-    <div class="bg-white/20 p-2 rounded-xl mb-2">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none"
+    class="bg-gradient-to-r from-green-500 to-green-700 rounded-2xl shadow-lg p-6 flex flex-col items-center justify-center gap-4 hover:scale-105 transform transition duration-300">
+    <div class="bg-white/20 p-4 rounded-xl">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none"
         viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
           d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10" />
       </svg>
     </div>
-    <span>Nova Avaliação</span>
+    <span class="text-white text-sm text-center">Nova Avaliação</span>
   </button>
 
+  <!-- Botão: Enviar Feedback -->
   <button onclick="openModal('feedbackModal')"
-    class="bg-gradient-to-r from-purple-600 to-purple-800 hover:scale-105 transition duration-300 text-white p-4 rounded-2xl shadow-lg flex flex-col items-center">
-    <div class="bg-white/20 p-2 rounded-xl mb-2">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none"
+    class="bg-gradient-to-r from-purple-600 to-purple-800 rounded-2xl shadow-lg p-6 flex flex-col items-center justify-center gap-4 hover:scale-105 transform transition duration-300">
+    <div class="bg-white/20 p-4 rounded-xl">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none"
         viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
           d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
       </svg>
     </div>
-    <span>Enviar Feedback</span>
+    <span class="text-white text-sm text-center">Enviar Feedback</span>
   </button>
 
+  <!-- Botão: Gerar Relatório -->
   <button onclick="openModal('relatorioModal')"
-    class="bg-gradient-to-r from-indigo-500 to-indigo-700 hover:scale-105 transition duration-300 text-white p-4 rounded-2xl shadow-lg flex flex-col items-center">
-    <div class="bg-white/20 p-2 rounded-xl mb-2">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none"
+    class="bg-gradient-to-r from-indigo-500 to-indigo-700 rounded-2xl shadow-lg p-6 flex flex-col items-center justify-center gap-4 hover:scale-105 transform transition duration-300">
+    <div class="bg-white/20 p-4 rounded-xl">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none"
         viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
           d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
       </svg>
     </div>
-    <span>Gerar Relatório</span>
+    <span class="text-white text-sm text-center">Gerar Relatório</span>
   </button>
+
 </div>
 
 
@@ -832,124 +785,299 @@
       </div>
     </div>
   </footer>
-
-  <!-- Modal de Cadastro de Treino -->
+<!-- MODAL DE TREINO -->
 <div id="treinoModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
   <div class="bg-white rounded-xl shadow-xl w-full max-w-2xl p-6">
     <div class="flex justify-between items-center mb-4">
       <h3 class="text-xl font-bold text-gray-900">Cadastrar Novo Treino</h3>
-      <button onclick="closeModal('treinoModal')" class="text-gray-500 hover:text-gray-700">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-        </svg>
-      </button>
+      <button onclick="closeModal('treinoModal')" class="text-gray-500 hover:text-gray-700">✕</button>
     </div>
 
-    <form id="formTreino" method="POST" action="{% url 'adicionar_treino' %}">
+    <form id="formTreino">
       {% csrf_token %}
-
       <div class="space-y-4">
-        <!-- Aluno -->
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Aluno</label>
-          <select name="cod_aluno" required class="w-full p-2 border border-gray-300 rounded-md">
-            <option value="">Selecione um aluno</option>
-            {% for aluno in alunos %}
-            <option value="{{ aluno.id }}">{{ aluno.nome }}</option>
-            {% endfor %}
-          </select>
+        <select name="cod_aluno" required class="w-full p-2 border rounded-md">
+          <option value="">Selecione um aluno</option>
+          {% for aluno in alunos %}
+          <option value="{{ aluno.cod_aluno }}">{{ aluno.nome }}</option>
+          {% endfor %}
+        </select>
+        <input type="hidden" name="cod_instrutor" value="{{ cod_instrutor }}">
+        <input name="tipo_treino" type="text" placeholder="Tipo de Treino" required class="w-full p-2 border rounded-md">
+        <input name="data_inicio" type="date" required class="w-full p-2 border rounded-md">
+        <input name="data_final" type="date" class="w-full p-2 border rounded-md">
+        <textarea name="objetivo" rows="2" class="w-full p-2 border rounded-md" placeholder="Objetivo do treino"></textarea>
+        <input name="observacoes" type="text" class="w-full p-2 border rounded-md" placeholder="Observações">
+
+        <div class="flex justify-between gap-2 pt-4">
+          <button type="button" onclick="closeModal('treinoModal')" class="border p-2 rounded-md">Cancelar</button>
+          <button type="submit" class="bg-blue-600 text-white p-2 rounded-md">Salvar Treino</button>
         </div>
-
-<!-- Instrutor (fixo) -->
-<div>
-  <label class="block text-sm font-medium text-gray-700 mb-1">Instrutor</label>
-
-  <!-- Mostra o nome do instrutor -->
-  <input 
-    type="text" 
-    value="{{ instrutor_nome }}" 
-    disabled 
-    class="w-full p-2 border border-gray-200 rounded-md bg-gray-100 cursor-not-allowed">
-
-  <!-- Envia o código do instrutor no payload -->
-  <input 
-    type="hidden" 
-    name="cod_instrutor" 
-    value="{{ cod_instrutor }}">
+        <!-- Botão para abrir manualmente o modal de exercício -->
+        <button type="button" onclick="abrirModalExercicio()" class="mt-2 bg-purple-600 text-white p-2 rounded-md w-full">
+          Adicionar Exercícios
+        </button>
+      </div>
+    </form>
+  </div>
 </div>
 
+<!-- MODAL DE EXERCÍCIO COM MESMO ESTILO -->
+<div id="exercicioModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+  <div class="bg-white rounded-xl shadow-xl w-full max-w-2xl p-6">
+    <div class="flex justify-between items-center mb-4">
+      <h2 class="text-xl font-bold text-gray-900">Adicionar Exercícios ao Treino</h2>
+      <button onclick="closeModal('exercicioModal')" class="text-gray-500 hover:text-gray-700">✕</button>
+    </div>
 
-        <!-- Dados do Treino -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de Treino</label>
-            <input name="tipo_treino" type="text" required class="w-full p-2 border border-gray-300 rounded-md"
-              placeholder="Ex: Hipertrofia">
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Data de Início</label>
-            <input name="data_inicio" type="date" required class="w-full p-2 border border-gray-300 rounded-md">
+    <form id="formExercicio">
+      {% csrf_token %}
+      <div class="space-y-4">
+        <select name="cod_treino" id="treinosDropdown" required class="w-full p-2 border rounded-md">
+          <option value="">Selecione um treino</option>
+        </select>
+        <input name="tipo_treino" type="text" placeholder="Tipo de treino" required class="w-full p-2 border rounded-md">
+
+        <div id="exerciciosContainer" class="space-y-3">
+          <div class="grid grid-cols-4 gap-2">
+            <input name="nome_exercicio[]" type="text" placeholder="Exercício" class="p-2 border rounded-md" required>
+            <input name="serie[]" type="number" placeholder="Séries" class="p-2 border rounded-md" required>
+            <input name="repeticao[]" type="number" placeholder="Repetições" class="p-2 border rounded-md" required>
+            <input name="intervalo[]" type="text" placeholder="Intervalo" class="p-2 border rounded-md" required>
           </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Data Final (opcional)</label>
-            <input name="data_final" type="date" class="w-full p-2 border border-gray-300 rounded-md">
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Observações (opcional)</label>
-            <input name="observacoes" type="text" class="w-full p-2 border border-gray-300 rounded-md"
-              placeholder="Observações do treino">
-          </div>
-        </div>
+        <button type="button" onclick="addExercicio()" class="text-blue-600 text-sm">+ Adicionar exercício</button>
 
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Objetivo</label>
-          <textarea name="objetivo" class="w-full p-2 border border-gray-300 rounded-md" rows="2"
-            placeholder="Descreva o objetivo do treino"></textarea>
-        </div>
-
-        <!-- Exercícios -->
-        <div class="border-t pt-4">
-          <h4 class="font-medium text-gray-700 mb-2">Exercícios</h4>
-          <div id="exerciciosContainer" class="space-y-3">
-            <div class="grid grid-cols-4 gap-2">
-              <input name="nome_exercicio[]" type="text" class="p-2 border border-gray-300 rounded-md"
-                placeholder="Exercício" required>
-              <input name="serie[]" type="number" class="p-2 border border-gray-300 rounded-md" placeholder="Séries"
-                min="1" required>
-              <input name="repeticao[]" type="number" class="p-2 border border-gray-300 rounded-md"
-                placeholder="Repetições" min="1" required>
-              <input name="intervalo[]" type="text" class="p-2 border border-gray-300 rounded-md"
-                placeholder="Intervalo" required>
-            </div>
-          </div>
-
-          <button type="button" onclick="addExercicio()"
-            class="mt-2 text-sm text-blue-600 hover:text-blue-800 flex items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24"
-              stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-            </svg>
-            Adicionar exercício
-          </button>
-        </div>
-
-        <!-- Ações -->
-        <div class="flex justify-end space-x-3 pt-4">
-          <button type="button" onclick="closeModal('treinoModal')"
-            class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
-            Cancelar
-          </button>
-          <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
-            Salvar Treino
-          </button>
+        <div class="flex justify-end gap-2 pt-4">
+          <button type="button" onclick="closeModal('exercicioModal')" class="border p-2 rounded-md">Cancelar</button>
+          <button type="submit" class="bg-green-600 text-white p-2 rounded-md">Salvar Exercícios</button>
         </div>
       </div>
     </form>
   </div>
 </div>
+
+<script>
+async function carregarTreinosDropdown() {
+  const dropdown = document.getElementById('treinosDropdown');
+  dropdown.innerHTML = '<option value="">Carregando...</option>';
+
+  try {
+    const response = await fetch("{% url 'listar_treinos_json' %}");
+    if (!response.ok) throw new Error('Erro ao carregar treinos');
+    const treinos = await response.json();
+
+    dropdown.innerHTML = '<option value="">Selecione um treino</option>';
+    treinos.forEach(treino => {
+      const option = document.createElement("option");
+      option.value = treino.cod_treino;
+      option.text = `${treino.tipo_treino} - ${treino.cod_treino}`;
+      dropdown.appendChild(option);
+    });
+  } catch (error) {
+    dropdown.innerHTML = '<option value="">Erro ao carregar treinos</option>';
+    console.error(error);
+  }
+}
+
+// Carrega os treinos quando o modal de exercício for aberto
+function abrirModalExercicio() {
+  carregarTreinosDropdown();
+  document.getElementById('exercicioModal').classList.remove('hidden');
+}
+
+// Fecha modal genérico
+function closeModal(id) {
+  document.getElementById(id).classList.add('hidden');
+}
+
+// Adiciona novo conjunto de campos de exercício
+function addExercicio() {
+  const container = document.getElementById("exerciciosContainer");
+  const div = document.createElement("div");
+  div.className = "grid grid-cols-4 gap-2";
+  div.innerHTML = `
+    <input name="nome_exercicio[]" type="text" placeholder="Exercício" class="p-2 border rounded-md" required>
+    <input name="serie[]" type="number" placeholder="Séries" class="p-2 border rounded-md" required>
+    <input name="repeticao[]" type="number" placeholder="Repetições" class="p-2 border rounded-md" required>
+    <input name="intervalo[]" type="text" placeholder="Intervalo" class="p-2 border rounded-md" required>
+  `;
+  container.appendChild(div);
+}
+
+// Evento submit do formExercicio (adicione seu fetch para salvar os exercícios aqui)
+document.getElementById("formExercicio").addEventListener("submit", async function (e) {
+  e.preventDefault();
+  const form = e.target;
+  const formData = new FormData(form);
+
+  const payload = {
+    cod_treino: formData.get("cod_treino"),
+    tipo_treino: formData.get("tipo_treino"),
+    nome_exercicio: formData.getAll("nome_exercicio[]"),
+    serie: formData.getAll("serie[]"),
+    repeticao: formData.getAll("repeticao[]"),
+    intervalo: formData.getAll("intervalo[]")
+  };
+
+  try {
+    const response = await fetch("{% url 'adicionar_exercicios_ao_treino' %}", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": formData.get("csrfmiddlewaretoken")
+      },
+      body: JSON.stringify(payload)
+    });
+
+    const result = await response.json();
+    if (response.ok) {
+      alert("Exercícios adicionados!");
+      closeModal('exercicioModal');
+      form.reset();
+    } else {
+      alert("Erro: " + (result.message || "Erro ao adicionar exercícios"));
+    }
+  } catch (error) {
+    alert("Erro ao adicionar exercícios.");
+    console.error(error);
+  }
+});
+</script>
+
+<!-- SCRIPTS -->
+<script>
+function closeModal(id) {
+  document.getElementById(id).classList.add("hidden");
+}
+function openModal(id) {
+  document.getElementById(id).classList.remove("hidden");
+}
+
+function addExercicio() {
+  const container = document.getElementById("exerciciosContainer");
+  const div = document.createElement("div");
+  div.className = "grid grid-cols-4 gap-2";
+  div.innerHTML = `
+    <input name="nome_exercicio[]" type="text" placeholder="Exercício" class="p-2 border rounded-md" required>
+    <input name="serie[]" type="number" placeholder="Séries" class="p-2 border rounded-md" required>
+    <input name="repeticao[]" type="number" placeholder="Repetições" class="p-2 border rounded-md" required>
+    <input name="intervalo[]" type="text" placeholder="Intervalo" class="p-2 border rounded-md" required>
+  `;
+  container.appendChild(div);
+}
+
+async function carregarTreinosDropdown(selecionado = null) {
+  const dropdown = document.getElementById('treinosDropdown');
+  dropdown.innerHTML = '<option value="">Carregando...</option>';
+  try {
+    const response = await fetch("{% url 'listar_treinos_json' %}");
+    const treinos = await response.json();
+    dropdown.innerHTML = '<option value="">Selecione um treino</option>';
+    treinos.forEach(t => {
+      const opt = document.createElement("option");
+      opt.value = t.cod_treino;
+      opt.text = `${t.tipo_treino} - ${t.cod_treino}`;
+      if (t.cod_treino === selecionado) opt.selected = true;
+      dropdown.appendChild(opt);
+    });
+  } catch {
+    dropdown.innerHTML = '<option value="">Erro ao carregar treinos</option>';
+  }
+}
+
+function abrirModalExercicio() {
+  closeModal('treinoModal');
+  carregarTreinosDropdown();
+  openModal('exercicioModal');
+}
+
+document.getElementById("formTreino").addEventListener("submit", async function (e) {
+  e.preventDefault();
+  const form = e.target;
+  const formData = new FormData(form);
+
+  const payload = {
+    cod_aluno: formData.get("cod_aluno"),
+    cod_instrutor: formData.get("cod_instrutor"),
+    tipo_treino: formData.get("tipo_treino"),
+    data_inicio: formData.get("data_inicio"),
+    data_final: formData.get("data_final"),
+    objetivo: formData.get("objetivo"),
+    observacoes: formData.get("observacoes")
+  };
+
+  try {
+    const response = await fetch("{% url 'adicionar_treino' %}", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": formData.get("csrfmiddlewaretoken")
+      },
+      body: JSON.stringify(payload)
+    });
+
+    const result = await response.json();
+
+    if (response.ok) {
+      alert("Treino salvo com sucesso!");
+
+      closeModal('treinoModal');
+      form.reset();
+
+      await carregarTreinosDropdown(result.cod_treino);
+      document.querySelector('#formExercicio input[name="tipo_treino"]').value = payload.tipo_treino;
+      openModal('exercicioModal');
+
+    } else {
+      alert("Erro: " + (result.message || "Erro ao salvar treino"));
+    }
+  } catch (error) {
+    alert("Erro inesperado.");
+    console.error(error);
+  }
+});
+
+document.getElementById("formExercicio").addEventListener("submit", async function (e) {
+  e.preventDefault();
+  const form = e.target;
+  const formData = new FormData(form);
+
+  const payload = {
+    cod_treino: formData.get("cod_treino"),
+    tipo_treino: formData.get("tipo_treino"),
+    nome_exercicio: formData.getAll("nome_exercicio[]"),
+    serie: formData.getAll("serie[]"),
+    repeticao: formData.getAll("repeticao[]"),
+    intervalo: formData.getAll("intervalo[]")
+  };
+
+  try {
+    const response = await fetch("{% url 'adicionar_exercicios_ao_treino' %}", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": formData.get("csrfmiddlewaretoken")
+      },
+      body: JSON.stringify(payload)
+    });
+
+    const result = await response.json();
+    if (response.ok) {
+      alert("Exercícios adicionados!");
+      closeModal('exercicioModal');
+      form.reset();
+    } else {
+      alert("Erro: " + result.message);
+    }
+  } catch (error) {
+    alert("Erro ao adicionar exercícios.");
+    console.error(error);
+  }
+});
+</script>
+
 
 
   <!-- Avaliação Modal -->
@@ -1021,6 +1149,12 @@
                 class="w-full p-2 border border-gray-300 rounded-md bg-gray-100" readonly>
             </div>
           </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Meta -->
+           <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Meta</label>
+              <input type="number" name="meta" id="meta" step="0.1" class="w-full p-2 border border-gray-300 rounded-md">
+            </div>
 
           <!-- Observações -->
           <div>
@@ -1028,6 +1162,7 @@
             <textarea name="observacoes" id="observacoes" class="w-full p-2 border border-gray-300 rounded-md"
               rows="3"></textarea>
           </div>
+          </div>         
 
           <!-- Botões -->
           <div class="flex justify-end space-x-3 pt-4">

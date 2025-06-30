@@ -119,58 +119,43 @@ def perfil(request, cod_aluno):
         aluno['nome_instrutor'] = mapa_instrutores.get(cod_instrutor, 'Não atribuído')
 
     # 🔍 Buscar treinos e exercícios
-        try:
-            url_treinos = f'https://api-flask-academia.onrender.com/detalhes/treino/aluno/{cod_aluno}'
-            response = requests.get(url_treinos)
+    try:
+        url_treinos = f'https://api-flask-academia.onrender.com/detalhes/treino/aluno/{cod_aluno}'
+        response = requests.get(url_treinos)
 
-            if response.status_code == 200:
-                dados_treinos = response.json()
+        if response.status_code == 200:
+            dados_treinos = response.json()
 
-                if isinstance(dados_treinos, list):
-                    for item in dados_treinos:
-                        treino_data = item.get('treino', {})
+            if isinstance(dados_treinos, list):
+                for item in dados_treinos:
+                    treino_data = item.get('treino', {})
+                    treino = {
+                        'cod_treino': treino_data.get('cod_treino'),
+                        'tipo_treino': treino_data.get('tipo_treino'),
+                        'objetivo': treino_data.get('objetivo'),
+                        'observacoes': treino_data.get('observacoes'),
+                        'data_inicio': treino_data.get('data_inicio'),
+                        'data_final': treino_data.get('data_final'),
+                        'exercicios': []
+                    }
 
-                        # Conversão segura das datas
-                        data_inicio = treino_data.get('data_inicio')
-                        data_final = treino_data.get('data_final')
+                    exercicios = treino_data.get('exercicios', [])
+                    for ex in exercicios:
+                        treino['exercicios'].append({
+                            'cod_exercicio': ex.get('cod_exercicio'),
+                            'nome_exercicio': ex.get('nome_exercicio'),
+                            'serie': ex.get('serie'),
+                            'repeticoes': ex.get('repeticoes'),
+                            'carga': ex.get('carga'),
+                            'observacao': ex.get('observacao'),
+                            'concluido': ex.get('concluido', False)
+                        })
 
-                        try:
-                            data_inicio = datetime.strptime(data_inicio, '%Y-%m-%d').date() if data_inicio else None
-                        except Exception:
-                            data_inicio = None
-
-                        try:
-                            data_final = datetime.strptime(data_final, '%Y-%m-%d').date() if data_final else None
-                        except Exception:
-                            data_final = None
-
-                        treino = {
-                            'cod_treino': treino_data.get('cod_treino'),
-                            'tipo_treino': treino_data.get('tipo_treino'),
-                            'objetivo': treino_data.get('objetivo'),
-                            'observacoes': treino_data.get('observacoes'),
-                            'data_inicio': data_inicio,
-                            'data_final': data_final,
-                            'exercicios': []
-                        }
-
-                        exercicios = treino_data.get('exercicios', [])
-                        for ex in exercicios:
-                            treino['exercicios'].append({
-                                'cod_exercicio': ex.get('cod_exercicio'),
-                                'nome_exercicio': ex.get('nome_exercicio'),
-                                'serie': ex.get('serie'),
-                                'repeticoes': ex.get('repeticoes'),
-                                'carga': ex.get('carga'),
-                                'observacao': ex.get('observacao'),
-                                'concluido': ex.get('concluido', False)
-                            })
-
-                        treinos.append(treino)
-            else:
-                messages.error(request, "Erro ao buscar dados dos treinos.")
-        except Exception as e:
-            messages.error(request, f"Erro na API de treinos: {str(e)}")
+                    treinos.append(treino)
+        else:
+            messages.error(request, "Erro ao buscar dados dos treinos.")
+    except Exception as e:
+        messages.error(request, f"Erro na API de treinos: {str(e)}")
 
     # 🔍 Buscar avaliações
     try:
@@ -287,15 +272,6 @@ def perfil(request, cod_aluno):
 
     return render(request, 'aluno/perfil.html', contexto)
 
-def listar_treinos_json(request):
-    try:
-        response = requests.get(f"{BASE_URL}/listar/treinos")
-        if response.status_code == 200:
-            return JsonResponse(response.json(), safe=False)
-        return JsonResponse([], safe=False)
-    except:
-        return JsonResponse([], safe=False)
-    
 def atualizar_status(request, cod_exercicio, cod_aluno):
     if request.method == 'POST':
         status = request.POST.get('status') == 'on'  # Checkbox retorna 'on' se estiver marcado
@@ -334,7 +310,6 @@ def cadastrar_aluno(request):
             'status': request.POST.get('status') == 'True',
             'data_nascimento': request.POST.get('data_nascimento'),
             'sexo': request.POST.get('sexo'),
-            'Cod_plano': request.POST.get('plano')
         }
 
         try:
@@ -447,8 +422,7 @@ def dashboard(request):
         soma_valores = 0
         ultimo_valor_pago = 0
         messages.error(request, f"Erro ao consultar pagamentos no Supabase: {str(e)}")
-    
-    planos = consultar_planos_supabase()
+
     return render(request, 'aluno/dashboard.html', {
         'alunos': alunos,
         'total_alunos': total_alunos,
@@ -457,7 +431,6 @@ def dashboard(request):
         'instrutores': instrutores,
         'soma_valores': soma_valores,
         'ultimo_pagamento': ultimo_valor_pago,
-        'planos': planos,
     })
  
 
@@ -620,10 +593,9 @@ def salvar_avaliacao(request, cod_instrutor):
             peso = request.POST.get('peso')
             altura = request.POST.get('altura')
             imc = request.POST.get('imc')
-            meta = request.POST.get('meta')
             observacoes = request.POST.get('observacoes', '')
 
-            if not (cod_aluno and data_avaliacao and peso and altura and imc):
+            if not (cod_aluno and data_avaliacao and peso and altura):
                 messages.error(request, 'Preencha todos os campos obrigatórios.')
                 return redirect('dashboard_instrutor', cod_instrutor=cod_instrutor)
 
@@ -633,7 +605,6 @@ def salvar_avaliacao(request, cod_instrutor):
                 "peso": float(peso),
                 "altura": float(altura),
                 "imc": float(imc),
-                "meta": float(meta), 
                 "observacoes": observacoes
             }
 
@@ -706,93 +677,89 @@ def listar_avaliacoes(request, cod_aluno):
 
 @csrf_exempt
 def adicionar_treino(request):
-    if request.method != 'POST':
-        return JsonResponse({"message": "Método não permitido."}, status=405)
+    if request.method == 'POST':
+        try:
+            try:
+                data = json.loads(request.body)
+            except Exception:
+                data = request.POST
 
-    try:
-        data = json.loads(request.body)
+            nome_aluno = data.get('nome_aluno')
+            cod_aluno = data.get('cod_aluno')  # caso tenha, para fallback
+            cod_instrutor = data.get('cod_instrutor')
 
-        cod_aluno = data.get('cod_aluno')
-        cod_instrutor = data.get('cod_instrutor')
-        if not cod_aluno or not cod_instrutor:
-            return JsonResponse({"message": "Aluno e Instrutor são obrigatórios."}, status=400)
+            if not cod_instrutor:
+                return HttpResponseBadRequest("Código do instrutor ausente.")
 
-        treino_payload = {
-            # Não envie cod_treino aqui para banco gerar sequencial automaticamente
-            "tipo_treino": data.get('tipo_treino'),
-            "cod_aluno": int(cod_aluno),
-            "cod_instrutor": int(cod_instrutor),
-            "objetivo": data.get('objetivo', ''),
-            "observacoes": data.get('observacoes', ''),
-            "data_inicio": data.get('data_inicio'),
-            "data_final": data.get('data_final') or None,
-            "dia_semana": data.get('dia_semana', '')
-        }
+            # Se veio só o nome do aluno, busca o código
+            if not cod_aluno and nome_aluno:
+                cod_aluno = buscar_cod_aluno_por_nome(nome_aluno)
 
-        treino_response = requests.post(f"{BASE_URL}/criar/treino/aluno", json=treino_payload)
+            if not cod_aluno:
+                return HttpResponseBadRequest("Código do aluno ausente ou não encontrado.")
 
-        if treino_response.status_code not in [200, 201]:
-            return JsonResponse({"message": "Erro ao criar treino.", "erro": treino_response.text}, status=400)
+            cod_treino = random.randint(100000, 999999)
 
-        # Supondo que a API retorne JSON com o treino criado e seu cod_treino sequencial:
-        treino_criado = treino_response.json()
-        cod_treino = treino_criado.get('cod_treino')  # Ajuste conforme o campo real da sua API
-
-        if not cod_treino:
-            return JsonResponse({"message": "Código do treino não retornado pela API."}, status=500)
-
-        return JsonResponse({"status": "success", "cod_treino": cod_treino})
-
-    except json.JSONDecodeError:
-        return JsonResponse({"message": "Dados inválidos no corpo da requisição."}, status=400)
-    except Exception as e:
-        return JsonResponse({"message": f"Erro inesperado: {str(e)}"}, status=500)
-    
-@csrf_exempt
-def adicionar_exercicios_ao_treino(request):
-    if request.method != 'POST':
-        return JsonResponse({"message": "Método não permitido."}, status=405)
-
-    try:
-        data = json.loads(request.body)
-
-        cod_treino = data.get('cod_treino')
-        tipo_treino = data.get('tipo_treino')
-
-        if not cod_treino or not tipo_treino:
-            return JsonResponse({"message": "Código do treino e tipo do treino são obrigatórios."}, status=400)
-
-        nomes = data.get('nome_exercicio') or []
-        series = data.get('serie') or []
-        repeticoes = data.get('repeticao') or []
-        intervalos = data.get('intervalo') or []
-
-        if isinstance(nomes, str): nomes = [nomes]
-        if isinstance(series, str): series = [series]
-        if isinstance(repeticoes, str): repeticoes = [repeticoes]
-        if isinstance(intervalos, str): intervalos = [intervalos]
-
-        for i in range(len(nomes)):
-            exercicio_payload = {
+            treino_payload = {
                 "cod_treino": cod_treino,
-                "tipo_treino": tipo_treino,
-                "nome_exercicio": nomes[i],
-                "serie": int(series[i]),
-                "repeticao": int(repeticoes[i]),
-                "intervalo": intervalos[i]
+                "tipo_treino": data.get('tipo_treino'),
+                "cod_aluno": int(cod_aluno),
+                "cod_instrutor": int(cod_instrutor),
+                "objetivo": data.get('objetivo', ''),
+                "observacoes": data.get('observacoes', ''),
+                "data_inicio": data.get('data_inicio'),
+                "data_final": data.get('data_final') or None
             }
 
-            exercicio_response = requests.post(f"{BASE_URL}/criar/exercicio/treino", json=exercicio_payload)
-            if exercicio_response.status_code not in [200, 201]:
-                return JsonResponse({"message": "Erro ao criar exercício.", "erro": exercicio_response.text}, status=400)
+            treino_response = requests.post(
+                f"{BASE_URL}/criar/treino/aluno",
+                json=treino_payload
+            )
 
-        return JsonResponse({"status": "success", "message": "Exercícios cadastrados com sucesso."})
+            if treino_response.status_code not in [200, 201]:
+                print("Erro ao criar treino:", treino_response.text)
+                return HttpResponseBadRequest("Erro ao criar treino.")
 
-    except json.JSONDecodeError:
-        return JsonResponse({"message": "Dados inválidos no corpo da requisição."}, status=400)
-    except Exception as e:
-        return JsonResponse({"message": f"Erro inesperado: {str(e)}"}, status=500)
+            nomes = data.get('nome_exercicio[]') or []
+            series = data.get('serie[]') or []
+            repeticoes = data.get('repeticao[]') or []
+            intervalos = data.get('intervalo[]') or []
 
+            if isinstance(nomes, str):
+                nomes = [nomes]
+            if isinstance(series, str):
+                series = [series]
+            if isinstance(repeticoes, str):
+                repeticoes = [repeticoes]
+            if isinstance(intervalos, str):
+                intervalos = [intervalos]
+
+            for i in range(len(nomes)):
+                exercicio_payload = {
+                    "cod_treino": cod_treino,
+                    "tipo_treino": data.get('tipo_treino'),
+                    "serie": int(series[i]),
+                    "repeticao": int(repeticoes[i]),
+                    "intervalo": intervalos[i]
+                }
+
+                exercicio_response = requests.post(
+                    f"{BASE_URL}/criar/exercicio/treino",
+                    json=exercicio_payload
+                )
+
+                if exercicio_response.status_code not in [200, 201]:
+                    print("Erro ao criar exercício:", exercicio_response.text)
+                    return HttpResponseBadRequest("Erro ao criar exercício.")
+
+            return JsonResponse({
+                "status": "success",
+                "cod_treino": cod_treino
+            })
+
+        except Exception as e:
+            print("Erro inesperado:", e)
+            return HttpResponseBadRequest(f"Erro interno: {e}")
 ###########
 
 def register_view(request):
@@ -963,28 +930,3 @@ def atualizar_status_pagamento(request, payment_id):
         return redirect('perfil', cod_aluno=cod_aluno)
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=400)
-    
-def consultar_planos_supabase():
-    url = "https://pgdldfqzqgxowqedrldh.supabase.co/rest/v1/planos"
-    headers = {
-        "apikey": settings.SUPABASE_KEY,
-        "Authorization": f"Bearer {settings.SUPABASE_KEY}",
-        "Content-Type": "application/json",
-        "Accept": "application/json",
-    }
-
-    try:
-        response = requests.get(url, headers=headers)
-        if response.status_code == 200:
-            planos = response.json()
-            print("✔ Planos retornados do Supabase:")
-            for plano in planos:
-                print(f"- ID: {plano.get('id')} | Nome: {plano.get('nome')} | Valor: R$ {plano.get('valor_mensal')}")
-            return planos
-        else:
-            print(f"❌ Erro ao buscar planos: {response.status_code}")
-            return []
-    except Exception as e:
-        print(f"❌ Erro de conexão com Supabase: {str(e)}")
-        return []
-

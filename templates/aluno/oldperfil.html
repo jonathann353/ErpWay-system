@@ -1,4 +1,4 @@
-{% load static %}
+8  9{% load static %}
 
 <!DOCTYPE html>
 <html lang="pt-br">
@@ -297,7 +297,8 @@
 
                 <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-8 mb-10">
   <!-- Card Treinos Semana -->
-  <div class="bg-gradient-to-r from-blue-600 to-blue-800 rounded-2xl shadow-lg p-6 flex flex-col items-center justify-center gap-4 hover:scale-105 transform transition duration-300">
+  <div
+    class="bg-gradient-to-r from-blue-600 to-blue-800 rounded-2xl shadow-lg p-6 flex flex-col items-center justify-center gap-4 hover:scale-105 transform transition duration-300">
     <div class="bg-white/20 p-4 rounded-xl">
       <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none"
         viewBox="0 0 24 24" stroke="currentColor">
@@ -409,12 +410,10 @@
                                             </h3>
 
                                             <div class="space-y-1">
-                                                <p class="text-gray-700">
-                                                <span class="font-medium">Início:</span> {{ treino.data_inicio|date:"d/m/Y" }}
-                                                </p>
-                                                <p class="text-gray-700">
-                                                <span class="font-medium">Fim:</span> {{ treino.data_final|date:"d/m/Y" }}
-                                                </p>
+                                                <p class="text-gray-700"><span class="font-medium">Início:</span> {{
+                                                    treino.data_inicio }}</p>
+                                                <p class="text-gray-700"><span class="font-medium">Fim:</span> {{
+                                                    treino.data_final }}</p>
                                             </div>
 
                                             {% if treino.observacoes %}
@@ -870,7 +869,7 @@
                                     </option>
                                 </select>
                                 <input name="identificationNumber" placeholder="Número do documento" required
-                                    value="{{ aluno.cpf }}"
+                                    value="{{ aluno.identificationNumber }}"
                                     class="border border-gray-300 rounded-md p-3 w-full focus:ring-indigo-500 focus:border-indigo-500" />
                                 <input name="valor" placeholder="Valor" required value="{{ aluno.valor_mensalidade }}"
                                     class="border border-gray-300 rounded-md p-3 w-full focus:ring-indigo-500 focus:border-indigo-500" />

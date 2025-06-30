@@ -1,0 +1,510 @@
+{% load static %}
+
+{% block style %}
+<link rel="stylesheet" href="{% static 'css/base.css' %}">
+<link rel="stylesheet" href="{% static 'css/aluno.css' %}">
+<script src="https://cdn.tailwindcss.com"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+<script src="https://code.highcharts.com/highcharts.js"></script>
+{% endblock style %}
+
+{% block content %}
+<div x-data="{ sidebarOpen: false }" class="flex h-screen bg-gray-100">
+    <div :class="sidebarOpen ? 'block' : 'hidden'" @click="sidebarOpen = false"
+        class="fixed inset-0 z-20 transition-opacity bg-black opacity-50 lg:hidden"></div>
+
+    <div :class="sidebarOpen ? 'translate-x-0 ease-out' : '-translate-x-full ease-in'"
+        class="fixed inset-y-0 left-0 z-30 w-64 overflow-y-auto transition duration-300 transform bg-gray-900 lg:translate-x-0 lg:static lg:inset-0 shadow-lg">
+        <div class="flex flex-col items-center justify-center mt-8 px-4">
+            <div class="flex items-center">
+                <svg class="w-12 h-12 text-blue-500" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path
+                        d="M364.61 390.213C304.625 450.196 207.37 450.196 147.386 390.213C117.394 360.22 102.398 320.911 102.398 281.6C102.398 242.291 117.394 202.981 147.386 172.989C147.386 230.4 153.6 281.6 230.4 307.2C230.4 256 256 102.4 294.4 76.7999C320 128 334.618 142.997 364.608 172.989C394.601 202.981 409.597 242.291 409.597 281.6C409.597 320.911 394.601 360.22 364.61 390.213Z"
+                        fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    </path>
+                    <path
+                        d="M201.694 387.105C231.686 417.098 280.312 417.098 310.305 387.105C325.301 372.109 332.8 352.456 332.8 332.8C332.8 313.144 325.301 293.491 310.305 278.495C295.309 263.498 288 256 275.2 230.4C256 243.2 243.201 320 243.201 345.6C201.694 345.6 179.2 332.8 179.2 332.8C179.2 352.456 186.698 372.109 201.694 387.105Z"
+                        fill="white"></path>
+                </svg>
+                <span class="mx-2 text-2xl font-semibold text-white">ERPWAY SYSTEM</span>
+            </div>
+            <div class="mt-4 text-xl font-medium text-white">
+                {% if user.is_authenticated %}
+                Bem-vindo(a), <span class="text-blue-300">{{ user.username }}</span>!
+                {% else %}
+                Olá, visitante!
+                {% endif %}
+            </div>
+        </div>
+
+        <nav class="mt-10">
+            <a class="flex items-center px-6 py-3 mt-2 text-gray-100 bg-gray-700 bg-opacity-30 rounded-md mx-3 hover:bg-opacity-50 transition-colors duration-200"
+                href="{% url 'dashboard' %}">
+                <svg class="w-6 h-6 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"></path>
+                </svg>
+                <span class="text-lg">Dashboard</span>
+            </a>
+
+            <a class="flex items-center px-6 py-3 mt-2 text-gray-400 hover:bg-gray-700 hover:bg-opacity-30 hover:text-gray-100 rounded-md mx-3 transition-colors duration-200"
+                href="../instrutores">
+                <svg class="w-6 h-6 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M17 14v6m-3-3h6M6 10h2a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v2a2 2 0 002 2zm10 0h2a2 2 0 002-2V6a2 2 0 00-2-2h-2a2 2 0 00-2 2v2a2 2 0 002 2zM6 20h2a2 2 0 002-2v-2a2 2 0 00-2-2H6a2 2 0 00-2 2v2a2 2 0 002 2z">
+                    </path>
+                </svg>
+                <span class="text-lg">Instrutores</span>
+            </a>
+
+            <a class="flex items-center px-6 py-3 mt-2 text-gray-400 hover:bg-gray-700 hover:bg-opacity-30 hover:text-gray-100 rounded-md mx-3 transition-colors duration-200"
+                href="../test">
+                <svg class="w-6 h-6 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10">
+                    </path>
+                </svg>
+                <span class="text-lg">Alunos</span>
+            </a>
+
+            <a class="flex items-center px-6 py-3 mt-2 text-gray-400 hover:bg-gray-700 hover:bg-opacity-30 hover:text-gray-100 rounded-md mx-3 transition-colors duration-200"
+                href="#">
+                <svg class="w-6 h-6 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
+                    </path>
+                </svg>
+                <span class="text-lg">Formulários</span>
+            </a>
+        </nav>
+        <div class="mt-auto p-4">
+            <form method="post" action="{% url 'logout' %}">
+                {% csrf_token %}
+                <button type="submit"
+                    class="w-full px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-200 text-lg">
+                    <i class="fas fa-sign-out-alt mr-2"></i>Sair
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="flex-1 flex flex-col overflow-hidden">
+        <header class="flex items-center justify-between px-6 py-4 bg-white border-b border-gray-200 shadow-md">
+            <div class="flex items-center">
+                <button @click="sidebarOpen = true" class="text-gray-500 focus:outline-none lg:hidden">
+                    <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M4 6H20M4 12H20M4 18H20" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                            stroke-linejoin="round"></path>
+                    </svg>
+                </button>
+                <h1 class="text-2xl font-semibold text-gray-800 ml-3">Dashboard Principal</h1>
+            </div>
+        </header>
+
+        <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div
+                    class="bg-white rounded-xl shadow-lg p-6 flex items-center justify-between transition-transform transform hover:scale-105">
+                    <div>
+                        <p class="text-sm font-medium text-gray-500 uppercase">Alunos Inativos</p>
+                        <h4 class="text-3xl font-bold text-gray-900 mt-1">{{ total_inativos }}</h4>
+                    </div>
+                    <div class="p-3 bg-red-100 rounded-full text-red-600">
+                        <i class="fas fa-user-slash text-2xl"></i>
+                    </div>
+                </div>
+
+                <div
+                    class="bg-white rounded-xl shadow-lg p-6 flex items-center justify-between transition-transform transform hover:scale-105">
+                    <div>
+                        <p class="text-sm font-medium text-gray-500 uppercase">Alunos Ativos</p>
+                        <h4 class="text-3xl font-bold text-gray-900 mt-1">{{ total_alunos }}</h4>
+                    </div>
+                    <div class="p-3 bg-green-100 rounded-full text-green-600">
+                        <i class="fas fa-user-check text-2xl"></i>
+                    </div>
+                </div>
+
+                <div
+                    class="bg-white rounded-xl shadow-lg p-6 flex items-center justify-between transition-transform transform hover:scale-105">
+                    <div>
+                        <p class="text-sm font-medium text-gray-500 uppercase">Faturamento Mensal</p>
+                        <h4 class="text-3xl font-bold text-gray-900 mt-1">R$ {{ soma_valores|floatformat:2 }}</h4>
+                    </div>
+                    <div class="p-3 bg-blue-100 rounded-full text-blue-600">
+                        <i class="fas fa-dollar-sign text-2xl"></i>
+                    </div>
+                </div>
+
+                <div
+                    class="bg-white rounded-xl shadow-lg p-6 flex items-center justify-between transition-transform transform hover:scale-105">
+                    <div>
+                        <p class="text-sm font-medium text-gray-500 uppercase">Último Pagamento</p>
+                        <h4 class="text-3xl font-bold text-gray-900 mt-1">R$ {{ ultimo_pagamento|floatformat:2 }}</h4>
+                    </div>
+                    <div class="p-3 bg-yellow-100 rounded-full text-yellow-600">
+                        <i class="fas fa-receipt text-2xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            {# Section for Charts #}
+            <h2 class="text-2xl font-semibold text-gray-800 mb-6 mt-8">Análises Visuais</h2>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                <div class="bg-white rounded-xl shadow-lg p-6">
+    <h3 class="text-lg font-semibold text-gray-800 mb-4">
+        Distribuição de Alunos por Status
+    </h3>
+    <div id="statusChart" class="h-68 w-full mx-auto"></div>
+</div>
+                <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        Highcharts.chart('statusChart', {
+            chart: {
+                type:  'column',
+                backgroundColor: 'transparent',
+                height: '60%'
+            },
+            title: { text: null },
+            tooltip: {
+                pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+            },
+            accessibility: {
+                point: { valueSuffix: '%' }
+            },
+            plotOptions: {
+                pie: {
+                    allowPointSelect: true,
+                    cursor: 'pointer',
+                    dataLabels: {
+                        enabled: true,
+                        format: '<b>{point.name}</b>: {point.y}'
+                    }
+                }
+            },
+            series: [{
+                name: 'Alunos',
+                colorByPoint: true,
+                data: [{
+                    name: 'Ativos',
+                    y: {{ total_alunos|default:0 }},
+                    color: '#10B981' // verde
+                }, {
+                    name: 'Inativos',
+                    y: {{ total_inativos|default:0 }},
+                    color: '#EF4444' // vermelho
+                }]
+            }],
+            credits: { enabled: false }
+        });
+
+        const btnMensal = document.getElementById('btnMensal');
+        const btnAnual = document.getElementById('btnAnual');
+
+        btnMensal.addEventListener('click', () => {
+            btnMensal.classList.add('bg-indigo-100', 'text-indigo-600');
+            btnAnual.classList.remove('bg-indigo-100', 'text-indigo-600');
+        });
+
+        btnAnual.addEventListener('click', () => {
+            btnAnual.classList.add('bg-indigo-100', 'text-indigo-600');
+            btnMensal.classList.remove('bg-indigo-100', 'text-indigo-600');
+        });
+    });
+</script>
+
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Tendência de Faturamento Mensal</h3>
+                    <canvas id="faturamentoChart"></canvas>
+                </div>
+            </div>
+
+            <div class="flex flex-col lg:flex-row lg:space-x-6"> {# Changed to flex-col and lg:flex-row for better responsiveness and side-by-side layout #}
+                <div class="w-full lg:w-7/12 bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden mb-6 lg:mb-0">
+                    <div x-data="{
+                        openTab: 1,
+                        activeClasses: 'border-b-2 border-blue-600 text-blue-700',
+                        inactiveClasses: 'text-gray-500 hover:text-gray-700'
+                    }" class="p-6">
+
+                        <ul class="flex border-b border-gray-200 mb-4">
+                            <li @click="openTab = 1" :class="{ '-mb-px': openTab === 1 }" class="mr-6">
+                                <a href="#" :class="openTab === 1 ? activeClasses : inactiveClasses"
+                                    class="inline-block py-3 px-1 font-semibold text-lg transition-colors duration-200">
+                                    Alunos
+                                </a>
+                            </li>
+                            <li @click="openTab = 2" :class="{ '-mb-px': openTab === 2 }" class="mr-6">
+                                <a href="#" :class="openTab === 2 ? activeClasses : inactiveClasses"
+                                    class="inline-block py-3 px-1 font-semibold text-lg transition-colors duration-200">
+                                    Instrutores
+                                </a>
+                            </li>
+                        </ul>
+
+                        <div class="w-full">
+
+                            <div x-show="openTab === 1" class="h-96 overflow-y-auto overflow-x-auto">
+                                {% if messages %}
+                                {% for message in messages %}
+                                <div id="alertBox" class="relative p-4 pr-12 mb-4 text-white border border-solid rounded-lg
+                                {% if message.tags == 'success' %}
+                                    bg-gradient-to-tl from-green-600 to-lime-400 border-lime-300
+                                {% elif message.tags == 'error' %}
+                                    bg-gradient-to-tl from-red-600 to-pink-400 border-pink-300
+                                {% endif %}">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex-1">
+                                            <strong class="font-semibold">{{ message }}</strong>
+                                        </div>
+                                        <button type="button" class="text-white hover:text-gray-300 cursor-pointer ml-2"
+                                            data-bs-dismiss="alert" aria-label="Close">
+                                            <span aria-hidden="true">&#10005;</span>
+                                        </button>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                                <script>
+                                    setTimeout(function () {
+                                        var alertBox = document.getElementById('alertBox');
+                                        if (alertBox) {
+                                            alertBox.style.display = 'none';
+                                        }
+                                    }, 3000);
+                                </script>
+                                {% endif %}
+
+                                <table class="min-w-full text-sm text-gray-800">
+                                    <thead class="bg-gray-50 border-b border-gray-200 sticky top-0 bg-white z-10">
+                                        <tr>
+                                            <th class="px-6 py-3 text-left font-medium uppercase tracking-wide">Nome</th>
+                                            <th class="px-6 py-3 text-left font-medium uppercase tracking-wide">Cpf</th>
+                                            <th class="px-6 py-3 text-left font-medium uppercase tracking-wide">Email</th>
+                                            <th class="px-6 py-3 text-left font-medium uppercase tracking-wide">Telefone</th>
+                                            <th class="px-6 py-3 text-left font-medium uppercase tracking-wide">Status</th>
+                                            <th class="px-6 py-3 text-left font-medium uppercase tracking-wide">Instrutor</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-100">
+                                        {% for aluno in alunos %}
+                                        <tr class="hover:bg-gray-50 transition-colors duration-150">
+                                            <td class="px-6 py-4 whitespace-nowrap">{{ aluno.nome }}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap">{{ aluno.cpf }}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap">{{ aluno.email }}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap">{{ aluno.telefone }}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <span class="inline-block px-3 py-1 rounded-full text-xs font-semibold
+                                                {% if aluno.status == 'Ativo' %}
+                                                    bg-green-100 text-green-800
+                                                {% else %}
+                                                    bg-red-100 text-red-800
+                                                {% endif %}">
+                                                    {{ aluno.status }}
+                                                </span>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap">{{ aluno.nome_instrutor }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div x-show="openTab === 2" class="h-96 overflow-y-auto overflow-x-auto">
+                                <table class="min-w-full text-sm text-gray-800">
+                                    <thead class="bg-gray-50 border-b border-gray-200 sticky top-0 bg-white z-10">
+                                        <tr>
+                                            <th class="px-6 py-3 text-left font-medium uppercase tracking-wide">ID</th>
+                                            <th class="px-6 py-3 text-left font-medium uppercase tracking-wide">Nome</th>
+                                            <th class="px-6 py-3 text-left font-medium uppercase tracking-wide">Num. Confef</th>
+                                            <th class="px-6 py-3 text-left font-medium uppercase tracking-wide">Telefone</th>
+                                            <th class="px-6 py-3 text-left font-medium uppercase tracking-wide">Função</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-100">
+                                        {% for instrutor in instrutores %}
+                                        <tr class="hover:bg-gray-50 transition-colors duration-150">
+                                            <td class="px-6 py-4 whitespace-nowrap">{{ instrutor.cod_instrutor }}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap">{{ instrutor.nome }}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap">{{ instrutor.num_confef }}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap">{{ instrutor.telefone }}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap">{{ instrutor.funcao }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <div class="w-full lg:w-5/12 bg-white rounded-xl shadow-lg p-6">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-5 flex items-center">
+                        <i class="fas fa-bolt mr-2 text-yellow-500"></i> Funcionalidades Rápidas
+                    </h2>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                        <button onclick="openModal('modalAluno')"
+                            class="flex items-center justify-center px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 text-base font-medium shadow-md">
+                            <i class="fas fa-user-plus mr-2"></i>Cadastrar Novo Aluno
+                        </button>
+                        <a href="#"
+                            class="flex items-center justify-center px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200 text-base font-medium shadow-md">
+                            <i class="fas fa-file-alt mr-2"></i>Emitir Relatório
+                        </a>
+                        <a href="#"
+                            class="flex items-center justify-center px-4 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors duration-200 text-base font-medium shadow-md">
+                            <i class="fas fa-calendar-alt mr-2"></i>Agendar Aula
+                        </a>
+                    </div>
+
+                    <div id="modalAluno" class="fixed inset-0 bg-black bg-opacity-60 hidden items-center justify-center z-50 p-4">
+                        <div class="bg-white rounded-lg shadow-2xl p-8 w-full max-w-2xl relative animate-fade-in-up">
+                            <h2 class="text-2xl font-bold text-gray-800 mb-6">Cadastrar Novo Aluno</h2>
+                            <form action="{% url 'cadastrar_aluno' %}" method="post" class="space-y-4">
+                                {% csrf_token %}
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label for="nome" class="block text-sm font-medium text-gray-700">Nome Completo</label>
+                                        <input type="text" id="nome" name="nome" required
+                                            class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-blue-500 focus:border-blue-500" />
+                                    </div>
+                                    <div>
+                                        <label for="cpf" class="block text-sm font-medium text-gray-700">CPF</label>
+                                        <input type="text" id="cpf" name="cpf" required
+                                            class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-blue-500 focus:border-blue-500" />
+                                    </div>
+                                    <div>
+                                        <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+                                        <input type="email" id="email" name="email" required
+                                            class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-blue-500 focus:border-blue-500" />
+                                    </div>
+                                    <div>
+                                        <label for="telefone" class="block text-sm font-medium text-gray-700">Telefone</label>
+                                        <input type="text" id="telefone" name="telefone" required
+                                            class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-blue-500 focus:border-blue-500" />
+                                    </div>
+                                    <div>
+                                        <label for="instrutor" class="block text-sm font-medium text-gray-700">Instrutor</label>
+                                        <select id="instrutor" name="Cod_instrutor" required
+                                            class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-blue-500 focus:border-blue-500">
+                                            <option value="">Selecione um instrutor</option>
+                                            {% for instrutor in instrutores %}
+                                            <option value="{{ instrutor.cod_instrutor }}">{{ instrutor.nome }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label for="status" class="block text-sm font-medium text-gray-700">Status</label>
+                                        <select id="status" name="status" required
+                                            class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-blue-500 focus:border-blue-500">
+                                            <option value="Ativo">Ativo</option>
+                                            <option value="Inativo">Inativo</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label for="data_nascimento" class="block text-sm font-medium text-gray-700">Data de
+                                            Nascimento</label>
+                                        <input type="date" id="data_nascimento" name="data_nascimento" required
+                                            class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-blue-500 focus:border-blue-500" />
+                                    </div>
+                                    <div>
+                                        <label for="sexo" class="block text-sm font-medium text-gray-700">Sexo</label>
+                                        <select id="sexo" name="sexo" required
+                                            class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-blue-500 focus:border-blue-500">
+                                            <option value="Masculino">Masculino</option>
+                                            <option value="Feminino">Feminino</option>
+                                            <option value="Outro">Outro</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="mt-6 flex justify-end space-x-3">
+                                    <button type="button" onclick="closeModal('modalAluno')"
+                                        class="px-5 py-2 bg-gray-300 rounded-md hover:bg-gray-400 text-gray-800 font-medium transition-colors duration-200">
+                                        Cancelar
+                                    </button>
+                                    <button type="submit"
+                                        class="px-5 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium transition-colors duration-200">
+                                        Salvar
+                                    </button>
+                                </div>
+                            </form>
+                            <button onclick="closeModal('modalAluno')"
+                                class="absolute top-4 right-4 text-gray-500 hover:text-gray-900 text-2xl">
+                                &times;
+                            </button>
+                        </div>
+                    </div>
+
+                    <script>
+                        function openModal(id) {
+                            document.getElementById(id).classList.remove("hidden");
+                            document.getElementById(id).classList.add("flex");
+                        }
+                        function closeModal(id) {
+                            document.getElementById(id).classList.remove("flex");
+                            document.getElementById(id).classList.add("hidden");
+                        }
+                    </script>
+
+                    <h3 class="text-xl font-semibold text-gray-800 mb-4 mt-8 flex items-center">
+                        <i class="fas fa-filter mr-2 text-blue-500"></i> Filtros Avançados
+                    </h3>
+                    <form method="get" action="#" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="filter_status" class="block text-sm font-medium text-gray-700">Status</label>
+                            <select id="filter_status" name="status"
+                                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-blue-500 focus:border-blue-500">
+                                <option value="">Todos</option>
+                                <option value="ativo">Ativo</option>
+                                <option value="inativo">Inativo</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label for="filter_unidade" class="block text-sm font-medium text-gray-700">Unidade</label>
+                            <select id="filter_unidade" name="unidade"
+                                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-blue-500 focus:border-blue-500">
+                                <option value="">Todas</option>
+                                <option value="porto_alegre">Porto Alegre</option>
+                                <option value="caxias">Caxias do Sul</option>
+                                <option value="canoas">Canoas</option>
+                            </select>
+                        </div>
+
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-medium text-gray-700">Período de Cadastro</label>
+                            <div class="flex flex-col sm:flex-row gap-3 mt-1">
+                                <input type="date" name="inicio"
+                                    class="w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-blue-500 focus:border-blue-500" />
+                                <input type="date" name="fim"
+                                    class="w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-blue-500 focus:border-blue-500" />
+                            </div>
+                        </div>
+
+                        <div class="md:col-span-2">
+                            <label for="search_query" class="block text-sm font-medium text-gray-700">Buscar por nome, CPF ou
+                                e-mail</label>
+                            <input type="text" id="search_query" name="q" placeholder="Digite para buscar..."
+                                class="mt-1 w-full border px-4 py-3 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
+                        </div>
+
+                        <div class="md:col-span-2 mt-4">
+                            <button type="submit"
+                                class="w-full px-5 py-3 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors duration-200 text-lg font-medium shadow-md">
+                                <i class="fas fa-search mr-2"></i>Aplicar Filtros
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+{% endblock content %}

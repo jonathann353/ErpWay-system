@@ -158,66 +158,70 @@
             <h2 class="text-2xl font-semibold text-gray-800 mb-6 mt-8">Análises Visuais</h2>
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
                 <div class="bg-white rounded-xl shadow-lg p-6">
-    <h3 class="text-lg font-semibold text-gray-800 mb-4">
-        Distribuição de Alunos por Status
-    </h3>
-    <div id="statusChart" class="h-68 w-full mx-auto"></div>
-</div>
-                <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        Highcharts.chart('statusChart', {
-            chart: {
-                type:  'column',
-                backgroundColor: 'transparent',
-                height: '60%'
-            },
-            title: { text: null },
-            tooltip: {
-                pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
-            },
-            accessibility: {
-                point: { valueSuffix: '%' }
-            },
-            plotOptions: {
-                pie: {
-                    allowPointSelect: true,
-                    cursor: 'pointer',
-                    dataLabels: {
-                        enabled: true,
-                        format: '<b>{point.name}</b>: {point.y}'
-                    }
-                }
-            },
-            series: [{
-                name: 'Alunos',
-                colorByPoint: true,
-                data: [{
-                    name: 'Ativos',
-                    y: {{ total_alunos|default:0 }},
-                    color: '#10B981' // verde
-                }, {
-                    name: 'Inativos',
-                    y: {{ total_inativos|default:0 }},
-                    color: '#EF4444' // vermelho
-                }]
-            }],
-            credits: { enabled: false }
-        });
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">
+                        Distribuição de Alunos por Status
+                    </h3>
+                    <div id="statusChart" class="h-68 w-full mx-auto"></div>
+                </div>
+                    <script>
+                        document.addEventListener('DOMContentLoaded', function () {
+                            Highcharts.chart('statusChart', {
+                                chart: {
+                                    type:  'column',
+                                    backgroundColor: 'transparent',
+                                    height: '60%'
+                                },
+                                title: { text: null },
+                                tooltip: {
+                                    pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+                                },
+                                accessibility: {
+                                    point: { valueSuffix: '%' }
+                                },
+                                plotOptions: {
+                                    pie: {
+                                        allowPointSelect: true,
+                                        cursor: 'pointer',
+                                        dataLabels: {
+                                            enabled: true,
+                                            format: '<b>{point.name}</b>: {point.y}'
+                                        }
+                                    }
+                                },
+                                series: [{
+                                    name: 'Alunos',
+                                    colorByPoint: true,
+                                    data: [{
+                                        name: 'Ativos',
+                                        y: {{ total_alunos|default:0 }},
+                                        color: '#10B981' // verde
+                                    }, {
+                                        name: 'Inativos',
+                                        y: {{ total_inativos|default:0 }},
+                                        color: '#EF4444' // vermelho
+                                    }]
+                                }],
+                                credits: { enabled: false }
+                            });
 
-        const btnMensal = document.getElementById('btnMensal');
-        const btnAnual = document.getElementById('btnAnual');
+                            const btnMensal = document.getElementById('btnMensal');
+                            const btnAnual = document.getElementById('btnAnual');
 
-        btnMensal.addEventListener('click', () => {
-            btnMensal.classList.add('bg-indigo-100', 'text-indigo-600');
-            btnAnual.classList.remove('bg-indigo-100', 'text-indigo-600');
-        });
+                            if (btnMensal) {
+                                btnMensal.addEventListener('click', () => {
+                                    btnMensal.classList.add('bg-indigo-100', 'text-indigo-600');
+                                    btnAnual.classList.remove('bg-indigo-100', 'text-indigo-600');
+                                });
+                            }
 
-        btnAnual.addEventListener('click', () => {
-            btnAnual.classList.add('bg-indigo-100', 'text-indigo-600');
-            btnMensal.classList.remove('bg-indigo-100', 'text-indigo-600');
-        });
-    });
-</script>
+                            if (btnAnual) {
+                                btnAnual.addEventListener('click', () => {
+                                    btnAnual.classList.add('bg-indigo-100', 'text-indigo-600');
+                                    btnMensal.classList.remove('bg-indigo-100', 'text-indigo-600');
+                                });
+                            }
+                        });
+                    </script>
 
                 <div class="bg-white rounded-xl shadow-lg p-6">
                     <h3 class="text-lg font-semibold text-gray-800 mb-4">Tendência de Faturamento Mensal</h3>
@@ -226,31 +230,38 @@
             </div>
 
             <div class="flex flex-col lg:flex-row lg:space-x-6"> {# Changed to flex-col and lg:flex-row for better responsiveness and side-by-side layout #}
-                <div class="w-full lg:w-7/12 bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden mb-6 lg:mb-0">
+                <div class="w-full bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden mb-6 lg:mb-0">
                     <div x-data="{
                         openTab: 1,
                         activeClasses: 'border-b-2 border-blue-600 text-blue-700',
                         inactiveClasses: 'text-gray-500 hover:text-gray-700'
                     }" class="p-6">
 
-                        <ul class="flex border-b border-gray-200 mb-4">
-                            <li @click="openTab = 1" :class="{ '-mb-px': openTab === 1 }" class="mr-6">
-                                <a href="#" :class="openTab === 1 ? activeClasses : inactiveClasses"
-                                    class="inline-block py-3 px-1 font-semibold text-lg transition-colors duration-200">
-                                    Alunos
-                                </a>
-                            </li>
-                            <li @click="openTab = 2" :class="{ '-mb-px': openTab === 2 }" class="mr-6">
-                                <a href="#" :class="openTab === 2 ? activeClasses : inactiveClasses"
-                                    class="inline-block py-3 px-1 font-semibold text-lg transition-colors duration-200">
-                                    Instrutores
-                                </a>
-                            </li>
-                        </ul>
+                        <div class="flex items-center justify-between border-b border-gray-200 mb-4">
+                            <!-- Abas de navegação -->
+                            <ul class="flex">
+                                <li @click="openTab = 1; renderStudentsTable();" :class="{ '-mb-px': openTab === 1 }" class="mr-6">
+                                    <a href="#" :class="openTab === 1 ? activeClasses : inactiveClasses"
+                                        class="inline-block py-3 px-1 font-semibold text-lg transition-colors duration-200">
+                                        Alunos
+                                    </a>
+                                </li>
+                                <li @click="openTab = 2; renderInstructorsTable();" :class="{ '-mb-px': openTab === 2 }" class="mr-6">
+                                    <a href="#" :class="openTab === 2 ? activeClasses : inactiveClasses"
+                                        class="inline-block py-3 px-1 font-semibold text-lg transition-colors duration-200">
+                                        Instrutores
+                                    </a>
+                                </li>
+                            </ul>
 
+                            <!-- Botão limpar filtros -->
+                            <button id="clearStudentFilters"
+                                class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-md transition-colors duration-200 text-sm md:text-base">
+                                <i class="fas fa-times mr-1"></i>Limpar Filtros
+                            </button>
+                        </div>
                         <div class="w-full">
-
-                            <div x-show="openTab === 1" class="h-96 overflow-y-auto overflow-x-auto">
+                            <div x-show="openTab === 1" class="overflow-y-auto overflow-x-auto">
                                 {% if messages %}
                                 {% for message in messages %}
                                 <div id="alertBox" class="relative p-4 pr-12 mb-4 text-white border border-solid rounded-lg
@@ -279,7 +290,19 @@
                                     }, 3000);
                                 </script>
                                 {% endif %}
+                                <div class="mb-4 flex flex-col md:flex-row md:items-center md:space-x-4 space-y-2 md:space-y-0">
+                                <!-- Campo de busca -->
+                                <input type="text" id="searchInputStudents" placeholder="Buscar por nome, CPF, telefone ou e-mail..."
+                                    class="w-full md:w-2/3 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
 
+                                <!-- Filtro de status -->
+                                <select id="statusFilterStudents"
+                                    class="w-full md:w-1/3 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option value="">Todos os Status</option>
+                                    <option value="Ativo">Ativo</option>
+                                    <option value="Inativo">Inativo</option>
+                                </select>
+                            </div>
                                 <table class="min-w-full text-sm text-gray-800">
                                     <thead class="bg-gray-50 border-b border-gray-200 sticky top-0 bg-white z-10">
                                         <tr>
@@ -291,31 +314,23 @@
                                             <th class="px-6 py-3 text-left font-medium uppercase tracking-wide">Instrutor</th>
                                         </tr>
                                     </thead>
-                                    <tbody class="divide-y divide-gray-100">
-                                        {% for aluno in alunos %}
-                                        <tr class="hover:bg-gray-50 transition-colors duration-150">
-                                            <td class="px-6 py-4 whitespace-nowrap">{{ aluno.nome }}</td>
-                                            <td class="px-6 py-4 whitespace-nowrap">{{ aluno.cpf }}</td>
-                                            <td class="px-6 py-4 whitespace-nowrap">{{ aluno.email }}</td>
-                                            <td class="px-6 py-4 whitespace-nowrap">{{ aluno.telefone }}</td>
-                                            <td class="px-6 py-4 whitespace-nowrap">
-                                                <span class="inline-block px-3 py-1 rounded-full text-xs font-semibold
-                                                {% if aluno.status == 'Ativo' %}
-                                                    bg-green-100 text-green-800
-                                                {% else %}
-                                                    bg-red-100 text-red-800
-                                                {% endif %}">
-                                                    {{ aluno.status }}
-                                                </span>
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap">{{ aluno.nome_instrutor }}</td>
-                                        </tr>
-                                        {% endfor %}
-                                    </tbody>
+                                    <tbody id="studentsTableBody" class="divide-y divide-gray-100">
+                                        </tbody>
                                 </table>
+                                <div class="flex justify-center items-center space-x-4 mt-4">
+                                    <button id="prevStudentPage"
+                                        class="px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded disabled:opacity-50">Anterior</button>
+                                    <span id="studentPageInfo" class="text-sm text-gray-700"></span>
+                                    <button id="nextStudentPage"
+                                        class="px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded disabled:opacity-50">Próxima</button>
+                                </div>
                             </div>
 
-                            <div x-show="openTab === 2" class="h-96 overflow-y-auto overflow-x-auto">
+                            <div x-show="openTab === 2" class="overflow-y-auto overflow-x-auto">
+                                <div class="mb-4">
+                                    <input type="text" id="searchInputInstructors" placeholder="Buscar por nome, número Confef, ou telefone..."
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                </div>
                                 <table class="min-w-full text-sm text-gray-800">
                                     <thead class="bg-gray-50 border-b border-gray-200 sticky top-0 bg-white z-10">
                                         <tr>
@@ -326,24 +341,21 @@
                                             <th class="px-6 py-3 text-left font-medium uppercase tracking-wide">Função</th>
                                         </tr>
                                     </thead>
-                                    <tbody class="divide-y divide-gray-100">
-                                        {% for instrutor in instrutores %}
-                                        <tr class="hover:bg-gray-50 transition-colors duration-150">
-                                            <td class="px-6 py-4 whitespace-nowrap">{{ instrutor.cod_instrutor }}</td>
-                                            <td class="px-6 py-4 whitespace-nowrap">{{ instrutor.nome }}</td>
-                                            <td class="px-6 py-4 whitespace-nowrap">{{ instrutor.num_confef }}</td>
-                                            <td class="px-6 py-4 whitespace-nowrap">{{ instrutor.telefone }}</td>
-                                            <td class="px-6 py-4 whitespace-nowrap">{{ instrutor.funcao }}</td>
-                                        </tr>
-                                        {% endfor %}
-                                    </tbody>
+                                    <tbody id="instructorsTableBody" class="divide-y divide-gray-100">
+                                        </tbody>
                                 </table>
+                                <div class="flex justify-center items-center space-x-4 mt-4">
+                                    <button id="prevInstructorPage"
+                                        class="px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded disabled:opacity-50">Anterior</button>
+                                    <span id="instructorPageInfo" class="text-sm text-gray-700"></span>
+                                    <button id="nextInstructorPage"
+                                        class="px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded disabled:opacity-50">Próxima</button>
+                                </div>
                             </div>
 
                         </div>
                     </div>
                 </div>
-
                 <div class="w-full lg:w-5/12 bg-white rounded-xl shadow-lg p-6">
                     <h2 class="text-xl font-semibold text-gray-800 mb-5 flex items-center">
                         <i class="fas fa-bolt mr-2 text-yellow-500"></i> Funcionalidades Rápidas
@@ -364,83 +376,89 @@
                         </a>
                     </div>
 
-                    <div id="modalAluno" class="fixed inset-0 bg-black bg-opacity-60 hidden items-center justify-center z-50 p-4">
-                        <div class="bg-white rounded-lg shadow-2xl p-8 w-full max-w-2xl relative animate-fade-in-up">
-                            <h2 class="text-2xl font-bold text-gray-800 mb-6">Cadastrar Novo Aluno</h2>
-                            <form action="{% url 'cadastrar_aluno' %}" method="post" class="space-y-4">
-                                {% csrf_token %}
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div>
-                                        <label for="nome" class="block text-sm font-medium text-gray-700">Nome Completo</label>
-                                        <input type="text" id="nome" name="nome" required
-                                            class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-blue-500 focus:border-blue-500" />
-                                    </div>
-                                    <div>
-                                        <label for="cpf" class="block text-sm font-medium text-gray-700">CPF</label>
-                                        <input type="text" id="cpf" name="cpf" required
-                                            class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-blue-500 focus:border-blue-500" />
-                                    </div>
-                                    <div>
-                                        <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
-                                        <input type="email" id="email" name="email" required
-                                            class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-blue-500 focus:border-blue-500" />
-                                    </div>
-                                    <div>
-                                        <label for="telefone" class="block text-sm font-medium text-gray-700">Telefone</label>
-                                        <input type="text" id="telefone" name="telefone" required
-                                            class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-blue-500 focus:border-blue-500" />
-                                    </div>
-                                    <div>
-                                        <label for="instrutor" class="block text-sm font-medium text-gray-700">Instrutor</label>
-                                        <select id="instrutor" name="Cod_instrutor" required
-                                            class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-blue-500 focus:border-blue-500">
-                                            <option value="">Selecione um instrutor</option>
-                                            {% for instrutor in instrutores %}
-                                            <option value="{{ instrutor.cod_instrutor }}">{{ instrutor.nome }}</option>
-                                            {% endfor %}
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label for="status" class="block text-sm font-medium text-gray-700">Status</label>
-                                        <select id="status" name="status" required
-                                            class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-blue-500 focus:border-blue-500">
-                                            <option value="Ativo">Ativo</option>
-                                            <option value="Inativo">Inativo</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label for="data_nascimento" class="block text-sm font-medium text-gray-700">Data de
-                                            Nascimento</label>
-                                        <input type="date" id="data_nascimento" name="data_nascimento" required
-                                            class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-blue-500 focus:border-blue-500" />
-                                    </div>
-                                    <div>
-                                        <label for="sexo" class="block text-sm font-medium text-gray-700">Sexo</label>
-                                        <select id="sexo" name="sexo" required
-                                            class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-blue-500 focus:border-blue-500">
-                                            <option value="Masculino">Masculino</option>
-                                            <option value="Feminino">Feminino</option>
-                                            <option value="Outro">Outro</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="mt-6 flex justify-end space-x-3">
-                                    <button type="button" onclick="closeModal('modalAluno')"
-                                        class="px-5 py-2 bg-gray-300 rounded-md hover:bg-gray-400 text-gray-800 font-medium transition-colors duration-200">
-                                        Cancelar
-                                    </button>
-                                    <button type="submit"
-                                        class="px-5 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium transition-colors duration-200">
-                                        Salvar
-                                    </button>
-                                </div>
-                            </form>
-                            <button onclick="closeModal('modalAluno')"
-                                class="absolute top-4 right-4 text-gray-500 hover:text-gray-900 text-2xl">
-                                &times;
-                            </button>
-                        </div>
-                    </div>
+                    <!-- Botão para abrir modal, só exemplo -->
+<button onclick="document.getElementById('modalAluno').classList.remove('hidden')" class="btn">Cadastrar Novo Aluno</button>
+
+<div id="modalAluno"
+    class="fixed inset-0 bg-black bg-opacity-60 hidden items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-lg shadow-2xl p-8 w-full max-w-2xl relative animate-fade-in-up">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6">Cadastrar Novo Aluno</h2>
+        <form action="{% url 'cadastrar_aluno' %}" method="post" class="space-y-4">
+            {% csrf_token %}
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Campos do aluno -->
+                <div>
+                    <label for="nome" class="block text-sm font-medium text-gray-700">Nome Completo</label>
+                    <input type="text" id="nome" name="nome" required
+                        class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-blue-500 focus:border-blue-500" />
+                </div>
+                <div>
+                    <label for="cpf" class="block text-sm font-medium text-gray-700">CPF</label>
+                    <input type="text" id="cpf" name="cpf" required
+                        class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-blue-500 focus:border-blue-500" />
+                </div>
+                <div>
+                    <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+                    <input type="email" id="email" name="email" required
+                        class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-blue-500 focus:border-blue-500" />
+                </div>
+                <div>
+                    <label for="telefone" class="block text-sm font-medium text-gray-700">Telefone</label>
+                    <input type="text" id="telefone" name="telefone" required
+                        class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-blue-500 focus:border-blue-500" />
+                </div>
+                <div>
+                    <label for="instrutor" class="block text-sm font-medium text-gray-700">Instrutor</label>
+                    <select id="instrutor" name="Cod_instrutor" required
+                        class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-blue-500 focus:border-blue-500">
+                        <option value="">Selecione um instrutor</option>
+                        {% for instrutor in instrutores %}
+                        <option value="{{ instrutor.cod_instrutor }}">{{ instrutor.nome }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label for="status" class="block text-sm font-medium text-gray-700">Status</label>
+                    <select id="status" name="status" required
+                        class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-blue-500 focus:border-blue-500">
+                        <option value="Ativo">Ativo</option>
+                        <option value="Inativo">Inativo</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="data_nascimento" class="block text-sm font-medium text-gray-700">Data de Nascimento</label>
+                    <input type="date" id="data_nascimento" name="data_nascimento" required
+                        class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-blue-500 focus:border-blue-500" />
+                </div>
+                <div>
+                    <label for="sexo" class="block text-sm font-medium text-gray-700">Sexo</label>
+                    <select id="sexo" name="sexo" required
+                        class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-blue-500 focus:border-blue-500">
+                        <option value="Masculino">Masculino</option>
+                        <option value="Feminino">Feminino</option>
+                        <option value="Outro">Outro</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="plano" class="block text-sm font-medium text-gray-700">Plano</label>
+                    <select id="plano" name="plano" required
+                        class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-blue-500 focus:border-blue-500">
+                        <option value="">Selecione um plano</option>
+                        {% for plano in planos %}
+                        <option value="{{ plano.id }}">{{ plano.nome }} - R$ {{ plano.valor_mensal }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div class="mt-6 flex justify-end gap-4">
+                <button type="button" onclick="document.getElementById('modalAluno').classList.add('hidden')" class="btn-cancel">Cancelar</button>
+                <button type="submit" class="btn-submit">Cadastrar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 
                     <script>
                         function openModal(id) {
@@ -503,8 +521,223 @@
                         </div>
                     </form>
                 </div>
+                
             </div>
         </main>
     </div>
 </div>
+
+<script>
+    const allStudents = [
+        {% for aluno in alunos %}
+        {
+            nome: "{{ aluno.nome|escapejs }}",
+            cpf: "{{ aluno.cpf|default:''|escapejs }}",
+            email: "{{ aluno.email|escapejs }}",
+            telefone: "{{ aluno.telefone|default:''|escapejs }}",
+            status: "{{ aluno.status|escapejs }}",
+            nome_instrutor: "{{ aluno.nome_instrutor|default:''|escapejs }}"
+        } {% if not forloop.last %}, {% endif %}
+        {% endfor %}
+    ];
+
+    const allInstructors = [
+        {% for instrutor in instrutores %}
+        {
+            cod_instrutor: "{{ instrutor.cod_instrutor|escapejs }}",
+            nome: "{{ instrutor.nome|escapejs }}",
+            num_confef: "{{ instrutor.num_confef|default:''|escapejs }}",
+            telefone: "{{ instrutor.telefone|default:''|escapejs }}",
+            funcao: "{{ instrutor.funcao|default:''|escapejs }}"
+        } {% if not forloop.last %}, {% endif %}
+        {% endfor %}
+    ];
+
+    const itemsPerPage = 6;
+
+    // Student Pagination
+    let currentStudentPage = 1;
+    let filteredStudents = allStudents;
+
+    const studentsTableBody = document.getElementById('studentsTableBody');
+    const studentPageInfo = document.getElementById('studentPageInfo');
+    const prevStudentPageBtn = document.getElementById('prevStudentPage');
+    const nextStudentPageBtn = document.getElementById('nextStudentPage');
+    const searchInputStudents = document.getElementById('searchInputStudents');
+    const statusFilterStudents = document.getElementById('statusFilterStudents');
+
+
+    function renderStudentsTable() {
+        const start = (currentStudentPage - 1) * itemsPerPage;
+        const end = start + itemsPerPage;
+        const paginatedStudents = filteredStudents.slice(start, end);
+
+        studentsTableBody.innerHTML = '';
+
+        if (paginatedStudents.length === 0) {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td colspan="6" class="text-center px-6 py-4 text-sm text-gray-500">
+                    Nenhum aluno encontrado.
+                </td>
+            `;
+            studentsTableBody.appendChild(row);
+        } else {
+            paginatedStudents.forEach(aluno => {
+                const row = document.createElement('tr');
+                row.classList.add('hover:bg-gray-50', 'transition-colors', 'duration-150');
+                row.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap">${aluno.nome}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${aluno.cpf}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${aluno.email}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${aluno.telefone}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="inline-block px-3 py-1 rounded-full text-xs font-semibold
+                        ${aluno.status === 'Ativo' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+                            ${aluno.status}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">${aluno.nome_instrutor}</td>
+                `;
+                studentsTableBody.appendChild(row);
+            });
+        }
+
+        const totalPages = Math.ceil(filteredStudents.length / itemsPerPage) || 1;
+        studentPageInfo.textContent = `Página ${currentStudentPage} de ${totalPages}`;
+
+        prevStudentPageBtn.disabled = currentStudentPage === 1;
+        nextStudentPageBtn.disabled = currentStudentPage === totalPages;
+    }
+
+    function applyStudentFilter() {
+    const searchTerm = searchInputStudents.value.trim().toLowerCase();
+    const selectedStatus = statusFilterStudents.value;
+
+    filteredStudents = allStudents.filter(aluno => {
+        const matchesSearch = aluno.nome.toLowerCase().includes(searchTerm)
+            || aluno.cpf.toLowerCase().includes(searchTerm)
+            || aluno.email.toLowerCase().includes(searchTerm)
+            || aluno.telefone.toLowerCase().includes(searchTerm);
+
+        const matchesStatus = selectedStatus === '' || aluno.status === selectedStatus;
+
+        return matchesSearch && matchesStatus;
+    }).sort((a, b) => a.nome.localeCompare(b.nome));
+
+    currentStudentPage = 1;
+    renderStudentsTable();
+}
+
+
+    searchInputStudents.addEventListener('input', applyStudentFilter);
+    statusFilterStudents.addEventListener('change', applyStudentFilter);
+
+    const clearStudentFilters = document.getElementById('clearStudentFilters');
+
+clearStudentFilters.addEventListener('click', () => {
+    searchInputStudents.value = '';
+    statusFilterStudents.value = '';
+    applyStudentFilter();
+});
+
+
+    prevStudentPageBtn.addEventListener('click', () => {
+        if (currentStudentPage > 1) {
+            currentStudentPage--;
+            renderStudentsTable();
+        }
+    });
+
+    nextStudentPageBtn.addEventListener('click', () => {
+        const totalPages = Math.ceil(filteredStudents.length / itemsPerPage);
+        if (currentStudentPage < totalPages) {
+            currentStudentPage++;
+            renderStudentsTable();
+        }
+    });
+
+    // Instructor Pagination
+    let currentInstructorPage = 1;
+    let filteredInstructors = allInstructors;
+
+    const instructorsTableBody = document.getElementById('instructorsTableBody');
+    const instructorPageInfo = document.getElementById('instructorPageInfo');
+    const prevInstructorPageBtn = document.getElementById('prevInstructorPage');
+    const nextInstructorPageBtn = document.getElementById('nextInstructorPage');
+    const searchInputInstructors = document.getElementById('searchInputInstructors');
+
+    function renderInstructorsTable() {
+        const start = (currentInstructorPage - 1) * itemsPerPage;
+        const end = start + itemsPerPage;
+        const paginatedInstructors = filteredInstructors.slice(start, end);
+
+        instructorsTableBody.innerHTML = '';
+
+        if (paginatedInstructors.length === 0) {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td colspan="5" class="text-center px-6 py-4 text-sm text-gray-500">
+                    Nenhum instrutor encontrado.
+                </td>
+            `;
+            instructorsTableBody.appendChild(row);
+        } else {
+            paginatedInstructors.forEach(instrutor => {
+                const row = document.createElement('tr');
+                row.classList.add('hover:bg-gray-50', 'transition-colors', 'duration-150');
+                row.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap">${instrutor.cod_instrutor}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${instrutor.nome}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${instrutor.num_confef}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${instrutor.telefone}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${instrutor.funcao}</td>
+                `;
+                instructorsTableBody.appendChild(row);
+            });
+        }
+
+        const totalPages = Math.ceil(filteredInstructors.length / itemsPerPage) || 1;
+        instructorPageInfo.textContent = `Página ${currentInstructorPage} de ${totalPages}`;
+
+        prevInstructorPageBtn.disabled = currentInstructorPage === 1;
+        nextInstructorPageBtn.disabled = currentInstructorPage === totalPages;
+    }
+
+    function applyInstructorFilter() {
+        const searchTerm = searchInputInstructors.value.trim().toLowerCase();
+        filteredInstructors = allInstructors.filter(instrutor =>
+            instrutor.nome.toLowerCase().includes(searchTerm) ||
+            instrutor.num_confef.toLowerCase().includes(searchTerm) ||
+            instrutor.telefone.toLowerCase().includes(searchTerm) ||
+            instrutor.funcao.toLowerCase().includes(searchTerm)
+        ).sort((a, b) => a.nome.localeCompare(b.nome));
+
+        currentInstructorPage = 1;
+        renderInstructorsTable();
+    }
+
+    searchInputInstructors.addEventListener('input', applyInstructorFilter);
+
+    prevInstructorPageBtn.addEventListener('click', () => {
+        if (currentInstructorPage > 1) {
+            currentInstructorPage--;
+            renderInstructorsTable();
+        }
+    });
+
+    nextInstructorPageBtn.addEventListener('click', () => {
+        const totalPages = Math.ceil(filteredInstructors.length / itemsPerPage);
+        if (currentInstructorPage < totalPages) {
+            currentInstructorPage++;
+            renderInstructorsTable();
+        }
+    });
+
+    // Initial render for students when the page loads
+    document.addEventListener('DOMContentLoaded', () => {
+        renderStudentsTable();
+        // Instructors table will be rendered when its tab is clicked
+    });
+</script>
 {% endblock content %}
