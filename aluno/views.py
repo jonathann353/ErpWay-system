@@ -95,28 +95,44 @@ def perfil(request, cod_aluno):
         response = requests.get(url_instrutor)
 
         if response.status_code == 200:
-            dados_instrutores = response.json()
-            if isinstance(dados_instrutores, list):
-                mapa_instrutores = {
-                    instrutor.get('cod_instrutor'): instrutor.get('nome')
-                    for instrutor in dados_instrutores
-                }
+            dados_instrutores_raw = response.json()
+            dados_instrutores = dados_instrutores_raw.get('dados', [])
+
+            mapa_instrutores = {
+                int(instrutor.get('cod_instrutor')): instrutor.get('nome')
+                for instrutor in dados_instrutores if isinstance(instrutor, dict)
+            }
+
+            print("Instrutores formatados:", mapa_instrutores)
+
         else:
             messages.error(request, "Erro ao buscar dados dos instrutores.")
     except Exception as e:
         messages.error(request, f"Erro na API de instrutores: {str(e)}")
 
-    # 🔧 Ajustar status e nome do instrutor do aluno
+    cod_instrutor = None  # Define fora do if para evitar UnboundLocalError
+
     if aluno:
         aluno['status'] = 'Ativo' if aluno.get('status') else 'Inativo'
 
-        cod_instrutor = aluno.get('Cod_instrutor') or aluno.get('cod_instrutor')
+        # Captura e força o tipo inteiro
+        cod_instrutor_raw = aluno.get('Cod_instrutor') or aluno.get('cod_instrutor')
         try:
-            cod_instrutor = int(cod_instrutor) if cod_instrutor else None
+            cod_instrutor = int(cod_instrutor_raw) if cod_instrutor_raw else None
         except (ValueError, TypeError):
             cod_instrutor = None
 
+        # Usa mapa_instrutores com int nas chaves
         aluno['nome_instrutor'] = mapa_instrutores.get(cod_instrutor, 'Não atribuído')
+        print("dados_instrutores:", dados_instrutores)
+        print("tipo dos itens:", [type(instrutor) for instrutor in dados_instrutores])
+        dados_instrutores_raw = response.json()
+        dados_instrutores = dados_instrutores_raw.get('dados', [])
+
+        mapa_instrutores = {
+            int(instrutor.get('cod_instrutor')): instrutor.get('nome')
+            for instrutor in dados_instrutores if isinstance(instrutor, dict) and instrutor.get('cod_instrutor') is not None
+        }
 
     # 🔍 Buscar treinos e exercícios
         try:
@@ -235,6 +251,12 @@ def perfil(request, cod_aluno):
             imc_diferenca = None
             imc_percentual = None
 
+    # Extrair dados para gráfico
+    meta = ultima_avaliacao.meta if ultima_avaliacao else None
+    labels = [a.data_avaliacao.strftime('%d/%m') for a in avaliacoes if a.data_avaliacao]
+    pesos = [a.peso for a in avaliacoes]
+    imcs = [a.imc for a in avaliacoes]
+    
     # 🔥 Contador decrescente do treino (dias restantes)
     dias_restantes_treino = None
 
@@ -273,6 +295,10 @@ def perfil(request, cod_aluno):
         'peso_percentual': peso_percentual,
         'imc_diferenca': imc_diferenca,
         'imc_percentual': imc_percentual,
+        'grafico_labels': labels,
+        'grafico_pesos': pesos,
+        'grafico_imcs': imcs,
+        'meta_peso': meta,
 
         # 🔥 Pagamentos
         'pagamentos': pagamentos,
@@ -287,14 +313,21 @@ def perfil(request, cod_aluno):
 
     return render(request, 'aluno/perfil.html', contexto)
 
-def listar_treinos_json(request):
+@csrf_exempt
+def listar_treinos_do_aluno(request, cod_aluno):
+    if request.method != "GET":
+        return JsonResponse({"message": "Método não permitido."}, status=405)
+
     try:
-        response = requests.get(f"{BASE_URL}/listar/treinos")
-        if response.status_code == 200:
-            return JsonResponse(response.json(), safe=False)
-        return JsonResponse([], safe=False)
-    except:
-        return JsonResponse([], safe=False)
+        url = f"{BASE_URL}/detalhes/treino/aluno/{cod_aluno}"
+        response = requests.get(url)
+        response.raise_for_status()
+        data = response.json()
+
+        return JsonResponse(data, safe=False)
+    except requests.exceptions.RequestException as e:
+        return JsonResponse({"message": "Erro ao consultar treinos.", "erro": str(e)}, status=400)
+
     
 def atualizar_status(request, cod_exercicio, cod_aluno):
     if request.method == 'POST':
@@ -714,40 +747,52 @@ def adicionar_treino(request):
 
         cod_aluno = data.get('cod_aluno')
         cod_instrutor = data.get('cod_instrutor')
-        if not cod_aluno or not cod_instrutor:
-            return JsonResponse({"message": "Aluno e Instrutor são obrigatórios."}, status=400)
+        tipo_treino = data.get('tipo_treino')
+        data_inicio = data.get('data_inicio')
+        dia_semana = data.get('dia_semana')
+
+        if not all([cod_aluno, cod_instrutor, tipo_treino, data_inicio, dia_semana]):
+            return JsonResponse({"message": "Todos os campos obrigatórios devem ser preenchidos."}, status=400)
+
+        cod_treino = data.get('cod_treino') or int(uuid.uuid4().int % 1000000)  # número simples único
 
         treino_payload = {
-            # Não envie cod_treino aqui para banco gerar sequencial automaticamente
-            "tipo_treino": data.get('tipo_treino'),
+            "cod_treino": cod_treino,
+            "tipo_treino": tipo_treino,
             "cod_aluno": int(cod_aluno),
             "cod_instrutor": int(cod_instrutor),
             "objetivo": data.get('objetivo', ''),
             "observacoes": data.get('observacoes', ''),
-            "data_inicio": data.get('data_inicio'),
+            "data_inicio": data_inicio,
             "data_final": data.get('data_final') or None,
-            "dia_semana": data.get('dia_semana', '')
+            "dia_semana": dia_semana
         }
 
-        treino_response = requests.post(f"{BASE_URL}/criar/treino/aluno", json=treino_payload)
+        response = requests.post(f"{BASE_URL}/criar/treino/aluno", json=treino_payload)
 
-        if treino_response.status_code not in [200, 201]:
-            return JsonResponse({"message": "Erro ao criar treino.", "erro": treino_response.text}, status=400)
+        # 🔍 DEBUG: veja o que a API retorna
+        print("=== RESPOSTA DA API ===")
+        print("Status code:", response.status_code)
+        print("Response text:", response.text)
+        print("=======================")
 
-        # Supondo que a API retorne JSON com o treino criado e seu cod_treino sequencial:
-        treino_criado = treino_response.json()
-        cod_treino = treino_criado.get('cod_treino')  # Ajuste conforme o campo real da sua API
+        if response.status_code not in [200, 201]:
+            return JsonResponse({
+                "message": "Erro ao criar treino.",
+                "erro": response.text,
+                "payload": treino_payload
+            }, status=400)
 
-        if not cod_treino:
-            return JsonResponse({"message": "Código do treino não retornado pela API."}, status=500)
-
-        return JsonResponse({"status": "success", "cod_treino": cod_treino})
+        return JsonResponse({
+            "status": "success",
+            "cod_treino": cod_treino,
+            "api_response": response.json()  # mostra a resposta retornada pela API
+        })
 
     except json.JSONDecodeError:
         return JsonResponse({"message": "Dados inválidos no corpo da requisição."}, status=400)
     except Exception as e:
         return JsonResponse({"message": f"Erro inesperado: {str(e)}"}, status=500)
-    
 @csrf_exempt
 def adicionar_exercicios_ao_treino(request):
     if request.method != 'POST':
@@ -755,12 +800,16 @@ def adicionar_exercicios_ao_treino(request):
 
     try:
         data = json.loads(request.body)
+        print(">>> DADOS RECEBIDOS NO DJANGO:", data)  # <-- Adicione isso para depurar
 
         cod_treino = data.get('cod_treino')
         tipo_treino = data.get('tipo_treino')
 
         if not cod_treino or not tipo_treino:
-            return JsonResponse({"message": "Código do treino e tipo do treino são obrigatórios."}, status=400)
+            return JsonResponse({
+                "message": "Código do treino e tipo do treino são obrigatórios.",
+                "debug": {"cod_treino": cod_treino, "tipo_treino": tipo_treino}
+            }, status=400)
 
         nomes = data.get('nome_exercicio') or []
         series = data.get('serie') or []
@@ -781,17 +830,24 @@ def adicionar_exercicios_ao_treino(request):
                 "repeticao": int(repeticoes[i]),
                 "intervalo": intervalos[i]
             }
+            print(">>> ENVIANDO EXERCÍCIO PARA FLASK:", exercicio_payload)
 
             exercicio_response = requests.post(f"{BASE_URL}/criar/exercicio/treino", json=exercicio_payload)
+            print(">>> RESPOSTA FLASK:", exercicio_response.status_code, exercicio_response.text)
+
             if exercicio_response.status_code not in [200, 201]:
-                return JsonResponse({"message": "Erro ao criar exercício.", "erro": exercicio_response.text}, status=400)
+                return JsonResponse({
+                    "message": "Erro ao criar exercício.",
+                    "erro": exercicio_response.text
+                }, status=400)
 
         return JsonResponse({"status": "success", "message": "Exercícios cadastrados com sucesso."})
 
-    except json.JSONDecodeError:
-        return JsonResponse({"message": "Dados inválidos no corpo da requisição."}, status=400)
+    except json.JSONDecodeError as e:
+        return JsonResponse({"message": "Dados inválidos no corpo da requisição.", "erro": str(e)}, status=400)
     except Exception as e:
         return JsonResponse({"message": f"Erro inesperado: {str(e)}"}, status=500)
+
 
 ###########
 

@@ -806,6 +806,16 @@
         <input name="tipo_treino" type="text" placeholder="Tipo de Treino" required class="w-full p-2 border rounded-md">
         <input name="data_inicio" type="date" required class="w-full p-2 border rounded-md">
         <input name="data_final" type="date" class="w-full p-2 border rounded-md">
+        <select name="dia_semana" required class="w-full p-2 border rounded-md">
+          <option value="">Selecione o dia da semana</option>
+          <option value="segunda">Segunda-feira</option>
+          <option value="terca">Terça-feira</option>
+          <option value="quarta">Quarta-feira</option>
+          <option value="quinta">Quinta-feira</option>
+          <option value="sexta">Sexta-feira</option>
+          <option value="sabado">Sábado</option>
+          <option value="domingo">Domingo</option>
+        </select>
         <textarea name="objetivo" rows="2" class="w-full p-2 border rounded-md" placeholder="Objetivo do treino"></textarea>
         <input name="observacoes" type="text" class="w-full p-2 border rounded-md" placeholder="Observações">
 
@@ -814,7 +824,7 @@
           <button type="submit" class="bg-blue-600 text-white p-2 rounded-md">Salvar Treino</button>
         </div>
         <!-- Botão para abrir manualmente o modal de exercício -->
-        <button type="button" onclick="abrirModalExercicio()" class="mt-2 bg-purple-600 text-white p-2 rounded-md w-full">
+        <button type="button" onclick="abrirModalExercicioManualmente()" class="mt-2 bg-purple-600 text-white p-2 rounded-md w-full">
           Adicionar Exercícios
         </button>
       </div>
@@ -822,7 +832,7 @@
   </div>
 </div>
 
-<!-- MODAL DE EXERCÍCIO COM MESMO ESTILO -->
+<!-- MODAL DE EXERCÍCIO -->
 <div id="exercicioModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
   <div class="bg-white rounded-xl shadow-xl w-full max-w-2xl p-6">
     <div class="flex justify-between items-center mb-4">
@@ -832,10 +842,13 @@
 
     <form id="formExercicio">
       {% csrf_token %}
+      <input type="hidden" name="cod_aluno" id="codAlunoExercicio">
+
       <div class="space-y-4">
         <select name="cod_treino" id="treinosDropdown" required class="w-full p-2 border rounded-md">
           <option value="">Selecione um treino</option>
         </select>
+
         <input name="tipo_treino" type="text" placeholder="Tipo de treino" required class="w-full p-2 border rounded-md">
 
         <div id="exerciciosContainer" class="space-y-3">
@@ -859,40 +872,13 @@
 </div>
 
 <script>
-async function carregarTreinosDropdown() {
-  const dropdown = document.getElementById('treinosDropdown');
-  dropdown.innerHTML = '<option value="">Carregando...</option>';
-
-  try {
-    const response = await fetch("{% url 'listar_treinos_json' %}");
-    if (!response.ok) throw new Error('Erro ao carregar treinos');
-    const treinos = await response.json();
-
-    dropdown.innerHTML = '<option value="">Selecione um treino</option>';
-    treinos.forEach(treino => {
-      const option = document.createElement("option");
-      option.value = treino.cod_treino;
-      option.text = `${treino.tipo_treino} - ${treino.cod_treino}`;
-      dropdown.appendChild(option);
-    });
-  } catch (error) {
-    dropdown.innerHTML = '<option value="">Erro ao carregar treinos</option>';
-    console.error(error);
-  }
-}
-
-// Carrega os treinos quando o modal de exercício for aberto
-function abrirModalExercicio() {
-  carregarTreinosDropdown();
-  document.getElementById('exercicioModal').classList.remove('hidden');
-}
-
-// Fecha modal genérico
 function closeModal(id) {
-  document.getElementById(id).classList.add('hidden');
+  document.getElementById(id).classList.add("hidden");
+}
+function openModal(id) {
+  document.getElementById(id).classList.remove("hidden");
 }
 
-// Adiciona novo conjunto de campos de exercício
 function addExercicio() {
   const container = document.getElementById("exerciciosContainer");
   const div = document.createElement("div");
@@ -906,7 +892,110 @@ function addExercicio() {
   container.appendChild(div);
 }
 
-// Evento submit do formExercicio (adicione seu fetch para salvar os exercícios aqui)
+async function carregarTreinosDropdown(codAluno, selecionado = null) {
+  const dropdown = document.getElementById('treinosDropdown');
+  const codAlunoInput = document.getElementById('codAlunoExercicio');
+
+  if (!codAluno) {
+    dropdown.innerHTML = '<option value="">Selecione um aluno primeiro</option>';
+    return;
+  }
+
+  codAlunoInput.value = codAluno;
+
+  dropdown.innerHTML = '<option value="">Carregando...</option>';
+
+  try {
+    const response = await fetch(`/api/treinos/aluno/${codAluno}/`);
+    const treinos = await response.json();
+    sessionStorage.setItem("lista_treinos", JSON.stringify(treinos));
+
+    dropdown.innerHTML = '<option value="">Selecione um treino</option>';
+    treinos.forEach(t => {
+      const opt = document.createElement("option");
+      opt.value = t.treino.cod_treino;
+      opt.text = `${t.treino.cod_treino} - ${t.treino.tipo_treino}`;
+      dropdown.appendChild(opt);
+    });
+
+    if (selecionado) {
+      dropdown.value = selecionado;
+      const treinoSelecionado = treinos.find(t => t.treino.cod_treino == selecionado);
+      if (treinoSelecionado) {
+        document.querySelector('#formExercicio input[name="tipo_treino"]').value = treinoSelecionado.treino.tipo_treino;
+      }
+    }
+
+  } catch (error) {
+    console.error("Erro ao carregar treinos:", error);
+    dropdown.innerHTML = '<option value="">Erro ao carregar treinos</option>';
+  }
+}
+
+
+document.getElementById("treinosDropdown").addEventListener("change", function () {
+  const treinos = JSON.parse(sessionStorage.getItem("lista_treinos") || "[]");
+  const codSelecionado = parseInt(this.value);
+  const treinoSelecionado = treinos.find(t => t.treino.cod_treino === codSelecionado);
+  if (treinoSelecionado) {
+    document.querySelector('#formExercicio input[name="tipo_treino"]').value = treinoSelecionado.treino.tipo_treino;
+  }
+});
+
+function abrirModalExercicioManualmente() {
+  const codAluno = document.querySelector('#formTreino select[name="cod_aluno"]').value;
+  if (!codAluno) {
+    alert("Selecione um aluno antes de adicionar exercícios.");
+    return;
+  }
+  closeModal('treinoModal');
+  carregarTreinosDropdown(codAluno);
+  openModal('exercicioModal');
+}
+// SUBMIT DO FORM DE TREINO
+document.getElementById("formTreino").addEventListener("submit", async function (e) {
+  e.preventDefault();
+  const form = e.target;
+  const formData = new FormData(form);
+
+  const payload = {
+    cod_aluno: formData.get("cod_aluno"),
+    cod_instrutor: formData.get("cod_instrutor"),
+    tipo_treino: formData.get("tipo_treino"),
+    data_inicio: formData.get("data_inicio"),
+    data_final: formData.get("data_final"),
+    dia_semana: formData.get("dia_semana"),
+    objetivo: formData.get("objetivo"),
+    observacoes: formData.get("observacoes")
+  };
+
+  try {
+    const response = await fetch("{% url 'adicionar_treino' %}", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": formData.get("csrfmiddlewaretoken")
+      },
+      body: JSON.stringify(payload)
+    });
+
+    const result = await response.json();
+
+    if (response.ok) {
+      alert("Treino salvo com sucesso!");
+      form.reset();
+      abrirModalExercicio(payload.cod_aluno, result.cod_treino, payload.tipo_treino);
+    } else {
+      alert("Erro: " + (result.message || "Erro ao salvar treino"));
+    }
+  } catch (error) {
+    alert("Erro inesperado.");
+    console.error(error);
+  }
+});
+
+
+// SUBMIT DO FORM DE EXERCÍCIO
 document.getElementById("formExercicio").addEventListener("submit", async function (e) {
   e.preventDefault();
   const form = e.target;
@@ -915,6 +1004,7 @@ document.getElementById("formExercicio").addEventListener("submit", async functi
   const payload = {
     cod_treino: formData.get("cod_treino"),
     tipo_treino: formData.get("tipo_treino"),
+    cod_aluno: formData.get("cod_aluno"),
     nome_exercicio: formData.getAll("nome_exercicio[]"),
     serie: formData.getAll("serie[]"),
     repeticao: formData.getAll("repeticao[]"),
@@ -922,7 +1012,7 @@ document.getElementById("formExercicio").addEventListener("submit", async functi
   };
 
   try {
-    const response = await fetch("{% url 'adicionar_exercicios_ao_treino' %}", {
+    const response = await fetch("/adicionar-exercicios/", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -937,7 +1027,7 @@ document.getElementById("formExercicio").addEventListener("submit", async functi
       closeModal('exercicioModal');
       form.reset();
     } else {
-      alert("Erro: " + (result.message || "Erro ao adicionar exercícios"));
+      alert("Erro: " + result.message);
     }
   } catch (error) {
     alert("Erro ao adicionar exercícios.");
@@ -945,8 +1035,7 @@ document.getElementById("formExercicio").addEventListener("submit", async functi
   }
 });
 </script>
-
-<!-- SCRIPTS -->
+<!-- SCRIPTS treino -->
 <script>
 function closeModal(id) {
   document.getElementById(id).classList.add("hidden");
@@ -968,21 +1057,40 @@ function addExercicio() {
   container.appendChild(div);
 }
 
-async function carregarTreinosDropdown(selecionado = null) {
+async function carregarTreinosDropdown(codAluno, selecionado = null) {
   const dropdown = document.getElementById('treinosDropdown');
+
+  if (!codAluno) {
+    dropdown.innerHTML = '<option value="">Selecione um aluno primeiro</option>';
+    return;
+  }
+
   dropdown.innerHTML = '<option value="">Carregando...</option>';
+
   try {
-    const response = await fetch("{% url 'listar_treinos_json' %}");
+    const response = await fetch(`/api/treinos/aluno/${codAluno}/`);
     const treinos = await response.json();
+    sessionStorage.setItem("lista_treinos", JSON.stringify(treinos));
+
     dropdown.innerHTML = '<option value="">Selecione um treino</option>';
     treinos.forEach(t => {
       const opt = document.createElement("option");
-      opt.value = t.cod_treino;
-      opt.text = `${t.tipo_treino} - ${t.cod_treino}`;
-      if (t.cod_treino === selecionado) opt.selected = true;
+      opt.value = t.treino.cod_treino;
+      opt.text = `${t.treino.cod_treino} - ${t.treino.tipo_treino}`;
       dropdown.appendChild(opt);
     });
-  } catch {
+
+    if (selecionado) {
+      dropdown.value = selecionado;
+      // Preenche tipo_treino automaticamente
+      const treinoSelecionado = treinos.find(t => t.treino.cod_treino == selecionado);
+      if (treinoSelecionado) {
+        document.querySelector('#formExercicio input[name="tipo_treino"]').value = treinoSelecionado.treino.tipo_treino;
+      }
+    }
+
+  } catch (error) {
+    console.error("Erro ao carregar treinos:", error);
     dropdown.innerHTML = '<option value="">Erro ao carregar treinos</option>';
   }
 }
@@ -1004,6 +1112,7 @@ document.getElementById("formTreino").addEventListener("submit", async function 
     tipo_treino: formData.get("tipo_treino"),
     data_inicio: formData.get("data_inicio"),
     data_final: formData.get("data_final"),
+    dia_semana: formData.get("dia_semana"),
     objetivo: formData.get("objetivo"),
     observacoes: formData.get("observacoes")
   };
@@ -1054,7 +1163,7 @@ document.getElementById("formExercicio").addEventListener("submit", async functi
   };
 
   try {
-    const response = await fetch("{% url 'adicionar_exercicios_ao_treino' %}", {
+    const response = await fetch("/adicionar-exercicios/", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
