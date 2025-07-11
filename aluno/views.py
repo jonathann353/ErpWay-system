@@ -3,6 +3,12 @@ import random
 import logging
 import mercadopago
 import json
+import base64
+import io
+import matplotlib.pyplot as plt
+from django.http import HttpResponse
+from django.template.loader import render_to_string
+from weasyprint import HTML
 from dateutil import parser
 from django.conf import settings
 from datetime import datetime
@@ -403,10 +409,7 @@ def graficos(request):
     return render(request, 'aluno/dashboard.html', {
         'labels': labels,
         'data': data
-    })
-
-    
-
+    })  
 
 @login_required_custom
 def dashboard(request):
@@ -492,9 +495,6 @@ def dashboard(request):
         'ultimo_pagamento': ultimo_valor_pago,
         'planos': planos,
     })
- 
-
-
     
 def buscar_global(request):
     q = request.GET.get('q', '')
@@ -608,7 +608,36 @@ def dashboard_instrutor(request, cod_instrutor):
         print(f"DEBUG dashboard instrutor cod_instrutor={cod_instrutor}: {data}")
 
         alunos = data.get('alunos', [])
+
+        for aluno in alunos:
+            cod_aluno = aluno.get('cod_aluno')
+
+            # Tenta usar o status da API primeiro
+            status_api = aluno.get('status')
+
+            if status_api in ['Ativo', 'Inativo']:
+                aluno['status'] = status_api
+            else:
+                try:
+                    result = supabase.table('pagamentos') \
+                        .select('status') \
+                        .eq('aluno', cod_aluno) \
+                        .order('criado_em', desc=True) \
+                        .limit(1) \
+                        .execute()
+
+                    pagamentos = result.data or []
+                    status_pagamento = pagamentos[0]['status'] if pagamentos else None
+                    aluno['status'] = 'Ativo' if status_pagamento == 'aprovado' else 'Inativo'
+
+                except Exception as e:
+                    print(f"Erro ao buscar status do aluno {cod_aluno}: {e}")
+                    aluno['status'] = 'Inativo'
+
+
         instrutor_id = data.get('instrutor_id') or cod_instrutor
+        mapa_alunos = {aluno['cod_aluno']: aluno['nome'] for aluno in alunos}
+        alunos_ids = list(mapa_alunos.keys())
 
     except requests.exceptions.RequestException as e:
         return render(request, 'instrutor/dashboard.html', {
@@ -633,16 +662,68 @@ def dashboard_instrutor(request, cod_instrutor):
     except requests.exceptions.RequestException as e:
         instrutor_nome = 'Nome não disponível'
         print(f"Erro ao buscar instrutor: {e}")
+    
+    # Últimos 5 treinos do instrutor
+    try:
+        treinos_resp = supabase \
+            .table('treino') \
+            .select('cod_treino, tipo_treino, data_inicio, cod_aluno') \
+            .eq('cod_instrutor', cod_instrutor) \
+            .order('data_inicio', desc=True) \
+            .limit(5) \
+            .execute()
+        ultimos_treinos = treinos_resp.data or []
+    except Exception as e:
+        print(f"Erro ao buscar treinos: {e}")
+        ultimos_treinos = []
+
+    # Últimas 5 avaliações físicas do instrutor
+    try:
+        aval_resp = supabase \
+            .table('avaliacao_fisica') \
+            .select('id, data_avaliacao, cod_aluno') \
+            .eq('cod_instrutor', cod_instrutor) \
+            .order('data_avaliacao', desc=True) \
+            .limit(5) \
+            .execute()
+        ultimas_avaliacoes = aval_resp.data or []
+    except Exception as e:
+        print(f"Erro ao buscar avaliações: {e}")
+        ultimas_avaliacoes = []
+
+    # ➕ Contador de treinos do instrutor
+    try:
+        treino_resp = supabase.table('treino').select('cod_treino', count='exact').eq('cod_instrutor', cod_instrutor).execute()
+        treino_count = treino_resp.count or 0
+    except Exception as e:
+        print(f"Erro ao contar treinos: {e}")
+        treino_count = 0
+
+    # ➕ Contador de avaliações físicas feitas pelo instrutor
+    try:
+        aval_resp = supabase.table('avaliacao_fisica').select('id', count='exact').eq('cod_instrutor', cod_instrutor).execute()
+        avaliacao_count = aval_resp.count or 0
+    except Exception as e:
+        print(f"Erro ao contar avaliações: {e}")
+        avaliacao_count = 0
 
     context = {
         'cod_instrutor': cod_instrutor,
         'instrutor_nome': instrutor_nome,
         'alunos': alunos,
         'dia': dia,
-        'year': datetime.now().year
+        'year': datetime.now().year,
+        'treino_count': treino_count,
+        'avaliacao_count': avaliacao_count,
+        'ultimos_treinos': ultimos_treinos,
+        'ultimas_avaliacoes': ultimas_avaliacoes,
+        'mapa_alunos': mapa_alunos,
+        'alunos_ids': alunos_ids,
     }
 
     return render(request, 'instrutor/dashboard.html', context)
+
+
 
 @csrf_exempt
 def salvar_avaliacao(request, cod_instrutor):
@@ -800,55 +881,105 @@ def adicionar_exercicios_ao_treino(request):
 
     try:
         data = json.loads(request.body)
-        print(">>> DADOS RECEBIDOS NO DJANGO:", data)  # <-- Adicione isso para depurar
+        exercicios = data.get('exercicios', [])
 
-        cod_treino = data.get('cod_treino')
-        tipo_treino = data.get('tipo_treino')
+        if not exercicios or not isinstance(exercicios, list):
+            return JsonResponse({"message": "A lista de exercícios é obrigatória."}, status=400)
 
-        if not cod_treino or not tipo_treino:
-            return JsonResponse({
-                "message": "Código do treino e tipo do treino são obrigatórios.",
-                "debug": {"cod_treino": cod_treino, "tipo_treino": tipo_treino}
-            }, status=400)
+        for ex in exercicios:
+            campos_obrigatorios = ['cod_treino', 'exercicio', 'serie', 'repeticao', 'intervalo']
+            for campo in campos_obrigatorios:
+                if campo not in ex:
+                    return JsonResponse({"message": f"O campo {campo} é obrigatório."}, status=400)
 
-        nomes = data.get('nome_exercicio') or []
-        series = data.get('serie') or []
-        repeticoes = data.get('repeticao') or []
-        intervalos = data.get('intervalo') or []
-
-        if isinstance(nomes, str): nomes = [nomes]
-        if isinstance(series, str): series = [series]
-        if isinstance(repeticoes, str): repeticoes = [repeticoes]
-        if isinstance(intervalos, str): intervalos = [intervalos]
-
-        for i in range(len(nomes)):
-            exercicio_payload = {
-                "cod_treino": cod_treino,
-                "tipo_treino": tipo_treino,
-                "nome_exercicio": nomes[i],
-                "serie": int(series[i]),
-                "repeticao": int(repeticoes[i]),
-                "intervalo": intervalos[i]
+            payload = {
+                "cod_treino": ex["cod_treino"],
+                "exercicio": ex["exercicio"],
+                "serie": int(ex["serie"]),
+                "repeticao": int(ex["repeticao"]),
+                "intervalo": ex["intervalo"]
             }
-            print(">>> ENVIANDO EXERCÍCIO PARA FLASK:", exercicio_payload)
 
-            exercicio_response = requests.post(f"{BASE_URL}/criar/exercicio/treino", json=exercicio_payload)
-            print(">>> RESPOSTA FLASK:", exercicio_response.status_code, exercicio_response.text)
+            response = requests.post(f"{BASE_URL}/criar/exercicio/treino", json=payload)
+            print(">>> ENVIANDO:", payload)
+            print(">>> RESPOSTA:", response.status_code, response.text)
 
-            if exercicio_response.status_code not in [200, 201]:
+            if response.status_code not in [200, 201]:
                 return JsonResponse({
-                    "message": "Erro ao criar exercício.",
-                    "erro": exercicio_response.text
+                    "message": "Erro ao criar exercício na API Flask.",
+                    "erro": response.text
                 }, status=400)
 
         return JsonResponse({"status": "success", "message": "Exercícios cadastrados com sucesso."})
 
     except json.JSONDecodeError as e:
-        return JsonResponse({"message": "Dados inválidos no corpo da requisição.", "erro": str(e)}, status=400)
+        return JsonResponse({"message": "Erro ao processar JSON.", "erro": str(e)}, status=400)
     except Exception as e:
         return JsonResponse({"message": f"Erro inesperado: {str(e)}"}, status=500)
 
+def gerar_relatorio_pdf(request, cod_aluno):
+    try:
+        cod_instrutor = request.GET.get("cod_instrutor")
+        if not cod_instrutor:
+            return HttpResponse("Código do instrutor é obrigatório.", status=400)
 
+        # Buscar todos os alunos do instrutor
+        resp = requests.get(f"{BASE_URL}/alunos/do/instrutor/{cod_instrutor}")
+        resp.raise_for_status()
+        alunos = resp.json().get("alunos", [])
+        aluno_data = next((a for a in alunos if a["cod_aluno"] == cod_aluno), None)
+        if not aluno_data:
+            return HttpResponse("Aluno não encontrado", status=404)
+
+        # Treinos
+        treinos_resp = supabase.table("treino").select("*").eq("cod_aluno", cod_aluno).execute()
+        treinos = treinos_resp.data or []
+
+        for treino in treinos:
+            exercicios_resp = supabase.table("exercicio").select("*").eq("cod_treino", treino["cod_treino"]).execute()
+            treino["exercicios"] = exercicios_resp.data or []
+
+        # Avaliações físicas
+        avaliacoes_resp = supabase.table("avaliacao_fisica").select("*").eq("cod_aluno", cod_aluno).execute()
+        avaliacoes = avaliacoes_resp.data or []
+
+        # Criar gráfico em memória (base64)
+        grafico_imc = None
+        if avaliacoes:
+            datas = [datetime.strptime(a["data_avaliacao"], "%Y-%m-%d").strftime("%b/%Y") for a in avaliacoes if a.get("imc")]
+            imcs = [a["imc"] for a in avaliacoes if a.get("imc")]
+            if datas and imcs:
+                plt.figure(figsize=(6, 3))
+                plt.plot(datas, imcs, marker='o', linestyle='-', color='blue')
+                plt.title("Evolução do IMC")
+                plt.xlabel("Data")
+                plt.ylabel("IMC")
+                plt.grid(True)
+                plt.tight_layout()
+
+                buf = io.BytesIO()
+                plt.savefig(buf, format="png")
+                plt.close()
+                buf.seek(0)
+                img_base64 = base64.b64encode(buf.read()).decode("utf-8")
+                grafico_imc = f"data:image/png;base64,{img_base64}"
+
+        # Renderiza HTML
+        html_string = render_to_string("instrutor/relatorio_pdf.html", {
+            "aluno": aluno_data,
+            "treinos": treinos,
+            "avaliacoes": avaliacoes,
+            "grafico_imc": grafico_imc,
+        })
+
+        # Gera PDF com WeasyPrint (tudo em memória)
+        pdf_file = HTML(string=html_string).write_pdf()
+        response = HttpResponse(pdf_file, content_type='application/pdf')
+        response['Content-Disposition'] = f'inline; filename="relatorio_aluno_{cod_aluno}.pdf"'
+        return response
+
+    except Exception as e:
+        return HttpResponse(f"Erro: {e}", status=500)
 ###########
 
 def register_view(request):
@@ -914,7 +1045,6 @@ def listar_instrutores(request):
     'total_instrutores': total_instrutores
 })
     
-# 🔥 Criar pagamento PIX
 def criar_pagamento_pix(request, cod_aluno):
     if request.method == 'POST':
         nome = request.POST.get('nome')
@@ -923,23 +1053,27 @@ def criar_pagamento_pix(request, cod_aluno):
         documento_numero = request.POST.get('identificationNumber')
         valor = float(request.POST.get('valor'))
 
-        # 🎯 Dados do pagamento Mercado Pago
         pagamento_data = {
-            "transaction_amount": valor,
-            "description": "Mensalidade Academia",
-            "payment_method_id": "pix",
-            "payer": {
-                "email": email,
-                "first_name": nome,
-                "last_name": "",
-                "identification": {
-                    "type": documento_tipo,
-                    "number": documento_numero.replace('.', '').replace('-', '').replace('/', '')
-                }
-            }
+    "transaction_amount": valor,
+    "description": "Mensalidade Academia",
+    "payment_method_id": "pix",
+    "payer": {
+        "email": email,
+        "first_name": nome,
+        "last_name": "",
+        "identification": {
+            "type": documento_tipo,
+            "number": documento_numero.replace('.', '').replace('-', '').replace('/', '')
+        }
+    },
+        #     "back_urls": {
+        #     "success": request.build_absolute_uri(reverse('pagamento_sucesso')),
+        #     "pending": request.build_absolute_uri(reverse('pagamento_pendente')),
+        #     "failure": request.build_absolute_uri(reverse('pagamento_falha')),
+        # },
+        # "auto_return": "approved"
         }
 
-        # 🔗 Criar pagamento Mercado Pago
         pagamento_response = sdk.payment().create(pagamento_data)
         pagamento = pagamento_response["response"]
 
@@ -949,11 +1083,7 @@ def criar_pagamento_pix(request, cod_aluno):
             status = pagamento["status"]
             mp_payment_id = str(pagamento["id"])
 
-            # 🔍 Buscar dados do aluno
-            aluno_response = supabase.table('aluno').select("nome").eq("cod_aluno", cod_aluno).single().execute()
-            nome_aluno = aluno_response.data.get('nome') if aluno_response.data else nome
-
-            # ➕ Salvar pagamento no Supabase
+            # Salva no Supabase
             supabase.table('pagamentos').insert({
                 "aluno": cod_aluno,
                 "email": email,
@@ -964,8 +1094,14 @@ def criar_pagamento_pix(request, cod_aluno):
                 "qr_code_base64": qr_code_base64,
             }).execute()
 
-            # 🔄 Redirecionar para o perfil do aluno
-            return redirect('perfil', cod_aluno=cod_aluno)
+            # 🔥 Exibe o QRCode diretamente
+            return render(request, 'pagamento_qrcode.html', {
+                'qr_code': qr_code,
+                'qr_code_base64': qr_code_base64,
+                'status': status,
+                'valor': valor,
+                'cod_aluno': cod_aluno
+            })
 
         return JsonResponse({'error': 'Erro ao criar pagamento.'}, status=400)
 
@@ -974,17 +1110,24 @@ def criar_pagamento_pix(request, cod_aluno):
 @csrf_exempt
 def webhook_mercadopago(request):
     if request.method == 'POST':
-        import json
-        data = json.loads(request.body)
-        payment_id = str(data.get('data', {}).get('id'))
+        try:
+            data = json.loads(request.body)
+            payment_id = str(data.get('data', {}).get('id'))
 
-        if payment_id:
+            if not payment_id:
+                return JsonResponse({"error": "ID do pagamento ausente"}, status=400)
+
             pagamento = sdk.payment().get(payment_id)
-            status = pagamento["response"]["status"]
+            status = pagamento["response"].get("status")
 
-            supabase.table('pagamentos').update({"status": status}).eq("mp_payment_id", payment_id).execute()
+            if status:
+                supabase.table('pagamentos').update({"status": status}).eq("mp_payment_id", payment_id).execute()
+                return JsonResponse({"status": "updated"})
+            else:
+                return JsonResponse({"error": "Status não encontrado"}, status=400)
 
-        return JsonResponse({"status": "updated"})
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
 
     return JsonResponse({"message": "Only POST allowed"}, status=400)
 
@@ -1019,7 +1162,7 @@ def atualizar_status_pagamento(request, payment_id):
         return redirect('perfil', cod_aluno=cod_aluno)
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=400)
-    
+   
 def consultar_planos_supabase():
     url = "https://pgdldfqzqgxowqedrldh.supabase.co/rest/v1/planos"
     headers = {

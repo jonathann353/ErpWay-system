@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        body { font-family: Arial, sans-serif; font-size: 12px; color: #333; }
+        h1, h2, h3 { color: #003366; }
+        .section { margin-bottom: 25px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid #ccc; padding: 6px; text-align: left; }
+        .table-title { margin-top: 10px; font-weight: bold; background: #f0f0f0; padding: 4px; }
+        .grafico { margin-top: 10px; text-align: center; }
+    </style>
+</head>
+<body>
+    <h1>Relatório Completo do Aluno</h1>
+    <div class="section">
+        <h2>Dados do Aluno</h2>
+        <p><strong>Nome:</strong> {{ aluno.nome }}</p>
+        <p><strong>Email:</strong> {{ aluno.email }}</p>
+        <p><strong>Telefone:</strong> {{ aluno.telefone }}</p>
+    </div>
+
+    <div class="section">
+        <h2>Avaliações Físicas</h2>
+        {% if avaliacoes %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Peso (kg)</th>
+                        <th>Altura (m)</th>
+                        <th>IMC</th>
+                        <th>Observações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for a in avaliacoes %}
+                    <tr>
+                        <td>{{ a.data_avaliacao }}</td>
+                        <td>{{ a.peso }}</td>
+                        <td>{{ a.altura }}</td>
+                        <td>{{ a.imc }}</td>
+                        <td>{{ a.observacoes }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <div class="grafico">
+                <p><strong>Evolução do IMC ao longo do tempo:</strong></p>
+                <img src="{{ grafico_imc }}" width="450" />
+            </div>
+        {% else %}
+            <p>Sem avaliações registradas.</p>
+        {% endif %}
+    </div>
+
+    <div class="section">
+        <h2>Treinos</h2>
+        {% for t in treinos %}
+            <h3>{{ t.tipo_treino }} - {{ t.data_inicio }}</h3>
+            <p><strong>Objetivo:</strong> {{ t.objetivo }}<br>
+            <strong>Observações:</strong> {{ t.observacoes }}</p>
+
+            <div class="table-title">Exercícios</div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Exercício</th>
+                        <th>Séries</th>
+                        <th>Repetições</th>
+                        <th>Intervalo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for e in t.exercicios %}
+                        <tr>
+                            <td>{{ e.exercicio }}</td>
+                            <td>{{ e.serie }}</td>
+                            <td>{{ e.repeticao }}</td>
+                            <td>{{ e.intervalo }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr><td colspan="4">Sem exercícios cadastrados</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% endfor %}
+    </div>
+</body>
+</html>

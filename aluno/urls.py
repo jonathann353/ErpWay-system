@@ -29,5 +29,6 @@ urlpatterns = [
     path('webhook/', views.webhook_mercadopago, name='webhook_mercadopago'),
     path('dashboard/pagamentos/<int:cod_aluno>/', views.listar_pagamentos, name='listar_pagamentos'),
     path('pagamento/atualizar/<str:payment_id>/', views.atualizar_status_pagamento, name='atualizar_status_pagamento'),
-    
+    path('relatorio/pdf/<int:cod_aluno>/', views.gerar_relatorio_pdf, name='gerar_relatorio_pdf'),
+
 ]

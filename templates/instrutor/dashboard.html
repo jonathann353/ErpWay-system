@@ -1,4 +1,5 @@
 {% load static %}
+{% load extras %}
 
 <!DOCTYPE html>
 <html lang="pt-br">
@@ -221,300 +222,312 @@
   <!-- Main Content -->
   <main class="flex-grow py-8">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="card p-6 mb-8 bg-white rounded-xl shadow-md">
-      <div class="flex flex-col md:flex-row items-center justify-between space-y-4 md:space-y-0">
-                    <div>
-                        <h2 class="text-2xl font-bold text-gray-900">Bem-vindo, {{ instrutor_nome }}!</h2>
-                        <p class="text-gray-600 mt-1">Seu progresso está incrível esta semana! Continue assim.</p>
-                    </div>
-                </div>
-      
-
-<!-- AÇÕES (estilo padrão solicitado com gradiente) -->
-<div class="grid grid-cols-2 md:grid-cols-4 gap-6 mt-10">
-
-  <!-- Botão: Novo Treino -->
-  <button onclick="openModal('treinoModal')"
-    class="bg-gradient-to-r from-blue-600 to-blue-800 rounded-2xl shadow-lg p-6 flex flex-col items-center justify-center gap-4 hover:scale-105 transform transition duration-300">
-    <div class="bg-white/20 p-4 rounded-xl">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none"
-        viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-          d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-      </svg>
-    </div>
-    <span class="text-white text-sm text-center">Novo Treino</span>
-  </button>
-
-  <!-- Botão: Nova Avaliação -->
-  <button onclick="openModal('avaliacaoModal')"
-    class="bg-gradient-to-r from-green-500 to-green-700 rounded-2xl shadow-lg p-6 flex flex-col items-center justify-center gap-4 hover:scale-105 transform transition duration-300">
-    <div class="bg-white/20 p-4 rounded-xl">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none"
-        viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-          d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10" />
-      </svg>
-    </div>
-    <span class="text-white text-sm text-center">Nova Avaliação</span>
-  </button>
-
-  <!-- Botão: Enviar Feedback -->
-  <button onclick="openModal('feedbackModal')"
-    class="bg-gradient-to-r from-purple-600 to-purple-800 rounded-2xl shadow-lg p-6 flex flex-col items-center justify-center gap-4 hover:scale-105 transform transition duration-300">
-    <div class="bg-white/20 p-4 rounded-xl">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none"
-        viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-          d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
-      </svg>
-    </div>
-    <span class="text-white text-sm text-center">Enviar Feedback</span>
-  </button>
-
-  <!-- Botão: Gerar Relatório -->
-  <button onclick="openModal('relatorioModal')"
-    class="bg-gradient-to-r from-indigo-500 to-indigo-700 rounded-2xl shadow-lg p-6 flex flex-col items-center justify-center gap-4 hover:scale-105 transform transition duration-300">
-    <div class="bg-white/20 p-4 rounded-xl">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none"
-        viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-          d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-      </svg>
-    </div>
-    <span class="text-white text-sm text-center">Gerar Relatório</span>
-  </button>
-
-</div>
-
-
-      <!-- Main Grid -->
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <!-- Alunos Recentes -->
-        <div class="bg-white rounded-xl shadow p-6 lg:col-span-2">
-          <div class="flex justify-between items-center mb-6">
-            <h2 class="text-xl font-bold text-gray-900">Seus Alunos</h2>
-            <a href="#" id="openAlunosModal" class="text-sm text-blue-600 hover:text-blue-800 font-medium">Ver todos</a>
-          </div>
-
-          <div class="overflow-x-auto max-h-96 overflow-y-auto">
-            <table class="min-w-full divide-y divide-gray-200">
-              <thead class="bg-gray-50">
-                <tr>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aluno</th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Último
-                    Treino</th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
-                </tr>
-              </thead>
-              <tbody class="bg-white divide-y divide-gray-200">
-                {% for aluno in alunos|slice:":5" %}
-                <tr>
-                  <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="flex items-center">
-                      <div class="flex-shrink-0 h-10 w-10">
-                        <img class="h-10 w-10 rounded-full" src="{{ aluno.foto_url }}" alt="{{ aluno.nome }}">
-                      </div>
-                      <div class="ml-4">
-                        <div class="text-sm font-medium text-gray-900">{{ aluno.nome }}</div>
-                        <div class="text-sm text-gray-500">{{ aluno.email }}</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td class="px-6 py-4 whitespace-nowrap">
-                    <span
-                      class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {% if aluno.status == 'Ativo' %}bg-green-100 text-green-800{% else %}bg-yellow-100 text-yellow-800{% endif %}">
-                      {{ aluno.status }}
-                    </span>
-                  </td>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {{ aluno.ultimo_treino|default:"Nenhum" }}
-                  </td>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <a href="#" class="text-blue-600 hover:text-blue-900 mr-3" onclick="verAluno(
-              '{{ aluno.nome|escapejs }}',
-              '{{ aluno.email|escapejs }}',
-              '{{ aluno.telefone|default:''|escapejs }}',
-              '{{ aluno.cpf|default:''|escapejs }}',
-              '{{ aluno.status|escapejs }}',
-              '{{ aluno.ultimo_treino|default:'Nenhum'|escapejs }}',
-              '{{ aluno.foto_url|escapejs }}'
-            )">Ver</a>
-                    <a href="#" class="text-green-600 hover:text-green-900" onclick="editarAluno(
-              '{{ aluno.nome|escapejs }}',
-              '{{ aluno.email|escapejs }}',
-              '{{ aluno.telefone|default:''|escapejs }}',
-              '{{ aluno.cpf|default:''|escapejs }}',
-              '{{ aluno.status|escapejs }}',
-              '{{ aluno.ultimo_treino|default:'Nenhum'|escapejs }}',
-              '{{ aluno.foto_url|escapejs }}'
-            )">Editar</a>
-                  </td>
-                </tr>
-                {% endfor %}
-              </tbody>
-            </table>
+      <div class="card p-6 mb-8 bg-white rounded-xl shadow-md">
+        <div class="flex flex-col md:flex-row items-center justify-between space-y-4 md:space-y-0">
+          <div>
+            <h2 class="text-2xl font-bold text-gray-900">Bem-vindo, {{ instrutor_nome }}!</h2>
+            <p class="text-gray-600 mt-1">Seu progresso está incrível esta semana! Continue assim.</p>
           </div>
         </div>
 
-        <!-- Modal Alunos -->
-        <div id="alunosModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
-          <div class="bg-white rounded-xl shadow-lg p-6 max-w-5xl w-full relative max-h-[90vh] overflow-auto">
-            <button id="closeAlunosModal"
-              class="absolute top-3 right-3 text-gray-500 hover:text-gray-700 font-bold text-xl">&times;</button>
-            <h3 class="text-lg font-bold mb-4">Lista Completa de Alunos</h3>
 
-            <div class="mb-4">
-              <input type="text" id="searchInput" placeholder="Buscar por nome, CPF, telefone ou e-mail..."
-                class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <!-- AÇÕES (estilo padrão solicitado com gradiente) -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-10 mb-12">
+
+          <!-- Botão: Novo Treino -->
+          <button onclick="openModal('treinoModal')"
+            class="bg-gradient-to-r from-blue-600 to-blue-800 rounded-2xl shadow-lg p-6 flex flex-col items-center justify-center gap-4 hover:scale-105 transform transition duration-300">
+            <div class="bg-white/20 p-4 rounded-xl">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+              </svg>
+            </div>
+            <span class="text-white text-sm text-center">Novo Treino</span>
+          </button>
+
+          <!-- Botão: Nova Avaliação -->
+          <button onclick="openModal('avaliacaoModal')"
+            class="bg-gradient-to-r from-green-500 to-green-700 rounded-2xl shadow-lg p-6 flex flex-col items-center justify-center gap-4 hover:scale-105 transform transition duration-300">
+            <div class="bg-white/20 p-4 rounded-xl">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10" />
+              </svg>
+            </div>
+            <span class="text-white text-sm text-center">Nova Avaliação</span>
+          </button>
+
+          <!-- Botão: Gerar Relatório -->
+          <button onclick="openModal('relatorioModal')"
+            class="bg-gradient-to-r from-indigo-500 to-indigo-700 rounded-2xl shadow-lg p-6 flex flex-col items-center justify-center gap-4 hover:scale-105 transform transition duration-300">
+            <div class="bg-white/20 p-4 rounded-xl">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+            </div>
+            <span class="text-white text-sm text-center">Gerar Relatório</span>
+          </button>
+
+        </div>
+
+
+        <!-- Main Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <!-- Alunos Recentes -->
+          <div class="bg-white rounded-2xl shadow-lg p-6 lg:col-span-2">
+            <div class="flex justify-between items-center mb-6">
+              <h2 class="text-2xl font-semibold text-gray-800">Seus Alunos</h2>
+              <a href="#" id="openAlunosModal"
+                class="text-sm text-blue-600 hover:text-blue-800 font-medium underline">Ver todos</a>
             </div>
 
-            <div class="overflow-x-auto">
-              <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
+            <div class="overflow-x-auto max-h-[500px] rounded-lg border border-gray-200">
+              <table class="min-w-full divide-y divide-gray-200 text-sm">
+                <thead class="bg-gray-100 sticky top-0 z-10">
                   <tr>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aluno
+                    <th class="px-6 py-3 text-left font-semibold text-gray-600 uppercase tracking-wider">Aluno</th>
+                    <th class="px-6 py-3 text-left font-semibold text-gray-600 uppercase tracking-wider">Status</th>
+                    <th class="px-6 py-3 text-left font-semibold text-gray-600 uppercase tracking-wider">Último Treino
                     </th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status
-                    </th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Último
-                      Treino</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações
-                    </th>
+                    <th class="px-6 py-3 text-left font-semibold text-gray-600 uppercase tracking-wider">Ações</th>
+                    <th class="px-6 py-3 text-left font-semibold text-gray-600 uppercase tracking-wider">Relatório</th>
                   </tr>
                 </thead>
-                <tbody id="alunosTableBody" class="bg-white divide-y divide-gray-200">
-                  <!-- Conteúdo gerado pelo JavaScript -->
+                <tbody class="bg-white divide-y divide-gray-100">
+                  {% for aluno in alunos|slice:":5" %}
+                  <tr class="hover:bg-gray-50">
+                    <!-- Aluno -->
+                    <td class="px-6 py-4">
+                      <div class="flex items-center space-x-4">
+                        <img class="h-10 w-10 rounded-full object-cover border" src="{{ aluno.foto_url }}"
+                          alt="{{ aluno.nome }}">
+                        <div>
+                          <div class="font-medium text-gray-900">{{ aluno.nome }}</div>
+                          <div class="text-gray-500 text-sm">{{ aluno.email }}</div>
+                        </div>
+                      </div>
+                    </td>
+
+                    <!-- Status -->
+                    <td class="px-6 py-4">
+                      <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold
+              {% if aluno.status == 'Ativo' %}
+                bg-green-100 text-green-800
+              {% elif aluno.status == 'Inativo' %}
+                bg-red-100 text-red-800
+              {% else %}
+                bg-yellow-100 text-yellow-800
+              {% endif %}
+            ">
+                        {{ aluno.status }}
+                      </span>
+                    </td>
+
+                    <!-- Último Treino -->
+                    <td class="px-6 py-4 text-gray-600">
+                      {{ aluno.ultimo_treino|default:"Nenhum" }}
+                    </td>
+
+                    <!-- Ações -->
+                    <td class="px-6 py-4 space-x-2">
+                      <button onclick="verAluno(
+              '{{ aluno.nome|escapejs }}',
+              '{{ aluno.email|escapejs }}',
+              '{{ aluno.telefone|default:''|escapejs }}',
+              '{{ aluno.cpf|default:''|escapejs }}',
+              '{{ aluno.status|escapejs }}',
+              '{{ aluno.ultimo_treino|default:'Nenhum'|escapejs }}',
+              '{{ aluno.foto_url|escapejs }}'
+            )" class="text-blue-600 hover:underline font-medium">Ver</button>
+
+                      <button onclick="editarAluno(
+              '{{ aluno.nome|escapejs }}',
+              '{{ aluno.email|escapejs }}',
+              '{{ aluno.telefone|default:''|escapejs }}',
+              '{{ aluno.cpf|default:''|escapejs }}',
+              '{{ aluno.status|escapejs }}',
+              '{{ aluno.ultimo_treino|default:'Nenhum'|escapejs }}',
+              '{{ aluno.foto_url|escapejs }}'
+            )" class="text-green-600 hover:underline font-medium">Editar</button>
+                    </td>
+
+                    <!-- Relatório PDF -->
+                    <td class="px-6 py-4">
+                      <a href="{% url 'gerar_relatorio_pdf' cod_aluno=aluno.cod_aluno %}?cod_instrutor={{ cod_instrutor }}"
+                        target="_blank"
+                        class="inline-flex items-center px-4 py-2 rounded-xl bg-blue-600 text-white hover:bg-blue-700 shadow text-sm">
+                        📄 PDF
+                      </a>
+                    </td>
+                  </tr>
+                  {% endfor %}
                 </tbody>
               </table>
             </div>
+          </div>
 
-            <div class="flex justify-center items-center space-x-4 mt-4">
-              <button id="prevPage"
-                class="px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded disabled:opacity-50">Anterior</button>
-              <span id="pageInfo" class="text-sm text-gray-700"></span>
-              <button id="nextPage"
-                class="px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded disabled:opacity-50">Próxima</button>
+          <!-- Modal Alunos -->
+          <div id="alunosModal"
+            class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+            <div class="bg-white rounded-xl shadow-lg p-6 max-w-5xl w-full relative max-h-[90vh] overflow-auto">
+              <button id="closeAlunosModal"
+                class="absolute top-3 right-3 text-gray-500 hover:text-gray-700 font-bold text-xl">&times;</button>
+              <h3 class="text-lg font-bold mb-4">Lista Completa de Alunos</h3>
+
+              <div class="mb-4">
+                <input type="text" id="searchInput" placeholder="Buscar por nome, CPF, telefone ou e-mail..."
+                  class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+              </div>
+
+              <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                  <thead class="bg-gray-50">
+                    <tr>
+                      <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aluno
+                      </th>
+                      <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status
+                      </th>
+                      <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Último
+                        Treino</th>
+                      <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody id="alunosTableBody" class="bg-white divide-y divide-gray-200">
+                    <!-- Conteúdo gerado pelo JavaScript -->
+                  </tbody>
+                </table>
+              </div>
+
+              <div class="flex justify-center items-center space-x-4 mt-4">
+                <button id="prevPage"
+                  class="px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded disabled:opacity-50">Anterior</button>
+                <span id="pageInfo" class="text-sm text-gray-700"></span>
+                <button id="nextPage"
+                  class="px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded disabled:opacity-50">Próxima</button>
+              </div>
             </div>
           </div>
-        </div>
 
-        <!-- Modal Ver Aluno -->
-        <div id="verAlunoModal"
-          class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
-          <div class="bg-white rounded-xl shadow-lg p-6 w-full max-w-lg relative">
-            <button onclick="fecharVerAluno()"
-              class="absolute top-3 right-3 text-gray-500 hover:text-gray-700 font-bold text-xl">&times;</button>
-            <div class="flex items-center space-x-4 mb-4">
-              <img id="verFoto" class="h-20 w-20 rounded-full" src="" alt="">
-              <div>
-                <h2 id="verNome" class="text-xl font-bold"></h2>
-                <p id="verEmail" class="text-gray-600"></p>
+          <!-- Modal Ver Aluno -->
+          <div id="verAlunoModal"
+            class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+            <div class="bg-white rounded-xl shadow-lg p-6 w-full max-w-lg relative">
+              <button onclick="fecharVerAluno()"
+                class="absolute top-3 right-3 text-gray-500 hover:text-gray-700 font-bold text-xl">&times;</button>
+              <div class="flex items-center space-x-4 mb-4">
+                <img id="verFoto" class="h-20 w-20 rounded-full" src="" alt="">
+                <div>
+                  <h2 id="verNome" class="text-xl font-bold"></h2>
+                  <p id="verEmail" class="text-gray-600"></p>
+                </div>
+              </div>
+              <div class="space-y-2">
+                <p><strong>Telefone:</strong> <span id="verTelefone"></span></p>
+                <p><strong>CPF:</strong> <span id="verCpf"></span></p>
+                <p><strong>Status:</strong> <span id="verStatus"></span></p>
+                <p><strong>Último Treino:</strong> <span id="verTreino"></span></p>
               </div>
             </div>
-            <div class="space-y-2">
-              <p><strong>Telefone:</strong> <span id="verTelefone"></span></p>
-              <p><strong>CPF:</strong> <span id="verCpf"></span></p>
-              <p><strong>Status:</strong> <span id="verStatus"></span></p>
-              <p><strong>Último Treino:</strong> <span id="verTreino"></span></p>
+          </div>
+
+          <!-- Modal Editar Aluno -->
+          <div id="editarAlunoModal"
+            class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+            <div class="bg-white rounded-xl shadow-lg p-6 w-full max-w-lg relative">
+              <button onclick="fecharEditarAluno()"
+                class="absolute top-3 right-3 text-gray-500 hover:text-gray-700 font-bold text-xl">&times;</button>
+              <h3 class="text-lg font-bold mb-4">Editar Aluno</h3>
+              <form class="space-y-4" onsubmit="event.preventDefault(); salvarAluno();">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700">Nome</label>
+                  <input id="editNome" type="text" class="w-full px-4 py-2 border rounded-md" required>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700">Email</label>
+                  <input id="editEmail" type="email" class="w-full px-4 py-2 border rounded-md" required>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700">Telefone</label>
+                  <input id="editTelefone" type="text" class="w-full px-4 py-2 border rounded-md">
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700">CPF</label>
+                  <input id="editCpf" type="text" class="w-full px-4 py-2 border rounded-md">
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700">Status</label>
+                  <select id="editStatus" class="w-full px-4 py-2 border rounded-md">
+                    <option>Ativo</option>
+                    <option>Inativo</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700">Último Treino</label>
+                  <input id="editTreino" type="text" class="w-full px-4 py-2 border rounded-md">
+                </div>
+                <div class="flex justify-end">
+                  <button type="button" onclick="fecharEditarAluno()"
+                    class="px-4 py-2 bg-gray-300 rounded mr-2">Cancelar</button>
+                  <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded">Salvar</button>
+                </div>
+              </form>
             </div>
           </div>
-        </div>
 
-        <!-- Modal Editar Aluno -->
-        <div id="editarAlunoModal"
-          class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
-          <div class="bg-white rounded-xl shadow-lg p-6 w-full max-w-lg relative">
-            <button onclick="fecharEditarAluno()"
-              class="absolute top-3 right-3 text-gray-500 hover:text-gray-700 font-bold text-xl">&times;</button>
-            <h3 class="text-lg font-bold mb-4">Editar Aluno</h3>
-            <form class="space-y-4" onsubmit="event.preventDefault(); salvarAluno();">
-              <div>
-                <label class="block text-sm font-medium text-gray-700">Nome</label>
-                <input id="editNome" type="text" class="w-full px-4 py-2 border rounded-md" required>
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700">Email</label>
-                <input id="editEmail" type="email" class="w-full px-4 py-2 border rounded-md" required>
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700">Telefone</label>
-                <input id="editTelefone" type="text" class="w-full px-4 py-2 border rounded-md">
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700">CPF</label>
-                <input id="editCpf" type="text" class="w-full px-4 py-2 border rounded-md">
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700">Status</label>
-                <select id="editStatus" class="w-full px-4 py-2 border rounded-md">
-                  <option>Ativo</option>
-                  <option>Inativo</option>
-                </select>
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700">Último Treino</label>
-                <input id="editTreino" type="text" class="w-full px-4 py-2 border rounded-md">
-              </div>
-              <div class="flex justify-end">
-                <button type="button" onclick="fecharEditarAluno()"
-                  class="px-4 py-2 bg-gray-300 rounded mr-2">Cancelar</button>
-                <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded">Salvar</button>
-              </div>
-            </form>
-          </div>
-        </div>
+          <script>
+            const openModalBtn = document.getElementById('openAlunosModal');
+            const closeModalBtn = document.getElementById('closeAlunosModal');
+            const modal = document.getElementById('alunosModal');
+            const searchInput = document.getElementById('searchInput');
 
-        <script>
-          const openModalBtn = document.getElementById('openAlunosModal');
-          const closeModalBtn = document.getElementById('closeAlunosModal');
-          const modal = document.getElementById('alunosModal');
-          const searchInput = document.getElementById('searchInput');
-
-          // Array de alunos carregado do backend via Django template tags
-          const alunos = [
-            {% for aluno in alunos %}
-          {
-            nome: "{{ aluno.nome|escapejs }}",
-              email: "{{ aluno.email|escapejs }}",
-                telefone: "{{ aluno.telefone|default:''|escapejs }}",
-                  cpf: "{{ aluno.cpf|default:''|escapejs }}",
-                    foto: "{{ aluno.foto_url|escapejs }}",
-                      status: "{{ aluno.status|escapejs }}",
-                        ultimo_treino: "{{ aluno.ultimo_treino|default:'Nenhum'|escapejs }}"
-          } {% if not forloop.last %}, {% endif %}
-          {% endfor %}
+            // Array de alunos carregado do backend via Django template tags
+            const alunos = [
+              {% for aluno in alunos %}
+            {
+              nome: "{{ aluno.nome|escapejs }}",
+                email: "{{ aluno.email|escapejs }}",
+                  telefone: "{{ aluno.telefone|default:''|escapejs }}",
+                    cpf: "{{ aluno.cpf|default:''|escapejs }}",
+                      foto: "{{ aluno.foto_url|escapejs }}",
+                        status: "{{ aluno.status|escapejs }}",
+                          ultimo_treino: "{{ aluno.ultimo_treino|default:'Nenhum'|escapejs }}"
+            } {% if not forloop.last %}, {% endif %}
+            {% endfor %}
   ];
 
-          const alunosPorPagina = 10;
-          let paginaAtual = 1;
-          let alunosFiltrados = alunos;
+            const alunosPorPagina = 5;
+            let paginaAtual = 1;
+            let alunosFiltrados = alunos;
 
-          const tableBody = document.getElementById('alunosTableBody');
-          const pageInfo = document.getElementById('pageInfo');
-          const prevBtn = document.getElementById('prevPage');
-          const nextBtn = document.getElementById('nextPage');
+            const tableBody = document.getElementById('alunosTableBody');
+            const pageInfo = document.getElementById('pageInfo');
+            const prevBtn = document.getElementById('prevPage');
+            const nextBtn = document.getElementById('nextPage');
 
-          function renderTabela() {
-            const inicio = (paginaAtual - 1) * alunosPorPagina;
-            const fim = inicio + alunosPorPagina;
-            const alunosPagina = alunosFiltrados.slice(inicio, fim);
+            function renderTabela() {
+              const inicio = (paginaAtual - 1) * alunosPorPagina;
+              const fim = inicio + alunosPorPagina;
+              const alunosPagina = alunosFiltrados.slice(inicio, fim);
 
-            tableBody.innerHTML = '';
+              tableBody.innerHTML = '';
 
-            if (alunosPagina.length === 0) {
-              const linha = document.createElement('tr');
-              linha.innerHTML = `
+              if (alunosPagina.length === 0) {
+                const linha = document.createElement('tr');
+                linha.innerHTML = `
         <td colspan="4" class="text-center px-6 py-4 text-sm text-gray-500">
           Nenhum aluno encontrado.
         </td>
       `;
-              tableBody.appendChild(linha);
-            } else {
-              alunosPagina.forEach(aluno => {
-                const linha = document.createElement('tr');
-                linha.innerHTML = `
+                tableBody.appendChild(linha);
+              } else {
+                alunosPagina.forEach(aluno => {
+                  const linha = document.createElement('tr');
+                  linha.innerHTML = `
           <td class="px-6 py-4 whitespace-nowrap">
             <div class="flex items-center">
               <div class="flex-shrink-0 h-10 w-10">
@@ -553,215 +566,497 @@
             )">Editar</a>
           </td>
         `;
-                tableBody.appendChild(linha);
-              });
+                  tableBody.appendChild(linha);
+                });
+              }
+
+              const totalPaginas = Math.ceil(alunosFiltrados.length / alunosPorPagina) || 1;
+              pageInfo.textContent = `Página ${paginaAtual} de ${totalPaginas}`;
+
+              prevBtn.disabled = paginaAtual === 1;
+              nextBtn.disabled = paginaAtual === totalPaginas;
             }
 
-            const totalPaginas = Math.ceil(alunosFiltrados.length / alunosPorPagina) || 1;
-            pageInfo.textContent = `Página ${paginaAtual} de ${totalPaginas}`;
+            function aplicarFiltro() {
+              const termo = searchInput.value.trim().toLowerCase();
 
-            prevBtn.disabled = paginaAtual === 1;
-            nextBtn.disabled = paginaAtual === totalPaginas;
-          }
+              alunosFiltrados = alunos.filter(aluno =>
+                aluno.nome.toLowerCase().includes(termo) ||
+                aluno.email.toLowerCase().includes(termo) ||
+                aluno.cpf.toLowerCase().includes(termo) ||
+                aluno.telefone.toLowerCase().includes(termo)
+              ).sort((a, b) => a.nome.localeCompare(b.nome));
 
-          function aplicarFiltro() {
-            const termo = searchInput.value.trim().toLowerCase();
-
-            alunosFiltrados = alunos.filter(aluno =>
-              aluno.nome.toLowerCase().includes(termo) ||
-              aluno.email.toLowerCase().includes(termo) ||
-              aluno.cpf.toLowerCase().includes(termo) ||
-              aluno.telefone.toLowerCase().includes(termo)
-            ).sort((a, b) => a.nome.localeCompare(b.nome));
-
-            paginaAtual = 1;
-            renderTabela();
-          }
-
-          searchInput.addEventListener('input', aplicarFiltro);
-
-          prevBtn.addEventListener('click', () => {
-            if (paginaAtual > 1) {
-              paginaAtual--;
+              paginaAtual = 1;
               renderTabela();
             }
-          });
 
-          nextBtn.addEventListener('click', () => {
-            const totalPaginas = Math.ceil(alunosFiltrados.length / alunosPorPagina);
-            if (paginaAtual < totalPaginas) {
-              paginaAtual++;
+            searchInput.addEventListener('input', aplicarFiltro);
+
+            prevBtn.addEventListener('click', () => {
+              if (paginaAtual > 1) {
+                paginaAtual--;
+                renderTabela();
+              }
+            });
+
+            nextBtn.addEventListener('click', () => {
+              const totalPaginas = Math.ceil(alunosFiltrados.length / alunosPorPagina);
+              if (paginaAtual < totalPaginas) {
+                paginaAtual++;
+                renderTabela();
+              }
+            });
+
+            openModalBtn.addEventListener('click', (e) => {
+              e.preventDefault();
+              paginaAtual = 1;
+              alunosFiltrados = alunos.slice().sort((a, b) => a.nome.localeCompare(b.nome));
+              searchInput.value = '';
               renderTabela();
-            }
-          });
+              modal.classList.remove('hidden');
+            });
 
-          openModalBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            paginaAtual = 1;
-            alunosFiltrados = alunos.slice().sort((a, b) => a.nome.localeCompare(b.nome));
-            searchInput.value = '';
-            renderTabela();
-            modal.classList.remove('hidden');
-          });
-
-          closeModalBtn.addEventListener('click', () => {
-            modal.classList.add('hidden');
-          });
-
-          modal.addEventListener('click', (e) => {
-            if (e.target === modal) {
+            closeModalBtn.addEventListener('click', () => {
               modal.classList.add('hidden');
+            });
+
+            modal.addEventListener('click', (e) => {
+              if (e.target === modal) {
+                modal.classList.add('hidden');
+              }
+            });
+
+            function verAluno(nome, email, telefone, cpf, status, treino, foto) {
+              document.getElementById('verNome').textContent = nome;
+              document.getElementById('verEmail').textContent = email;
+              document.getElementById('verTelefone').textContent = telefone;
+              document.getElementById('verCpf').textContent = cpf;
+              document.getElementById('verStatus').textContent = status;
+              document.getElementById('verTreino').textContent = treino;
+              document.getElementById('verFoto').src = foto;
+              document.getElementById('verAlunoModal').classList.remove('hidden');
             }
-          });
 
-          function verAluno(nome, email, telefone, cpf, status, treino, foto) {
-            document.getElementById('verNome').textContent = nome;
-            document.getElementById('verEmail').textContent = email;
-            document.getElementById('verTelefone').textContent = telefone;
-            document.getElementById('verCpf').textContent = cpf;
-            document.getElementById('verStatus').textContent = status;
-            document.getElementById('verTreino').textContent = treino;
-            document.getElementById('verFoto').src = foto;
-            document.getElementById('verAlunoModal').classList.remove('hidden');
-          }
-
-          function fecharVerAluno() {
-            document.getElementById('verAlunoModal').classList.add('hidden');
-          }
-
-          function editarAluno(nome, email, telefone, cpf, status, treino, foto) {
-            document.getElementById('editNome').value = nome;
-            document.getElementById('editEmail').value = email;
-            document.getElementById('editTelefone').value = telefone;
-            document.getElementById('editCpf').value = cpf;
-            document.getElementById('editStatus').value = status;
-            document.getElementById('editTreino').value = treino;
-            document.getElementById('editarAlunoModal').classList.remove('hidden');
-          }
-
-          function fecharEditarAluno() {
-            document.getElementById('editarAlunoModal').classList.add('hidden');
-          }
-
-          // Função para salvar edição (exemplo, deve ser adaptada para seu backend)
-          function salvarAluno() {
-            alert('Salvar dados do aluno (implementar backend)');
-            fecharEditarAluno();
-          }
-        </script>
-        <!-- Agenda -->
-        <div class="bg-white rounded-xl shadow p-6">
-          <div class="flex justify-between items-center mb-6">
-            <h2 class="text-xl font-bold text-gray-900">Agenda {{dia}}</h2>
-            <button id="openCalendarBtn" class="text-sm text-blue-600 hover:text-blue-800 font-medium">
-              Ver calendário
-            </button>
-          </div>
-
-          <div class="space-y-4">
-            <div class="border-l-4 border-blue-500 pl-4 py-2">
-              <h3 class="font-medium text-gray-900">Treino com João Silva</h3>
-              <p class="text-sm text-gray-500">08:00 - 09:00</p>
-            </div>
-            <div class="border-l-4 border-green-500 pl-4 py-2">
-              <h3 class="font-medium text-gray-900">Avaliação com Maria Souza</h3>
-              <p class="text-sm text-gray-500">10:30 - 11:00</p>
-            </div>
-            <div class="border-l-4 border-purple-500 pl-4 py-2">
-              <h3 class="font-medium text-gray-900">Reunião de equipe</h3>
-              <p class="text-sm text-gray-500">14:00 - 15:00</p>
-            </div>
-            <div class="border-l-4 border-yellow-500 pl-4 py-2">
-              <h3 class="font-medium text-gray-900">Treino com Pedro Alves</h3>
-              <p class="text-sm text-gray-500">17:00 - 18:00</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Modal do Calendário -->
-        <div id="calendarModal"
-          class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
-          <div class="bg-white rounded-xl shadow-lg p-6 max-w-md w-full relative">
-            <button id="closeCalendarBtn"
-              class="absolute top-3 right-3 text-gray-500 hover:text-gray-700 font-bold text-xl">&times;</button>
-            <h3 class="text-lg font-bold mb-4">Calendário</h3>
-            <div id="calendar"><!-- treinos dinamicos que seram exibidos dentro do modal --></div>
-          </div>
-        </div>
-
-        <!-- flatpickr CSS -->
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" />
-
-        <!-- flatpickr JS -->
-        <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-
-        <script>
-          const openBtn = document.getElementById('openCalendarBtn');
-          const closeBtn = document.getElementById('closeCalendarBtn');
-          const calendarModal = document.getElementById('calendarModal');
-
-          openBtn.addEventListener('click', () => {
-            calendarModal.classList.remove('hidden');
-          });
-
-          closeBtn.addEventListener('click', () => {
-            calendarModal.classList.add('hidden');
-          });
-
-          calendarModal.addEventListener('click', (e) => {
-            if (e.target === calendarModal) {
-              calendarModal.classList.add('hidden');
+            function fecharVerAluno() {
+              document.getElementById('verAlunoModal').classList.add('hidden');
             }
-          });
 
-          flatpickr("#calendar", {
-            inline: true,
-            dateFormat: "d/m/Y",
-          });
-        </script>
+            function editarAluno(nome, email, telefone, cpf, status, treino, foto) {
+              document.getElementById('editNome').value = nome;
+              document.getElementById('editEmail').value = email;
+              document.getElementById('editTelefone').value = telefone;
+              document.getElementById('editCpf').value = cpf;
+              document.getElementById('editStatus').value = status;
+              document.getElementById('editTreino').value = treino;
+              document.getElementById('editarAlunoModal').classList.remove('hidden');
+            }
 
-        <!-- Card de Progresso dos Alunos + Estatísticas -->
-        <div class="bg-white rounded-xl shadow p-6 lg:col-span-3">
-          <!-- Cabeçalho -->
-          <div class="flex justify-between items-center mb-6">
-            <h2 class="text-xl font-bold text-gray-900">Progresso dos Alunos</h2>
+            function fecharEditarAluno() {
+              document.getElementById('editarAlunoModal').classList.add('hidden');
+            }
+
+            // Função para salvar edição (exemplo, deve ser adaptada para seu backend)
+            function salvarAluno() {
+              alert('Salvar dados do aluno (implementar backend)');
+              fecharEditarAluno();
+            }
+          </script>
+          <!-- Lista de Alunos -->
+          <div class="bg-white rounded-xl shadow p-6">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">Gerenciar Treinos</h2>
+
+            <div class="space-y-6" id="alunosContainer">
+              {% for aluno in alunos %}
+              <div
+                class="aluno-card bg-gradient-to-br from-blue-50 to-white p-4 rounded-xl shadow-md border border-blue-100 {% if forloop.counter > 3 %}hidden aluno-extra{% endif %}"
+                data-cod-aluno="{{ aluno.cod_aluno }}" data-nome-aluno="{{ aluno.nome }}">
+                <div class="flex items-center justify-between mb-2">
+                  <div>
+                    <h3 class="text-lg font-semibold text-blue-800">{{ aluno.nome }}</h3>
+                    <p class="text-sm text-gray-500">Código: {{ aluno.cod_aluno }}</p>
+                  </div>
+                  <button id="btn-ver-treinos-{{ aluno.cod_aluno }}"
+                    class="text-blue-600 text-sm font-medium hover:underline hidden"
+                    onclick="abrirModalTreinos('{{ aluno.cod_aluno }}', '{{ aluno.nome }}')">Ver todos</button>
+                </div>
+                <div id="ultimosTreinos-{{ aluno.cod_aluno }}">
+                  <p class="text-gray-500 text-sm">Carregando...</p>
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+
+            <div class="text-center mt-4">
+              <button id="toggleAlunosBtn" class="text-sm text-blue-700 hover:underline font-medium transition">Ver
+                todos os alunos</button>
+            </div>
           </div>
 
-          <!-- Cards de Estatísticas -->
-          <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-            <!-- Treinos na Semana -->
-            <button class="bg-blue-50 hover:bg-blue-100 p-4 rounded-lg w-full text-left shadow-sm transition">
-              <p class="text-sm text-blue-600 font-medium">Treinos na Semana</p>
-              <p class="text-2xl font-bold text-blue-800">24</p>
-            </button>
-
-            <!-- Avaliações -->
-            <button class="bg-green-50 hover:bg-green-100 p-4 rounded-lg w-full text-left shadow-sm transition">
-              <p class="text-sm text-green-600 font-medium">Avaliações</p>
-              <p class="text-2xl font-bold text-green-800">5</p>
-            </button>
-
-            <!-- Novos Alunos -->
-            <button class="bg-purple-50 hover:bg-purple-100 p-4 rounded-lg w-full text-left shadow-sm transition">
-              <p class="text-sm text-purple-600 font-medium">Novos Alunos</p>
-              <p class="text-2xl font-bold text-purple-800">3</p>
-            </button>
-
-            <!-- Feedbacks -->
-            <button class="bg-yellow-50 hover:bg-yellow-100 p-4 rounded-lg w-full text-left shadow-sm transition">
-              <p class="text-sm text-yellow-600 font-medium">Feedbacks</p>
-              <p class="text-2xl font-bold text-yellow-800">7</p>
-            </button>
+          <!-- Modal de Treinos -->
+          <div id="GerenciatreinoModal"
+            class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden px-4">
+            <div class="bg-white rounded-2xl shadow-2xl w-full max-w-3xl p-6 relative overflow-y-auto max-h-[90vh]">
+              <button onclick="fecharModalTreinos()"
+                class="absolute top-4 right-6 text-gray-400 hover:text-red-600 text-2xl font-bold transition">&times;</button>
+              <h2 class="text-2xl font-bold text-gray-800 mb-6" id="modalTitulo"></h2>
+              <div id="modalConteudo" class="space-y-6"></div>
+            </div>
           </div>
 
-          <!-- Gráfico de Progresso -->
-          <div>
-            <canvas id="progressoChart" height="100"></canvas>
+          <!-- Modal de Exercícios -->
+          <div id="modalExercicios"
+            class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden px-4">
+            <div class="bg-white rounded-2xl shadow-xl w-full max-w-xl p-6 relative max-h-[90vh] overflow-y-auto">
+              <button onclick="fecharModalExercicios()"
+                class="absolute top-4 right-6 text-gray-400 hover:text-red-600 text-2xl font-bold transition">&times;</button>
+              <h2 class="text-xl font-bold text-gray-800 mb-4">Exercícios do Treino</h2>
+              <ul id="listaExercicios" class="list-disc ml-5 space-y-2 text-sm text-gray-700"></ul>
+              <div class="mt-4 text-right">
+                <button onclick="voltarParaTreinos()" class="text-blue-600 hover:underline text-sm">Voltar aos
+                  treinos</button>
+              </div>
+            </div>
           </div>
+
+          <!-- Modal de Todos os Alunos -->
+          <div id="modalAlunos"
+            class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden px-4">
+            <div class="bg-white rounded-xl shadow-2xl w-full max-w-4xl p-6 overflow-y-auto max-h-[90vh] relative">
+              <button onclick="fecharModalAlunos()"
+                class="absolute top-4 right-6 text-gray-400 hover:text-red-600 text-2xl font-bold transition">&times;</button>
+              <h2 class="text-2xl font-bold text-gray-800 mb-4">Todos os Alunos</h2>
+              <div id="listaTodosAlunos" class="space-y-4">
+                {% for aluno in alunos %}
+                <div class="bg-gray-50 border border-blue-100 p-4 rounded-xl shadow-sm">
+                  <div class="flex justify-between">
+                    <div>
+                      <p class="font-semibold text-blue-800">{{ aluno.nome }}</p>
+                      <p class="text-sm text-gray-500">Código: {{ aluno.cod_aluno }}</p>
+                    </div>
+                    <button class="text-sm text-blue-600 hover:underline"
+                      onclick="abrirModalTreinos('{{ aluno.cod_aluno }}', '{{ aluno.nome }}')">Ver treinos</button>
+                  </div>
+                </div>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+
+          <!-- Script -->
+          <script>
+            let exerciciosPorTreino = {};
+            let codAlunoAtual = null;
+            let nomeAlunoAtual = null;
+
+            function formatarDataBR(dataStr) {
+              if (!dataStr) return '-';
+              const data = new Date(dataStr);
+              if (isNaN(data)) return '-';
+              return data.toLocaleDateString('pt-BR');
+            }
+
+            async function carregarUltimosTreinos(cod_aluno) {
+              const container = document.getElementById(`ultimosTreinos-${cod_aluno}`);
+              const botao = document.getElementById(`btn-ver-treinos-${cod_aluno}`);
+              try {
+                const response = await fetch(`/api/treinos/aluno/${cod_aluno}`);
+                const data = await response.json();
+
+                if (!data || data.length === 0) {
+                  container.innerHTML = `<p class="text-gray-500 text-sm">Aluno sem treino.</p>`;
+                  botao?.classList.add('hidden');
+                  return;
+                }
+
+                container.innerHTML = `<p class="text-gray-500 text-sm">Treinos disponíveis. Clique em 'Ver todos'.</p>`;
+                botao?.classList.remove('hidden');
+              } catch (error) {
+                container.innerHTML = `<p class="text-gray-500 text-sm">Aluno sem treino.</p>`;
+                botao?.classList.add('hidden');
+              }
+            }
+
+            function abrirModalTreinos(cod_aluno, nomeAluno) {
+              document.getElementById('modalAlunos').classList.add('hidden');
+
+              codAlunoAtual = cod_aluno;
+              nomeAlunoAtual = nomeAluno;
+
+              const modal = document.getElementById('GerenciatreinoModal');
+              const conteudo = document.getElementById('modalConteudo');
+              const titulo = document.getElementById('modalTitulo');
+
+              modal.classList.remove('hidden');
+              titulo.innerText = `Treinos de ${nomeAluno}`;
+              conteudo.innerHTML = `<p class="text-gray-500">Carregando...</p>`;
+
+              fetch(`/api/treinos/aluno/${cod_aluno}`)
+                .then(response => response.json())
+                .then(data => {
+                  if (!data || data.length === 0) {
+                    conteudo.innerHTML = `<p class="text-gray-500">Nenhum treino encontrado.</p>`;
+                    return;
+                  }
+
+                  conteudo.innerHTML = '';
+                  exerciciosPorTreino = {};
+
+                  data.forEach(item => {
+                    const treino = item.treino || {};
+                    const exercicios = treino.exercicios || [];  // <- AJUSTE AQUI
+                    const codTreino = treino.cod_treino;
+
+                    exerciciosPorTreino[codTreino] = exercicios;
+
+                    const div = document.createElement('div');
+                    div.className = 'p-4 rounded-xl bg-gray-50 shadow-inner border-l-4 border-blue-500';
+
+                    div.innerHTML = `
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <div>
+              <h3 class="text-blue-700 font-semibold text-lg">Tipo: ${treino.tipo_treino || '-'}</h3>
+              <p class="text-sm text-gray-600">Data Início: ${formatarDataBR(treino.data_inicio)}</p>
+              <p class="text-sm text-gray-600">Data Final: ${formatarDataBR(treino.data_final)}</p>
+            </div>
+            <div>
+              <p class="text-sm text-gray-600">Objetivo: ${treino.objetivo || '-'}</p>
+              <p class="text-sm text-gray-600">Observações: ${treino.observacoes || '-'}</p>
+              <p class="text-sm text-gray-600">Concluído: ${treino.treino_concluido ? 'Sim' : 'Não'}</p>
+            </div>
+          </div>
+          <div class="mt-3 text-right">
+            <button onclick="abrirModalExercicios(${codTreino})" class="text-sm text-blue-600 hover:underline">Ver exercícios</button>
+          </div>
+        `;
+
+                    conteudo.appendChild(div);
+                  });
+                })
+                .catch(() => {
+                  conteudo.innerHTML = `<p class="text-red-500">Erro ao carregar dados.</p>`;
+                });
+            }
+
+
+            function abrirModalExercicios(codTreino) {
+              fecharModalTreinos();
+
+              const modal = document.getElementById('modalExercicios');
+              const lista = document.getElementById('listaExercicios');
+              const exercicios = exerciciosPorTreino[codTreino] || [];
+
+              lista.innerHTML = '';
+
+              if (exercicios.length === 0) {
+                lista.innerHTML = `<li class="text-gray-500">Nenhum exercício encontrado.</li>`;
+              } else {
+                exercicios.forEach(ex => {
+                  const li = document.createElement('li');
+                  li.innerHTML = `
+        <div class="bg-gray-100 p-3 rounded-md shadow-sm">
+          <p><strong>ID:</strong> ${ex.cod_exercicio}</p>
+          <p><strong>Exercício:</strong> ${ex.exercicio}</p>
+          <p><strong>Séries:</strong> ${ex.serie}</p>
+          <p><strong>Repetições:</strong> ${ex.repeticao}</p>
+          <p><strong>Intervalo:</strong> ${ex.intervalo}</p>
+          <p><strong>Concluído:</strong> ${ex.concluido ? 'Sim' : 'Não'}</p>
         </div>
+      `;
+                  lista.appendChild(li);
+                });
+              }
 
+              modal.classList.remove('hidden');
+            }
+
+
+            function voltarParaTreinos() {
+              fecharModalExercicios();
+              abrirModalTreinos(codAlunoAtual, nomeAlunoAtual);
+            }
+
+            function fecharModalTreinos() {
+              document.getElementById('GerenciatreinoModal').classList.add('hidden');
+            }
+
+            function fecharModalExercicios() {
+              document.getElementById('modalExercicios').classList.add('hidden');
+            }
+
+            function fecharModalAlunos() {
+              document.getElementById('modalAlunos').classList.add('hidden');
+            }
+
+            document.getElementById('toggleAlunosBtn').addEventListener('click', function () {
+              document.getElementById('modalAlunos').classList.remove('hidden');
+            });
+
+            window.addEventListener('DOMContentLoaded', () => {
+              document.querySelectorAll('.aluno-card:not(.aluno-extra)').forEach(card => {
+                const codAluno = card.getAttribute('data-cod-aluno');
+                carregarUltimosTreinos(codAluno);
+              });
+            });
+          </script>
+
+          <!-- Card de Progresso dos Alunos + Estatísticas -->
+          <div class="bg-white rounded-xl shadow p-6 lg:col-span-3">
+            <!-- Cabeçalho -->
+            <div class="flex justify-between items-center mb-6">
+              <h2 class="text-xl font-bold text-gray-900">Progresso dos Alunos</h2>
+            </div>
+
+            <!-- Cards de Estatísticas -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+              <!-- Treinos na Semana -->
+              <button class="bg-blue-50 hover:bg-blue-100 p-4 rounded-lg w-full text-left shadow-sm transition">
+                <p class="text-sm text-blue-600 font-medium">Treinos na Semana</p>
+                <p class="text-2xl font-bold text-blue-800">{{ treino_count }}</p>
+              </button>
+
+              <!-- Avaliações -->
+              <button class="bg-green-50 hover:bg-green-100 p-4 rounded-lg w-full text-left shadow-sm transition">
+                <p class="text-sm text-green-600 font-medium">Avaliações</p>
+                <p class="text-2xl font-bold text-green-800">{{ avaliacao_count }}</p>
+              </button>
+
+              <!-- Novos Alunos -->
+              <button class="bg-purple-50 hover:bg-purple-100 p-4 rounded-lg w-full text-left shadow-sm transition">
+                <p class="text-sm text-purple-600 font-medium">Novos Alunos</p>
+                <p class="text-2xl font-bold text-purple-800">3</p>
+              </button>
+            </div>
+            <!-- 📊 Container Responsivo para os Gráficos -->
+            <div class="flex flex-col lg:flex-row gap-6 mt-8">
+
+              <!-- 📊 Gráfico de Estatísticas Gerais -->
+              <div class="bg-white p-6 rounded-xl shadow-lg w-full lg:w-1/2">
+                <h2 class="text-xl font-bold text-gray-900 mb-6">Estatísticas Gerais</h2>
+                <canvas id="graficoTotais" height="350"></canvas>
+              </div>
+
+              <!-- 📊 Gráfico de Tipos de Treino -->
+              <div class="bg-white p-6 rounded-xl shadow-lg w-full lg:w-1/2">
+                <h2 class="text-xl font-bold text-gray-900 mb-6">Tipos de Treino Recentes</h2>
+                <canvas id="graficoUltimosTreinos" height="350"></canvas>
+              </div>
+
+            </div>
+
+            <script>
+              const treinoCount = {{ treino_count|default:0 }};
+              const avaliacaoCount = {{ avaliacao_count|default:0 }};
+              const ultimosTreinos = {{ ultimos_treinos|default:"[]"|safe }};
+              const alunosIds = {{ alunos_ids|default:"[]"|safe }};
+
+              // 📊 Gráfico 1: Estatísticas Gerais
+              const ctxTotais = document.getElementById('graficoTotais').getContext('2d');
+              new Chart(ctxTotais, {
+                type: 'bar',
+                data: {
+                  labels: ['Treinos', 'Avaliações'],
+                  datasets: [{
+                    label: 'Atividades Totais',
+                    data: [treinoCount, avaliacaoCount],
+                    backgroundColor: ['rgba(59, 130, 246, 0.6)', 'rgba(16, 185, 129, 0.6)'],
+                    borderColor: ['rgb(59, 130, 246)', 'rgb(16, 185, 129)'],
+                    borderWidth: 1,
+                    borderRadius: 8
+                  }]
+                },
+                options: {
+                  responsive: true,
+                  plugins: {
+                    legend: {
+                      display: true,
+                      labels: {
+                        boxWidth: 12
+                      }
+                    },
+                    title: {
+                      display: true,
+                      text: 'Totais de Atividades'
+                    }
+                  },
+                  scales: {
+                    x: {
+                      title: {
+                        display: true,
+                        text: 'Tipo de Atividade'
+                      }
+                    },
+                    y: {
+                      beginAtZero: true,
+                      title: {
+                        display: true,
+                        text: 'Quantidade'
+                      }
+                    }
+                  }
+                }
+              });
+
+              // 📊 Gráfico 2: Tipos de Treino Recentes (filtrando apenas alunos do instrutor)
+              const tipoCounts = {};
+              ultimosTreinos.forEach(treino => {
+                if (alunosIds.includes(treino.cod_aluno)) {
+                  const tipo = treino.tipo_treino || 'Desconhecido';
+                  tipoCounts[tipo] = (tipoCounts[tipo] || 0) + 1;
+                }
+              });
+
+              const ctxTreinos = document.getElementById('graficoUltimosTreinos').getContext('2d');
+              new Chart(ctxTreinos, {
+                type: 'bar',
+                data: {
+                  labels: Object.keys(tipoCounts),
+                  datasets: [{
+                    label: 'Qtd por Tipo de Treino',
+                    data: Object.values(tipoCounts),
+                    backgroundColor: 'rgba(99, 102, 241, 0.6)',
+                    borderColor: 'rgb(99, 102, 241)',
+                    borderWidth: 1,
+                    borderRadius: 8
+                  }]
+                },
+                options: {
+                  responsive: true,
+                  plugins: {
+                    legend: {
+                      display: true,
+                      labels: {
+                        boxWidth: 12
+                      }
+                    },
+                    title: {
+                      display: true,
+                      text: 'Distribuição dos Últimos Tipos de Treino'
+                    }
+                  },
+                  scales: {
+                    x: {
+                      title: {
+                        display: true,
+                        text: 'Tipo de Treino'
+                      }
+                    },
+                    y: {
+                      beginAtZero: true,
+                      title: {
+                        display: true,
+                        text: 'Quantidade'
+                      }
+                    }
+                  }
+                }
+              });
+            </script>
+
+          </div>
+
+        </div>
       </div>
-    </div>
   </main>
 
   <!-- Footer -->
@@ -785,413 +1080,344 @@
       </div>
     </div>
   </footer>
-<!-- MODAL DE TREINO -->
-<div id="treinoModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-  <div class="bg-white rounded-xl shadow-xl w-full max-w-2xl p-6">
-    <div class="flex justify-between items-center mb-4">
-      <h3 class="text-xl font-bold text-gray-900">Cadastrar Novo Treino</h3>
-      <button onclick="closeModal('treinoModal')" class="text-gray-500 hover:text-gray-700">✕</button>
-    </div>
-
-    <form id="formTreino">
-      {% csrf_token %}
-      <div class="space-y-4">
-        <select name="cod_aluno" required class="w-full p-2 border rounded-md">
-          <option value="">Selecione um aluno</option>
-          {% for aluno in alunos %}
-          <option value="{{ aluno.cod_aluno }}">{{ aluno.nome }}</option>
-          {% endfor %}
-        </select>
-        <input type="hidden" name="cod_instrutor" value="{{ cod_instrutor }}">
-        <input name="tipo_treino" type="text" placeholder="Tipo de Treino" required class="w-full p-2 border rounded-md">
-        <input name="data_inicio" type="date" required class="w-full p-2 border rounded-md">
-        <input name="data_final" type="date" class="w-full p-2 border rounded-md">
-        <select name="dia_semana" required class="w-full p-2 border rounded-md">
-          <option value="">Selecione o dia da semana</option>
-          <option value="segunda">Segunda-feira</option>
-          <option value="terca">Terça-feira</option>
-          <option value="quarta">Quarta-feira</option>
-          <option value="quinta">Quinta-feira</option>
-          <option value="sexta">Sexta-feira</option>
-          <option value="sabado">Sábado</option>
-          <option value="domingo">Domingo</option>
-        </select>
-        <textarea name="objetivo" rows="2" class="w-full p-2 border rounded-md" placeholder="Objetivo do treino"></textarea>
-        <input name="observacoes" type="text" class="w-full p-2 border rounded-md" placeholder="Observações">
-
-        <div class="flex justify-between gap-2 pt-4">
-          <button type="button" onclick="closeModal('treinoModal')" class="border p-2 rounded-md">Cancelar</button>
-          <button type="submit" class="bg-blue-600 text-white p-2 rounded-md">Salvar Treino</button>
-        </div>
-        <!-- Botão para abrir manualmente o modal de exercício -->
-        <button type="button" onclick="abrirModalExercicioManualmente()" class="mt-2 bg-purple-600 text-white p-2 rounded-md w-full">
-          Adicionar Exercícios
-        </button>
+  <!-- MODAL DE TREINO -->
+  <div id="treinoModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-xl shadow-xl w-full max-w-2xl p-6">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-xl font-bold text-gray-900">Cadastrar Novo Treino</h3>
+        <button onclick="closeModal('treinoModal')" class="text-gray-500 hover:text-gray-700">✕</button>
       </div>
-    </form>
-  </div>
-</div>
 
-<!-- MODAL DE EXERCÍCIO -->
-<div id="exercicioModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-  <div class="bg-white rounded-xl shadow-xl w-full max-w-2xl p-6">
-    <div class="flex justify-between items-center mb-4">
-      <h2 class="text-xl font-bold text-gray-900">Adicionar Exercícios ao Treino</h2>
-      <button onclick="closeModal('exercicioModal')" class="text-gray-500 hover:text-gray-700">✕</button>
+      <form id="formTreino">
+        {% csrf_token %}
+        <div class="space-y-4">
+          <select name="cod_aluno" required class="w-full p-2 border rounded-md">
+            <option value="">Selecione um aluno</option>
+            {% for aluno in alunos %}
+            <option value="{{ aluno.cod_aluno }}">{{ aluno.nome }}</option>
+            {% endfor %}
+          </select>
+          <input type="hidden" name="cod_instrutor" value="{{ cod_instrutor }}">
+          <input name="tipo_treino" type="text" placeholder="Tipo de Treino" required
+            class="w-full p-2 border rounded-md">
+          <input name="data_inicio" type="date" required class="w-full p-2 border rounded-md">
+          <input name="data_final" type="date" class="w-full p-2 border rounded-md">
+          <select name="dia_semana" required class="w-full p-2 border rounded-md">
+            <option value="">Selecione o dia da semana</option>
+            <option value="segunda">Segunda-feira</option>
+            <option value="terca">Terça-feira</option>
+            <option value="quarta">Quarta-feira</option>
+            <option value="quinta">Quinta-feira</option>
+            <option value="sexta">Sexta-feira</option>
+            <option value="sabado">Sábado</option>
+            <option value="domingo">Domingo</option>
+          </select>
+          <textarea name="objetivo" rows="2" class="w-full p-2 border rounded-md"
+            placeholder="Objetivo do treino"></textarea>
+          <input name="observacoes" type="text" class="w-full p-2 border rounded-md" placeholder="Observações">
+
+          <div class="flex justify-between gap-2 pt-4">
+            <button type="button" onclick="closeModal('treinoModal')" class="border p-2 rounded-md">Cancelar</button>
+            <button type="submit" class="bg-blue-600 text-white p-2 rounded-md">Salvar Treino</button>
+          </div>
+          <!-- Botão para abrir manualmente o modal de exercício -->
+          <button type="button" onclick="abrirModalExercicioManualmente()"
+            class="mt-2 bg-purple-600 text-white p-2 rounded-md w-full">
+            Adicionar Exercícios
+          </button>
+        </div>
+      </form>
     </div>
+  </div>
 
-    <form id="formExercicio">
-      {% csrf_token %}
-      <input type="hidden" name="cod_aluno" id="codAlunoExercicio">
+  <!-- MODAL DE EXERCÍCIO -->
+  <div id="exercicioModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-xl shadow-xl w-full max-w-2xl p-6">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-xl font-bold text-gray-900">Adicionar Exercícios ao Treino</h2>
+        <button onclick="closeModal('exercicioModal')" class="text-gray-500 hover:text-gray-700">✕</button>
+      </div>
 
-      <div class="space-y-4">
-        <select name="cod_treino" id="treinosDropdown" required class="w-full p-2 border rounded-md">
-          <option value="">Selecione um treino</option>
-        </select>
+      <form id="formExercicio">
+        {% csrf_token %}
+        <input type="hidden" name="cod_aluno" id="codAlunoExercicio">
 
-        <input name="tipo_treino" type="text" placeholder="Tipo de treino" required class="w-full p-2 border rounded-md">
+        <div class="space-y-4">
+          <select name="cod_treino" id="treinosDropdown" required class="w-full p-2 border rounded-md">
+            <option value="">Selecione um treino</option>
+          </select>
 
-        <div id="exerciciosContainer" class="space-y-3">
-          <div class="grid grid-cols-4 gap-2">
-            <input name="nome_exercicio[]" type="text" placeholder="Exercício" class="p-2 border rounded-md" required>
-            <input name="serie[]" type="number" placeholder="Séries" class="p-2 border rounded-md" required>
-            <input name="repeticao[]" type="number" placeholder="Repetições" class="p-2 border rounded-md" required>
-            <input name="intervalo[]" type="text" placeholder="Intervalo" class="p-2 border rounded-md" required>
+          <input name="tipo_treino" type="text" placeholder="Tipo de treino" required
+            class="w-full p-2 border rounded-md">
+
+          <div id="exerciciosContainer" class="space-y-3">
+            <div class="grid grid-cols-4 gap-2">
+              <input name="nome_exercicio[]" type="text" placeholder="Exercício" class="p-2 border rounded-md" required>
+              <input name="serie[]" type="number" placeholder="Séries" class="p-2 border rounded-md" required>
+              <input name="repeticao[]" type="number" placeholder="Repetições" class="p-2 border rounded-md" required>
+              <input name="intervalo[]" type="text" placeholder="Intervalo" class="p-2 border rounded-md" required>
+            </div>
+          </div>
+
+          <button type="button" onclick="addExercicio()" class="text-blue-600 text-sm">+ Adicionar exercício</button>
+
+          <div class="flex justify-end gap-2 pt-4">
+            <button type="button" onclick="closeModal('exercicioModal')" class="border p-2 rounded-md">Cancelar</button>
+            <button type="submit" class="bg-green-600 text-white p-2 rounded-md">Salvar Exercícios</button>
           </div>
         </div>
-
-        <button type="button" onclick="addExercicio()" class="text-blue-600 text-sm">+ Adicionar exercício</button>
-
-        <div class="flex justify-end gap-2 pt-4">
-          <button type="button" onclick="closeModal('exercicioModal')" class="border p-2 rounded-md">Cancelar</button>
-          <button type="submit" class="bg-green-600 text-white p-2 rounded-md">Salvar Exercícios</button>
-        </div>
-      </div>
-    </form>
+      </form>
+    </div>
   </div>
-</div>
 
-<script>
-function closeModal(id) {
-  document.getElementById(id).classList.add("hidden");
-}
-function openModal(id) {
-  document.getElementById(id).classList.remove("hidden");
-}
+  <script>
+    function closeModal(id) {
+      document.getElementById(id).classList.add("hidden");
+    }
+    function openModal(id) {
+      document.getElementById(id).classList.remove("hidden");
+    }
 
-function addExercicio() {
-  const container = document.getElementById("exerciciosContainer");
-  const div = document.createElement("div");
-  div.className = "grid grid-cols-4 gap-2";
-  div.innerHTML = `
+    function addExercicio() {
+      const container = document.getElementById("exerciciosContainer");
+      const div = document.createElement("div");
+      div.className = "grid grid-cols-4 gap-2";
+      div.innerHTML = `
     <input name="nome_exercicio[]" type="text" placeholder="Exercício" class="p-2 border rounded-md" required>
     <input name="serie[]" type="number" placeholder="Séries" class="p-2 border rounded-md" required>
     <input name="repeticao[]" type="number" placeholder="Repetições" class="p-2 border rounded-md" required>
     <input name="intervalo[]" type="text" placeholder="Intervalo" class="p-2 border rounded-md" required>
   `;
-  container.appendChild(div);
-}
+      container.appendChild(div);
+    }
 
-async function carregarTreinosDropdown(codAluno, selecionado = null) {
-  const dropdown = document.getElementById('treinosDropdown');
-  const codAlunoInput = document.getElementById('codAlunoExercicio');
+    async function carregarTreinosDropdown(codAluno, selecionado = null) {
+      const dropdown = document.getElementById('treinosDropdown');
+      const codAlunoInput = document.getElementById('codAlunoExercicio');
 
-  if (!codAluno) {
-    dropdown.innerHTML = '<option value="">Selecione um aluno primeiro</option>';
-    return;
-  }
+      if (!codAluno) {
+        dropdown.innerHTML = '<option value="">Selecione um aluno primeiro</option>';
+        return;
+      }
 
-  codAlunoInput.value = codAluno;
+      codAlunoInput.value = codAluno;
 
-  dropdown.innerHTML = '<option value="">Carregando...</option>';
+      dropdown.innerHTML = '<option value="">Carregando...</option>';
 
-  try {
-    const response = await fetch(`/api/treinos/aluno/${codAluno}/`);
-    const treinos = await response.json();
-    sessionStorage.setItem("lista_treinos", JSON.stringify(treinos));
+      try {
+        const response = await fetch(`/api/treinos/aluno/${codAluno}/`);
+        const treinos = await response.json();
+        sessionStorage.setItem("lista_treinos", JSON.stringify(treinos));
 
-    dropdown.innerHTML = '<option value="">Selecione um treino</option>';
-    treinos.forEach(t => {
-      const opt = document.createElement("option");
-      opt.value = t.treino.cod_treino;
-      opt.text = `${t.treino.cod_treino} - ${t.treino.tipo_treino}`;
-      dropdown.appendChild(opt);
-    });
+        dropdown.innerHTML = '<option value="">Selecione um treino</option>';
+        treinos.forEach(t => {
+          const opt = document.createElement("option");
+          opt.value = t.treino.cod_treino;
+          opt.text = `${t.treino.cod_treino} - ${t.treino.tipo_treino}`;
+          dropdown.appendChild(opt);
+        });
 
-    if (selecionado) {
-      dropdown.value = selecionado;
-      const treinoSelecionado = treinos.find(t => t.treino.cod_treino == selecionado);
-      if (treinoSelecionado) {
-        document.querySelector('#formExercicio input[name="tipo_treino"]').value = treinoSelecionado.treino.tipo_treino;
+        if (selecionado) {
+          dropdown.value = selecionado;
+          const treinoSelecionado = treinos.find(t => t.treino.cod_treino == selecionado);
+          if (treinoSelecionado) {
+            document.querySelector('#formExercicio input[name="tipo_treino"]').value = treinoSelecionado.treino.tipo_treino;
+          }
+        }
+
+      } catch (error) {
+        console.error("Erro ao carregar treinos:", error);
+        dropdown.innerHTML = '<option value="">Erro ao carregar treinos</option>';
       }
     }
 
-  } catch (error) {
-    console.error("Erro ao carregar treinos:", error);
-    dropdown.innerHTML = '<option value="">Erro ao carregar treinos</option>';
-  }
-}
 
-
-document.getElementById("treinosDropdown").addEventListener("change", function () {
-  const treinos = JSON.parse(sessionStorage.getItem("lista_treinos") || "[]");
-  const codSelecionado = parseInt(this.value);
-  const treinoSelecionado = treinos.find(t => t.treino.cod_treino === codSelecionado);
-  if (treinoSelecionado) {
-    document.querySelector('#formExercicio input[name="tipo_treino"]').value = treinoSelecionado.treino.tipo_treino;
-  }
-});
-
-function abrirModalExercicioManualmente() {
-  const codAluno = document.querySelector('#formTreino select[name="cod_aluno"]').value;
-  if (!codAluno) {
-    alert("Selecione um aluno antes de adicionar exercícios.");
-    return;
-  }
-  closeModal('treinoModal');
-  carregarTreinosDropdown(codAluno);
-  openModal('exercicioModal');
-}
-// SUBMIT DO FORM DE TREINO
-document.getElementById("formTreino").addEventListener("submit", async function (e) {
-  e.preventDefault();
-  const form = e.target;
-  const formData = new FormData(form);
-
-  const payload = {
-    cod_aluno: formData.get("cod_aluno"),
-    cod_instrutor: formData.get("cod_instrutor"),
-    tipo_treino: formData.get("tipo_treino"),
-    data_inicio: formData.get("data_inicio"),
-    data_final: formData.get("data_final"),
-    dia_semana: formData.get("dia_semana"),
-    objetivo: formData.get("objetivo"),
-    observacoes: formData.get("observacoes")
-  };
-
-  try {
-    const response = await fetch("{% url 'adicionar_treino' %}", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-CSRFToken": formData.get("csrfmiddlewaretoken")
-      },
-      body: JSON.stringify(payload)
-    });
-
-    const result = await response.json();
-
-    if (response.ok) {
-      alert("Treino salvo com sucesso!");
-      form.reset();
-      abrirModalExercicio(payload.cod_aluno, result.cod_treino, payload.tipo_treino);
-    } else {
-      alert("Erro: " + (result.message || "Erro ao salvar treino"));
-    }
-  } catch (error) {
-    alert("Erro inesperado.");
-    console.error(error);
-  }
-});
-
-
-// SUBMIT DO FORM DE EXERCÍCIO
-document.getElementById("formExercicio").addEventListener("submit", async function (e) {
-  e.preventDefault();
-  const form = e.target;
-  const formData = new FormData(form);
-
-  const payload = {
-    cod_treino: formData.get("cod_treino"),
-    tipo_treino: formData.get("tipo_treino"),
-    cod_aluno: formData.get("cod_aluno"),
-    nome_exercicio: formData.getAll("nome_exercicio[]"),
-    serie: formData.getAll("serie[]"),
-    repeticao: formData.getAll("repeticao[]"),
-    intervalo: formData.getAll("intervalo[]")
-  };
-
-  try {
-    const response = await fetch("/adicionar-exercicios/", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-CSRFToken": formData.get("csrfmiddlewaretoken")
-      },
-      body: JSON.stringify(payload)
-    });
-
-    const result = await response.json();
-    if (response.ok) {
-      alert("Exercícios adicionados!");
-      closeModal('exercicioModal');
-      form.reset();
-    } else {
-      alert("Erro: " + result.message);
-    }
-  } catch (error) {
-    alert("Erro ao adicionar exercícios.");
-    console.error(error);
-  }
-});
-</script>
-<!-- SCRIPTS treino -->
-<script>
-function closeModal(id) {
-  document.getElementById(id).classList.add("hidden");
-}
-function openModal(id) {
-  document.getElementById(id).classList.remove("hidden");
-}
-
-function addExercicio() {
-  const container = document.getElementById("exerciciosContainer");
-  const div = document.createElement("div");
-  div.className = "grid grid-cols-4 gap-2";
-  div.innerHTML = `
-    <input name="nome_exercicio[]" type="text" placeholder="Exercício" class="p-2 border rounded-md" required>
-    <input name="serie[]" type="number" placeholder="Séries" class="p-2 border rounded-md" required>
-    <input name="repeticao[]" type="number" placeholder="Repetições" class="p-2 border rounded-md" required>
-    <input name="intervalo[]" type="text" placeholder="Intervalo" class="p-2 border rounded-md" required>
-  `;
-  container.appendChild(div);
-}
-
-async function carregarTreinosDropdown(codAluno, selecionado = null) {
-  const dropdown = document.getElementById('treinosDropdown');
-
-  if (!codAluno) {
-    dropdown.innerHTML = '<option value="">Selecione um aluno primeiro</option>';
-    return;
-  }
-
-  dropdown.innerHTML = '<option value="">Carregando...</option>';
-
-  try {
-    const response = await fetch(`/api/treinos/aluno/${codAluno}/`);
-    const treinos = await response.json();
-    sessionStorage.setItem("lista_treinos", JSON.stringify(treinos));
-
-    dropdown.innerHTML = '<option value="">Selecione um treino</option>';
-    treinos.forEach(t => {
-      const opt = document.createElement("option");
-      opt.value = t.treino.cod_treino;
-      opt.text = `${t.treino.cod_treino} - ${t.treino.tipo_treino}`;
-      dropdown.appendChild(opt);
-    });
-
-    if (selecionado) {
-      dropdown.value = selecionado;
-      // Preenche tipo_treino automaticamente
-      const treinoSelecionado = treinos.find(t => t.treino.cod_treino == selecionado);
+    document.getElementById("treinosDropdown").addEventListener("change", function () {
+      const treinos = JSON.parse(sessionStorage.getItem("lista_treinos") || "[]");
+      const codSelecionado = parseInt(this.value);
+      const treinoSelecionado = treinos.find(t => t.treino.cod_treino === codSelecionado);
       if (treinoSelecionado) {
         document.querySelector('#formExercicio input[name="tipo_treino"]').value = treinoSelecionado.treino.tipo_treino;
       }
-    }
-
-  } catch (error) {
-    console.error("Erro ao carregar treinos:", error);
-    dropdown.innerHTML = '<option value="">Erro ao carregar treinos</option>';
-  }
-}
-
-function abrirModalExercicio() {
-  closeModal('treinoModal');
-  carregarTreinosDropdown();
-  openModal('exercicioModal');
-}
-
-document.getElementById("formTreino").addEventListener("submit", async function (e) {
-  e.preventDefault();
-  const form = e.target;
-  const formData = new FormData(form);
-
-  const payload = {
-    cod_aluno: formData.get("cod_aluno"),
-    cod_instrutor: formData.get("cod_instrutor"),
-    tipo_treino: formData.get("tipo_treino"),
-    data_inicio: formData.get("data_inicio"),
-    data_final: formData.get("data_final"),
-    dia_semana: formData.get("dia_semana"),
-    objetivo: formData.get("objetivo"),
-    observacoes: formData.get("observacoes")
-  };
-
-  try {
-    const response = await fetch("{% url 'adicionar_treino' %}", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-CSRFToken": formData.get("csrfmiddlewaretoken")
-      },
-      body: JSON.stringify(payload)
     });
 
-    const result = await response.json();
-
-    if (response.ok) {
-      alert("Treino salvo com sucesso!");
-
+    function abrirModalExercicioManualmente() {
+      const codAluno = document.querySelector('#formTreino select[name="cod_aluno"]').value;
+      if (!codAluno) {
+        alert("Selecione um aluno antes de adicionar exercícios.");
+        return;
+      }
       closeModal('treinoModal');
-      form.reset();
-
-      await carregarTreinosDropdown(result.cod_treino);
-      document.querySelector('#formExercicio input[name="tipo_treino"]').value = payload.tipo_treino;
+      carregarTreinosDropdown(codAluno);
       openModal('exercicioModal');
-
-    } else {
-      alert("Erro: " + (result.message || "Erro ao salvar treino"));
     }
-  } catch (error) {
-    alert("Erro inesperado.");
-    console.error(error);
-  }
-});
+    // SUBMIT DO FORM DE TREINO
+    document.getElementById("formTreino").addEventListener("submit", async function (e) {
+      e.preventDefault();
+      const form = e.target;
+      const formData = new FormData(form);
 
-document.getElementById("formExercicio").addEventListener("submit", async function (e) {
-  e.preventDefault();
-  const form = e.target;
-  const formData = new FormData(form);
+      const payload = {
+        cod_aluno: formData.get("cod_aluno"),
+        cod_instrutor: formData.get("cod_instrutor"),
+        tipo_treino: formData.get("tipo_treino"),
+        data_inicio: formData.get("data_inicio"),
+        data_final: formData.get("data_final"),
+        dia_semana: formData.get("dia_semana"),
+        objetivo: formData.get("objetivo"),
+        observacoes: formData.get("observacoes")
+      };
 
-  const payload = {
-    cod_treino: formData.get("cod_treino"),
-    tipo_treino: formData.get("tipo_treino"),
-    nome_exercicio: formData.getAll("nome_exercicio[]"),
-    serie: formData.getAll("serie[]"),
-    repeticao: formData.getAll("repeticao[]"),
-    intervalo: formData.getAll("intervalo[]")
-  };
+      try {
+        const response = await fetch("{% url 'adicionar_treino' %}", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": formData.get("csrfmiddlewaretoken")
+          },
+          body: JSON.stringify(payload)
+        });
 
-  try {
-    const response = await fetch("/adicionar-exercicios/", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-CSRFToken": formData.get("csrfmiddlewaretoken")
-      },
-      body: JSON.stringify(payload)
+        const result = await response.json();
+
+        if (response.ok) {
+          alert("Treino salvo com sucesso!");
+          form.reset();
+          abrirModalExercicio(payload.cod_aluno, result.cod_treino, payload.tipo_treino);
+        } else {
+          alert("Erro: " + (result.message || "Erro ao salvar treino"));
+        }
+      } catch (error) {
+        alert("Erro inesperado.");
+        console.error(error);
+      }
     });
 
-    const result = await response.json();
-    if (response.ok) {
-      alert("Exercícios adicionados!");
-      closeModal('exercicioModal');
-      form.reset();
-    } else {
-      alert("Erro: " + result.message);
+
+    // SUBMIT DO FORM DE EXERCÍCIO
+    document.getElementById("formExercicio").addEventListener("submit", async function (e) {
+      e.preventDefault();
+      const form = e.target;
+      const formData = new FormData(form);
+
+      const codTreino = formData.get("cod_treino");
+      const nomes = formData.getAll("nome_exercicio[]");
+      const series = formData.getAll("serie[]");
+      const repeticoes = formData.getAll("repeticao[]");
+      const intervalos = formData.getAll("intervalo[]");
+
+      const exercicios = [];
+
+      for (let i = 0; i < nomes.length; i++) {
+        exercicios.push({
+          cod_treino: codTreino,
+          exercicio: nomes[i],
+          serie: parseInt(series[i]),
+          repeticao: parseInt(repeticoes[i]),
+          intervalo: intervalos[i]
+        });
+      }
+
+      const payload = { exercicios };
+
+      try {
+        const response = await fetch("/adicionar-exercicios/", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": formData.get("csrfmiddlewaretoken")
+          },
+          body: JSON.stringify(payload)
+        });
+
+        const result = await response.json();
+        if (response.ok) {
+          alert("Exercícios adicionados!");
+          closeModal('exercicioModal');
+          form.reset();
+        } else {
+          alert("Erro: " + result.message);
+        }
+      } catch (error) {
+        alert("Erro ao adicionar exercícios.");
+        console.error(error);
+      }
+    });
+
+  </script>
+  <!-- SCRIPTS treino -->
+  <script>
+    function closeModal(id) {
+      document.getElementById(id).classList.add("hidden");
     }
-  } catch (error) {
-    alert("Erro ao adicionar exercícios.");
-    console.error(error);
-  }
-});
-</script>
+    function openModal(id) {
+      document.getElementById(id).classList.remove("hidden");
+    }
+
+    function addExercicio() {
+      const container = document.getElementById("exerciciosContainer");
+      const div = document.createElement("div");
+      div.className = "grid grid-cols-4 gap-2";
+      div.innerHTML = `
+    <input name="nome_exercicio[]" type="text" placeholder="Exercício" class="p-2 border rounded-md" required>
+    <input name="serie[]" type="number" placeholder="Séries" class="p-2 border rounded-md" required>
+    <input name="repeticao[]" type="number" placeholder="Repetições" class="p-2 border rounded-md" required>
+    <input name="intervalo[]" type="text" placeholder="Intervalo" class="p-2 border rounded-md" required>
+  `;
+      container.appendChild(div);
+    }
+
+    async function carregarTreinosDropdown(codAluno, selecionado = null) {
+      const dropdown = document.getElementById('treinosDropdown');
+
+      if (!codAluno) {
+        dropdown.innerHTML = '<option value="">Selecione um aluno primeiro</option>';
+        return;
+      }
+
+      dropdown.innerHTML = '<option value="">Carregando...</option>';
+
+      try {
+        const response = await fetch(`/api/treinos/aluno/${codAluno}/`);
+        const treinos = await response.json();
+        sessionStorage.setItem("lista_treinos", JSON.stringify(treinos));
+
+        dropdown.innerHTML = '<option value="">Selecione um treino</option>';
+        treinos.forEach(t => {
+          const opt = document.createElement("option");
+          opt.value = t.treino.cod_treino;
+          opt.text = `${t.treino.cod_treino} - ${t.treino.tipo_treino}`;
+          dropdown.appendChild(opt);
+        });
+
+        if (selecionado) {
+          dropdown.value = selecionado;
+          // Preenche tipo_treino automaticamente
+          const treinoSelecionado = treinos.find(t => t.treino.cod_treino == selecionado);
+          if (treinoSelecionado) {
+            document.querySelector('#formExercicio input[name="tipo_treino"]').value = treinoSelecionado.treino.tipo_treino;
+          }
+        }
+
+      } catch (error) {
+        console.error("Erro ao carregar treinos:", error);
+        dropdown.innerHTML = '<option value="">Erro ao carregar treinos</option>';
+      }
+    }
+
+    function abrirModalExercicio() {
+      closeModal('treinoModal');
+      carregarTreinosDropdown();
+      openModal('exercicioModal');
+    }
+  </script>
 
 
 
   <!-- Avaliação Modal -->
   <div id="avaliacaoModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-    <div class="bg-white rounded-xl shadow-xl w-full max-w-2xl p-6">
+    <div class="bg-white rounded-xl shadow-xl w-full max-w-2xl mx-4 sm:my-10 p-4 sm:p-6 overflow-y-auto max-h-screen">
+
       {% if mensagem_sucesso %}
       <div class="mb-4 px-4 py-3 rounded-md bg-green-100 text-green-800 border border-green-300">
         {{ mensagem_sucesso }}
@@ -1203,6 +1429,7 @@ document.getElementById("formExercicio").addEventListener("submit", async functi
         {{ mensagem_erro }}
       </div>
       {% endif %}
+
       <form id="formAvaliacao" action="{% url 'salvar_avaliacao' cod_instrutor=cod_instrutor %}" method="POST">
         {% csrf_token %}
         <div class="flex justify-between items-center mb-4">
@@ -1227,7 +1454,7 @@ document.getElementById("formExercicio").addEventListener("submit", async functi
             </select>
           </div>
 
-          <!-- Instrutor (preenchido automaticamente) -->
+          <!-- Instrutor -->
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Instrutor</label>
             <input type="text" class="w-full p-2 border border-gray-300 rounded-md bg-gray-100"
@@ -1258,28 +1485,31 @@ document.getElementById("formExercicio").addEventListener("submit", async functi
                 class="w-full p-2 border border-gray-300 rounded-md bg-gray-100" readonly>
             </div>
           </div>
+
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <!-- Meta -->
-           <div>
+            <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">Meta</label>
-              <input type="number" name="meta" id="meta" step="0.1" class="w-full p-2 border border-gray-300 rounded-md">
+              <input type="number" name="meta" id="meta" step="0.1"
+                class="w-full p-2 border border-gray-300 rounded-md">
             </div>
 
-          <!-- Observações -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Observações</label>
-            <textarea name="observacoes" id="observacoes" class="w-full p-2 border border-gray-300 rounded-md"
-              rows="3"></textarea>
+            <!-- Observações -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Observações</label>
+              <textarea name="observacoes" id="observacoes" class="w-full p-2 border border-gray-300 rounded-md"
+                rows="3"></textarea>
+            </div>
           </div>
-          </div>         
 
           <!-- Botões -->
-          <div class="flex justify-end space-x-3 pt-4">
+          <div class="flex flex-col sm:flex-row justify-end sm:space-x-3 pt-4 space-y-2 sm:space-y-0">
             <button type="button" onclick="closeModal('avaliacaoModal')"
-              class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
+              class="w-full sm:w-auto px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
               Cancelar
             </button>
-            <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">
+            <button type="submit"
+              class="w-full sm:w-auto px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">
               Salvar Avaliação
             </button>
           </div>
@@ -1287,7 +1517,7 @@ document.getElementById("formExercicio").addEventListener("submit", async functi
       </form>
     </div>
   </div>
-
+  <!-- script calcula imc -->
   <script>
     function calcularIMC() {
       const peso = parseFloat(document.getElementById('peso').value);
@@ -1309,61 +1539,7 @@ document.getElementById("formExercicio").addEventListener("submit", async functi
       document.getElementById(id).classList.remove('hidden');
     }
   </script>
-
-
-
-  <!-- Feedback Modal -->
-  <div id="feedbackModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-    <div class="bg-white rounded-xl shadow-xl w-full max-w-2xl p-6">
-      <div class="flex justify-between items-center mb-4">
-        <h3 class="text-xl font-bold text-gray-900">Enviar Feedback</h3>
-        <button onclick="closeModal('feedbackModal')" class="text-gray-500 hover:text-gray-700">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
-      </div>
-
-      <div class="space-y-4">
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Aluno</label>
-          <select class="w-full p-2 border border-gray-300 rounded-md">
-            <option>Selecione um aluno</option>
-            {% for aluno in alunos %}
-            <option value="{{ aluno.id }}">{{ aluno.nome }}</option>
-            {% endfor %}
-          </select>
-        </div>
-
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Tipo</label>
-          <select class="w-full p-2 border border-gray-300 rounded-md">
-            <option>Selecione o tipo</option>
-            <option>Elogio</option>
-            <option>Sugestão</option>
-            <option>Crítica</option>
-            <option>Dúvida</option>
-          </select>
-        </div>
-
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Mensagem</label>
-          <textarea class="w-full p-2 border border-gray-300 rounded-md" rows="5"></textarea>
-        </div>
-
-        <div class="flex justify-end space-x-3 pt-4">
-          <button onclick="closeModal('feedbackModal')"
-            class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
-            Cancelar
-          </button>
-          <button class="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700">
-            Enviar Feedback
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-
+  <!-- ################# -->
   <script>
     // Modal functions
     function openModal(id) {
